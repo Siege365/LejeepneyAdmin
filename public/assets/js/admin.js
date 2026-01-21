@@ -401,3 +401,59 @@ function setButtonLoading(button, loading = true) {
 window.showToast = showToast;
 window.setButtonLoading = setButtonLoading;
 window.initTableSearch = initTableSearch;
+
+/**
+ * Kebab Menu Toggle - Exposed globally for inline onclick
+ */
+window.toggleKebabMenu = function(trigger) {
+    const menu = trigger.closest('.kebab-menu');
+    if (!menu) return;
+    
+    const isOpen = menu.classList.contains('open');
+    
+    // Close all other menus first
+    document.querySelectorAll('.kebab-menu.open').forEach(m => {
+        if (m !== menu) {
+            m.classList.remove('open');
+            m.classList.remove('dropup');
+        }
+    });
+    
+    // Toggle current menu
+    if (!isOpen) {
+        const dropdown = menu.querySelector('.kebab-dropdown');
+        const triggerRect = trigger.getBoundingClientRect();
+        const dropdownHeight = 150; // Approximate dropdown height
+        const viewportHeight = window.innerHeight;
+        const spaceBelow = viewportHeight - triggerRect.bottom;
+        const spaceAbove = triggerRect.top;
+        
+        // Determine if dropdown should open upward
+        if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
+            menu.classList.add('dropup');
+            dropdown.style.top = (triggerRect.top - dropdownHeight) + 'px';
+        } else {
+            menu.classList.remove('dropup');
+            dropdown.style.top = (triggerRect.bottom + 4) + 'px';
+        }
+        
+        // Position horizontally (align to right of trigger)
+        dropdown.style.left = (triggerRect.right - 140) + 'px';
+        
+        menu.classList.add('open');
+    } else {
+        menu.classList.remove('open');
+        menu.classList.remove('dropup');
+    }
+};
+
+// Close kebab menu when clicking outside (wait for DOM)
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.kebab-menu')) {
+            document.querySelectorAll('.kebab-menu.open').forEach(m => {
+                m.classList.remove('open');
+            });
+        }
+    });
+});

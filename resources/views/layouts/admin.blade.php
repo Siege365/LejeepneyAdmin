@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Admin Styles -->
-    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}?v={{ time() }}">
     
     @stack('styles')
 </head>
@@ -35,13 +35,13 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('landmarks.index') }}" class="{{ request()->routeIs('landmarks.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.landmarks.index') }}" class="{{ request()->routeIs('admin.landmarks.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-map-marker-alt"></i>
                     <span>Landmarks</span>
                 </a>
             </li>
             <li>
-                <a href="{{ route('routes.index') }}" class="{{ request()->routeIs('routes.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.routes.index') }}" class="{{ request()->routeIs('admin.routes.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-route"></i>
                     <span>Routes</span>
                 </a>
@@ -85,11 +85,6 @@
             <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
             
             <div class="top-bar-right">
-                <div class="search-box">
-                    <i class="fa-solid fa-search"></i>
-                    <input type="text" placeholder="Search...">
-                </div>
-                
                 <button class="notification-btn">
                     <i class="fa-solid fa-bell"></i>
                     <span class="notification-badge">3</span>
@@ -124,7 +119,7 @@
     </main>
 
     <!-- Admin Scripts -->
-    <script src="{{ asset('assets/js/admin.js') }}"></script>
+    <script src="{{ asset('assets/js/admin.js') }}?v={{ time() }}"></script>
     
     @stack('scripts')
 </body>
