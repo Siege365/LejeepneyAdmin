@@ -23,8 +23,8 @@ class Landmark extends Model
     protected $casts = [
         'latitude' => 'decimal:8',
         'longitude' => 'decimal:8',
-        'gallery_images' => 'array',
-        'is_featured' => 'boolean'
+        'is_featured' => 'boolean',
+        'gallery_images' => 'array'
     ];
 
     /**

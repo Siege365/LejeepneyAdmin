@@ -108,9 +108,16 @@
                     <!-- Icon Image -->
                     <div class="form-group">
                         <label for="icon_image">Icon Image <span class="required">*</span></label>
-                        <input type="file" class="form-control @error('icon_image') is-invalid @enderror" 
-                               id="icon_image" name="icon_image" 
-                               accept="image/jpeg,image/png,image/jpg,image/webp" required>
+                        <div class="file-input-wrapper">
+                            <input type="file" class="form-control file-input @error('icon_image') is-invalid @enderror" 
+                                   id="icon_image" name="icon_image" 
+                                   accept="image/jpeg,image/png,image/jpg,image/webp" required>
+                            <label for="icon_image" class="file-input-label">
+                                <i class="fa-solid fa-cloud-upload-alt"></i>
+                                <span>Choose Icon Image</span>
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">Maximum size: 2MB</small>
                         <div id="iconPreview" class="mt-2" style="display: none;">
                             <img id="iconPreviewImg" src="" alt="Icon Preview" 
                                  class="img-thumbnail" style="max-width: 120px;">
@@ -123,13 +130,19 @@
                     <!-- Gallery Images -->
                     <div class="form-group">
                         <label for="gallery_images">Gallery Images</label>
-                        <input type="file" class="form-control @error('gallery_images.*') is-invalid @enderror" 
-                               id="gallery_images" name="gallery_images[]" 
-                               accept="image/jpeg,image/png,image/jpg,image/webp" multiple>
-                        <div id="galleryPreview" class="gallery-preview mt-2"></div>
-                        <p class="text-muted small mt-1" id="galleryCount" style="display: none; margin: 0;">
-                            <span id="galleryCountText"></span>
-                        </p>
+                        <div class="file-input-wrapper">
+                            <input type="file" class="form-control file-input @error('gallery_images.*') is-invalid @enderror" 
+                                   id="gallery_images" name="gallery_images[]" 
+                                   accept="image/jpeg,image/png,image/jpg,image/webp" multiple>
+                            <label for="gallery_images" class="file-input-label">
+                                <i class="fa-solid fa-images"></i>
+                                <span>Choose Gallery Images</span>
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">You can select multiple images</small>
+                        <div id="galleryPreview" class="mt-2" style="display: none;">
+                            <div id="galleryPreviewContainer" class="gallery-preview-grid"></div>
+                        </div>
                         @error('gallery_images.*')
                             <span class="error-text">{{ $message }}</span>
                         @enderror

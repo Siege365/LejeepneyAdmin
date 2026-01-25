@@ -56,8 +56,8 @@ class LandmarkController extends Controller
             'description' => 'nullable|string',
             'category' => 'required|string|in:' . implode(',', array_keys(Landmark::CATEGORIES)),
             'is_featured' => 'boolean',
-            'icon_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
+            'icon_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120'
         ]);
 
         // Handle icon image upload
@@ -66,13 +66,13 @@ class LandmarkController extends Controller
         }
 
         // Handle gallery images upload
+        $galleryPaths = [];
         if ($request->hasFile('gallery_images')) {
-            $galleryPaths = [];
             foreach ($request->file('gallery_images') as $image) {
                 $galleryPaths[] = $image->store('landmarks/gallery', 'public');
             }
-            $validated['gallery_images'] = $galleryPaths;
         }
+        $validated['gallery_images'] = $galleryPaths;
 
         $validated['is_featured'] = $request->has('is_featured');
 
@@ -112,9 +112,10 @@ class LandmarkController extends Controller
             'category' => 'required|string|in:' . implode(',', array_keys(Landmark::CATEGORIES)),
             'is_featured' => 'boolean',
             'icon_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'remove_icon' => 'boolean',
-            'remove_gallery' => 'array'
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'remove_gallery' => 'nullable|array',
+            'remove_gallery.*' => 'integer'
         ]);
 
         // Handle removing icon image
@@ -138,24 +139,28 @@ class LandmarkController extends Controller
         }
 
         // Handle gallery images
-        $currentGallery = $landmark->gallery_images ?? [];
+        $existingGallery = $landmark->gallery_images ?? [];
         
         // Remove selected gallery images
         if ($request->has('remove_gallery')) {
-            foreach ($request->remove_gallery as $imagePath) {
-                Storage::disk('public')->delete($imagePath);
-                $currentGallery = array_values(array_diff($currentGallery, [$imagePath]));
+            foreach ($request->remove_gallery as $index) {
+                if (isset($existingGallery[$index])) {
+                    Storage::disk('public')->delete($existingGallery[$index]);
+                    unset($existingGallery[$index]);
+                }
             }
+            $existingGallery = array_values($existingGallery); // Re-index array
         }
-
+        
         // Add new gallery images
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $image) {
-                $currentGallery[] = $image->store('landmarks/gallery', 'public');
+                $existingGallery[] = $image->store('landmarks/gallery', 'public');
             }
         }
+        
+        $validated['gallery_images'] = $existingGallery;
 
-        $validated['gallery_images'] = !empty($currentGallery) ? $currentGallery : null;
         $validated['is_featured'] = $request->has('is_featured');
 
         $landmark->update($validated);
@@ -180,10 +185,12 @@ class LandmarkController extends Controller
     {
         $name = $landmark->name;
 
-        // Delete images
+        // Delete icon image
         if ($landmark->icon_image) {
             Storage::disk('public')->delete($landmark->icon_image);
         }
+
+        // Delete gallery images
         if ($landmark->gallery_images) {
             foreach ($landmark->gallery_images as $image) {
                 Storage::disk('public')->delete($image);

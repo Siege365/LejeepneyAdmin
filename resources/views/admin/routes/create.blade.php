@@ -90,6 +90,9 @@
                             >
                             <span class="color-value" id="colorValue">#EBAF3E</span>
                         </div>
+                    @error('color')
+                        <span class="error-text">{{ $message }}</span>
+                    @enderror
                     </div>
 
                     <!-- Description -->
@@ -114,7 +117,8 @@
                 </h4>
                 <p class="section-description">
                     Click on the map to add waypoints. The path will automatically follow the actual roads.
-                    Once you're satisfied with the route, click "Set Route" to finalize it.
+                    <strong>Green marker</strong> indicates the starting point, <strong>red marker</strong> indicates the end point.
+                    Direction arrows will guide users along the route path.
                 </p>
                 
                 <div id="map" class="route-map"></div>
@@ -174,6 +178,15 @@
         initialColor: '{{ old('color', '#EBAF3E') }}',
         davaoCenter: [7.0731, 125.6128]
     };
+    
+      document.addEventListener('DOMContentLoaded', function() {
+          const colorInput = document.getElementById('color');
+          const colorValue = document.getElementById('colorValue');
+          const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
+          colorInput.value = randomColor;
+          colorValue.textContent = randomColor;
+                        });
+                    
 </script>
 <script src="{{ asset('assets/js/route-map.js') }}"></script>
 @endpush

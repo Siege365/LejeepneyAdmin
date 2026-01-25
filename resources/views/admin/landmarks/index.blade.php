@@ -47,7 +47,6 @@
                     <th>Name</th>
                     <th style="width: 120px;">Category</th>
                     <th style="width: 200px;">Location</th>
-                    <th style="width: 100px;">Gallery</th>
                     <th style="width: 80px;">Featured</th>
                     <th style="width: 60px;">Actions</th>
                 </tr>
@@ -95,16 +94,6 @@
                                 {{ number_format($landmark->latitude, 6) }}, {{ number_format($landmark->longitude, 6) }}
                             </div>
                         </td>
-                        <td>
-                            @if($landmark->gallery_images && count($landmark->gallery_images) > 0)
-                                <span style="background: #DBEAFE; color: #3B82F6; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.8125rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.375rem; white-space: nowrap;">
-                                    <i class="fa-solid fa-images"></i>
-                                    {{ count($landmark->gallery_images) }}
-                                </span>
-                            @else
-                                <span style="color: #94A3B8; font-size: 0.875rem;">—</span>
-                            @endif
-                        </td>
                         <td style="text-align: center;">
                             @if($landmark->is_featured)
                                 <i class="fa-solid fa-star" style="color: #F59E0B; font-size: 1.125rem;" title="Featured"></i>
@@ -136,7 +125,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 3rem;">
+                        <td colspan="6" style="text-align: center; padding: 3rem;">
                             <i class="fa-solid fa-map-marker-alt" style="font-size: 3rem; color: #CBD5E1; margin-bottom: 1rem;"></i>
                             <p style="color: #64748B; margin: 0;">No landmarks found. Add your first landmark!</p>
                         </td>

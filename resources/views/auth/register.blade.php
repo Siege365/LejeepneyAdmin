@@ -1,10 +1,10 @@
 @extends('layouts.auth')
 
-@section('title', 'Sign Up')
+@section('title', 'Register')
 
 @section('content')
-<h1 class="auth-title">Sign Up</h1>
-<p class="auth-subtitle">Create your admin account to get started.</p>
+<h1 class="auth-title">Create Account</h1>
+<p class="auth-subtitle">Welcome! Create your admin account to get started.</p>
 
 <form id="signupForm" class="auth-form" method="POST" action="{{ route('register') }}">
     @csrf
@@ -98,6 +98,24 @@
 
 <!-- Login Link -->
 <div class="auth-footer">
-    <p>Already have an account? <a href="{{ route('login') }}">Login</a></p>
+    <p>Back to <a href="{{ route('dashboard') }}">Dashboard</a></p>
 </div>
+
+@if($errors->any())
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        @foreach($errors->all() as $error)
+            showNotification('{{ $error }}', 'error');
+        @endforeach
+    });
+</script>
+@endif
+
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        showNotification('{{ session('success') }}', 'success');
+    });
+</script>
+@endif
 @endsection

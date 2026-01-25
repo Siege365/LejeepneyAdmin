@@ -98,16 +98,13 @@
      * Add a marker to the map
      */
     function addMarker(point, number) {
-        const isFirst = number === 1;
-        const markerClass = isFirst ? 'start' : '';
-        
         const marker = L.marker([point.lat, point.lng], {
             draggable: true,
             icon: L.divIcon({
                 className: 'custom-marker',
-                html: `<div class="marker-icon ${markerClass}">${number}</div>`,
-                iconSize: [28, 28],
-                iconAnchor: [14, 14]
+                html: `<div class="marker-icon">${number}</div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
             })
         }).addTo(map);
 
@@ -189,11 +186,21 @@
     }
 
     /**
-     * Draw the path polyline on the map
+     * Draw the path polyline on the map with direction arrows
      */
     function drawPath(points) {
-        // Remove existing polyline
+        // Remove existing polyline and arrows
         if (pathPolyline) {
+            // Remove arrow markers if they exist
+            if (pathPolyline.arrowMarkers) {
+                pathPolyline.arrowMarkers.forEach(marker => map.removeLayer(marker));
+                pathPolyline.arrowMarkers = [];
+            }
+            // Remove decorator if it exists
+            if (pathPolyline.decorator) {
+                map.removeLayer(pathPolyline.decorator);
+                pathPolyline.decorator = null;
+            }
             map.removeLayer(pathPolyline);
             pathPolyline = null;
         }
@@ -201,6 +208,7 @@
         if (points.length >= 2) {
             const color = elements.colorInput ? elements.colorInput.value : config.initialColor;
             
+            // Create polyline with arrow decorator
             pathPolyline = L.polyline(
                 points.map(p => [p.lat, p.lng]),
                 {
@@ -211,9 +219,110 @@
                     lineJoin: 'round'
                 }
             ).addTo(map);
+
+            // Add direction arrows using Leaflet polylineDecorator if available
+            // If not available, add arrows manually
+            addDirectionArrows(pathPolyline, color);
         }
 
         updateMarkerClasses();
+    }
+
+    /**
+     * Add direction arrows to the polyline
+     */
+    function addDirectionArrows(polyline, color) {
+        // Check if Leaflet.PolylineDecorator is available
+        if (typeof L.polylineDecorator !== 'undefined') {
+            // Use polyline decorator plugin
+            const decorator = L.polylineDecorator(polyline, {
+                patterns: [
+                    {
+                        offset: '10%',
+                        repeat: 80,
+                        symbol: L.Symbol.arrowHead({
+                            pixelSize: 12,
+                            pathOptions: {
+                                fillOpacity: 1,
+                                weight: 0,
+                                color: color
+                            }
+                        })
+                    }
+                ]
+            }).addTo(map);
+            
+            // Store reference to remove later
+            if (!pathPolyline.decorator) {
+                pathPolyline.decorator = decorator;
+            }
+        } else {
+            // Fallback: Add arrow markers manually
+            addManualArrows(polyline, color);
+        }
+    }
+
+    /**
+     * Add manual arrow markers along the path (fallback)
+     */
+    function addManualArrows(polyline, color) {
+        const latlngs = polyline.getLatLngs();
+        const arrowSpacing = 500; // meters (500m intervals)
+        
+        // Remove old arrows if they exist
+        if (pathPolyline.arrowMarkers) {
+            pathPolyline.arrowMarkers.forEach(marker => map.removeLayer(marker));
+        }
+        pathPolyline.arrowMarkers = [];
+        
+        // Get contrasting color for arrows
+        const arrowColor = getContrastColor(color);
+
+        // Calculate total path length
+        let pathLength = 0;
+        for (let i = 0; i < latlngs.length - 1; i++) {
+            pathLength += map.distance(latlngs[i], latlngs[i + 1]);
+        }
+
+        // Place arrows every 500m
+        if (pathLength < arrowSpacing) return; // Don't show arrows if path is too short
+
+        let currentDistance = arrowSpacing; // Start at 500m, not 0
+
+        let accumulatedDistance = 0;
+        for (let i = 0; i < latlngs.length - 1; i++) {
+            const segmentDistance = map.distance(latlngs[i], latlngs[i + 1]);
+            
+            while (accumulatedDistance + segmentDistance >= currentDistance) {
+                const segmentRatio = (currentDistance - accumulatedDistance) / segmentDistance;
+                const lat = latlngs[i].lat + (latlngs[i + 1].lat - latlngs[i].lat) * segmentRatio;
+                const lng = latlngs[i].lng + (latlngs[i + 1].lng - latlngs[i].lng) * segmentRatio;
+                
+                // Calculate bearing angle for arrow direction
+                const deltaLat = latlngs[i + 1].lat - latlngs[i].lat;
+                const deltaLng = latlngs[i + 1].lng - latlngs[i].lng;
+                // Subtract 90 degrees because the arrow symbol ➤ points right by default
+                const bearing = (Math.atan2(deltaLng, deltaLat) * (180 / Math.PI)) - 90;
+
+                // Create arrow marker pointing in the direction of travel
+                const arrowIcon = L.divIcon({
+                    className: 'arrow-marker',
+                    html: `<div class="arrow-icon" style="transform: rotate(${bearing}deg); color: ${arrowColor};">➤</div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+
+                const marker = L.marker([lat, lng], {
+                    icon: arrowIcon,
+                    interactive: false
+                }).addTo(map);
+
+                pathPolyline.arrowMarkers.push(marker);
+                currentDistance += arrowSpacing;
+            }
+
+            accumulatedDistance += segmentDistance;
+        }
     }
 
     /**
@@ -238,17 +347,48 @@
             const isLast = index === markers.length - 1 && markers.length > 1;
             
             let markerClass = '';
-            if (isFirst) markerClass = 'start';
-            else if (isLast) markerClass = 'end';
+            let label = index + 1;
+            
+            if (isFirst) {
+                markerClass = 'start';
+                label = '<i class="fa-solid fa-play" style="font-size: 0.65rem;"></i>';
+            } else if (isLast) {
+                markerClass = 'end';
+                label = '<i class="fa-solid fa-stop" style="font-size: 0.6rem;"></i>';
+            }
             
             const icon = L.divIcon({
                 className: 'custom-marker',
-                html: `<div class="marker-icon ${markerClass}">${index + 1}</div>`,
-                iconSize: [28, 28],
-                iconAnchor: [14, 14]
+                html: `<div class="marker-icon ${markerClass}">${label}</div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
             });
             
             marker.setIcon(icon);
+            
+            // Update popup
+            let popupContent = '';
+            if (isFirst) {
+                popupContent = `
+                    <strong><i class="fa-solid fa-play"></i> Starting Point</strong><br>
+                    Lat: ${waypoints[index].lat.toFixed(6)}<br>
+                    Lng: ${waypoints[index].lng.toFixed(6)}
+                `;
+            } else if (isLast) {
+                popupContent = `
+                    <strong><i class="fa-solid fa-stop"></i> End Point</strong><br>
+                    Lat: ${waypoints[index].lat.toFixed(6)}<br>
+                    Lng: ${waypoints[index].lng.toFixed(6)}
+                `;
+            } else {
+                popupContent = `
+                    <strong>Waypoint ${index + 1}</strong><br>
+                    Lat: ${waypoints[index].lat.toFixed(6)}<br>
+                    Lng: ${waypoints[index].lng.toFixed(6)}
+                `;
+            }
+            
+            marker.bindPopup(popupContent);
         });
     }
 
@@ -450,8 +590,18 @@
         markers.forEach(marker => map.removeLayer(marker));
         markers = [];
 
-        // Remove polyline
+        // Remove polyline and arrows
         if (pathPolyline) {
+            // Remove arrow markers if they exist
+            if (pathPolyline.arrowMarkers) {
+                pathPolyline.arrowMarkers.forEach(marker => map.removeLayer(marker));
+                pathPolyline.arrowMarkers = [];
+            }
+            // Remove decorator if it exists
+            if (pathPolyline.decorator) {
+                map.removeLayer(pathPolyline.decorator);
+                pathPolyline.decorator = null;
+            }
             map.removeLayer(pathPolyline);
             pathPolyline = null;
         }
@@ -466,7 +616,7 @@
     }
 
     /**
-     * Toggle route set - removes waypoint markers when set, shows them when editing
+     * Toggle route set - keeps start/end visible, hides middle waypoints
      */
     function toggleRouteSet() {
         if (waypoints.length < 2 || isLoading) return;
@@ -474,13 +624,23 @@
         isRouteSet = !isRouteSet;
         
         if (isRouteSet) {
-            // Hide all waypoint markers
-            markers.forEach(marker => {
-                marker.setOpacity(0);
-                marker.dragging.disable();
+            // Keep start and end markers visible, hide middle waypoints
+            markers.forEach((marker, index) => {
+                const isFirst = index === 0;
+                const isLast = index === markers.length - 1;
+                
+                if (isFirst || isLast) {
+                    // Keep start/end visible but not draggable
+                    marker.setOpacity(1);
+                    marker.dragging.disable();
+                } else {
+                    // Hide middle waypoints
+                    marker.setOpacity(0);
+                    marker.dragging.disable();
+                }
             });
         } else {
-            // Show all waypoint markers
+            // Show all waypoint markers and make draggable
             markers.forEach(marker => {
                 marker.setOpacity(1);
                 marker.dragging.enable();
@@ -527,9 +687,28 @@
             elements.colorValue.textContent = color.toUpperCase();
         }
 
-        // Update polyline color
+        // Update polyline color and redraw arrows with new color
         if (pathPolyline) {
             pathPolyline.setStyle({ color: color });
+            
+            // Redraw arrows with new color
+            if (pathPolyline.arrowMarkers) {
+                pathPolyline.arrowMarkers.forEach(marker => {
+                    const icon = marker.getElement();
+                    if (icon) {
+                        const arrow = icon.querySelector('.arrow-icon');
+                        if (arrow) {
+                            arrow.style.color = color;
+                        }
+                    }
+                });
+            }
+            
+            // Update decorator color if using plugin
+            if (pathPolyline.decorator) {
+                map.removeLayer(pathPolyline.decorator);
+                addDirectionArrows(pathPolyline, color);
+            }
         }
     }
 
@@ -551,6 +730,25 @@
         }
 
         return true;
+    }
+
+    /**
+     * Get contrasting color (black or white) based on background color
+     */
+    function getContrastColor(hexColor) {
+        // Remove # if present
+        const hex = hexColor.replace('#', '');
+        
+        // Convert to RGB
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        
+        // Calculate luminance
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        
+        // Return black for light colors, white for dark colors
+        return luminance > 0.5 ? '#000000' : '#FFFFFF';
     }
 
     /**

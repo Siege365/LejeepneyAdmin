@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\RouteApiController;
 use App\Http\Controllers\Api\LandmarkApiController;
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,16 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group.
 |
 */
+
+// Authentication Routes (Public)
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// Protected Routes (Require Authentication)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
 
 // API v1 Routes (Public - for Flutter App)
 Route::prefix('v1')->group(function () {

@@ -115,7 +115,8 @@
                 </h4>
                 <p class="section-description">
                     Click on the map to add waypoints. The path will automatically follow the actual roads.
-                    Once you're satisfied with the route, click "Set Route" to finalize it.
+                    <strong>Green marker</strong> indicates the starting point, <strong>red marker</strong> indicates the end point.
+                    Direction arrows will guide users along the route path.
                 </p>
                 
                 <div id="map" class="route-map"></div>

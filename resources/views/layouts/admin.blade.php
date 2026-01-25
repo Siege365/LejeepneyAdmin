@@ -52,6 +52,12 @@
                     <span>Customer Service</span>
                 </a>
             </li>
+            <li>
+                <a href="{{ route('register') }}" class="{{ request()->routeIs('register') ? 'active' : '' }}">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Add Admin User</span>
+                </a>
+            </li>
         </ul>
         
         <div class="sidebar-footer">

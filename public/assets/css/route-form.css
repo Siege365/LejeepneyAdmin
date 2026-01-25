@@ -275,8 +275,8 @@ select.form-control {
 }
 
 .marker-icon {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     background: linear-gradient(135deg, var(--secondary-blue), #1565C0);
     color: white;
     border-radius: 50%;
@@ -284,17 +284,69 @@ select.form-control {
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     border: 3px solid white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+    transition: all 0.2s ease;
 }
 
 .marker-icon.start {
     background: linear-gradient(135deg, #10B981, #059669);
+    box-shadow: 0 3px 10px rgba(16, 185, 129, 0.5);
+    animation: pulse-start 2s infinite;
 }
 
 .marker-icon.end {
     background: linear-gradient(135deg, #EF4444, #DC2626);
+    box-shadow: 0 3px 10px rgba(239, 68, 68, 0.5);
+    animation: pulse-end 2s infinite;
+}
+
+/* Pulse animations for start and end markers */
+@keyframes pulse-start {
+    0%, 100% {
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.5);
+    }
+    50% {
+        box-shadow: 0 3px 15px rgba(16, 185, 129, 0.8), 0 0 0 8px rgba(16, 185, 129, 0.2);
+    }
+}
+
+@keyframes pulse-end {
+    0%, 100% {
+        box-shadow: 0 3px 10px rgba(239, 68, 68, 0.5);
+    }
+    50% {
+        box-shadow: 0 3px 15px rgba(239, 68, 68, 0.8), 0 0 0 8px rgba(239, 68, 68, 0.2);
+    }
+}
+
+/* Arrow markers */
+.arrow-marker {
+    background: none !important;
+    border: none !important;
+}
+
+.arrow-icon {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: bold;
+    pointer-events: none;
+    text-shadow: 
+        -1.5px -1.5px 0 rgba(255,255,255,0.9),
+        1.5px -1.5px 0 rgba(255,255,255,0.9),
+        -1.5px 1.5px 0 rgba(255,255,255,0.9),
+        1.5px 1.5px 0 rgba(255,255,255,0.9),
+        0 0 3px rgba(255,255,255,0.9),
+        0 2px 6px rgba(0,0,0,0.6);
+    line-height: 1;
+    transform-origin: center center;
 }
 
 /* Responsive */
@@ -349,4 +401,92 @@ select.form-control {
 .leaflet-popup-content {
     margin: 0.75rem 1rem;
     font-size: 0.875rem;
+}
+
+/* ========================================
+   FILE INPUT STYLING
+   ======================================== */
+
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+}
+
+.file-input-wrapper .file-input {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+}
+
+.file-input-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #EBAF3E;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    border: 2px dashed transparent;
+    margin: 0;
+}
+
+.file-input-label:hover {
+    background: #D99E2E;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(235, 175, 62, 0.3);
+}
+
+.file-input-label:active {
+    transform: translateY(0);
+}
+
+.file-input-label i {
+    font-size: 1.125rem;
+}
+
+/* Remove Button Styling */
+.remove-btn {
+    color: #DC2626;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.remove-btn:hover {
+    color: #B91C1C;
+}
+
+.remove-btn i {
+    font-size: 0.75rem;
+}
+
+/* Gallery Preview Grid */
+.gallery-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.gallery-item {
+    position: relative;
+}
+
+.gallery-item img {
+    border-radius: 4px;
+}
+
+/* File Input Helper Text */
+.form-text.text-muted {
+    font-size: 0.75rem;
+    color: #64748B;
+    margin-top: 0.25rem;
+    display: block;
 }

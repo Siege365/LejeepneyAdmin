@@ -69,113 +69,136 @@ const iconPreview = document.getElementById('iconPreview');
 const iconPreviewImg = document.getElementById('iconPreviewImg');
 let currentIconFile = null;
 
-iconInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        // Validate file size
-        if (file.size > 2 * 1024 * 1024) {
-            alert('Icon file is too large. Maximum size is 2MB.');
-            iconInput.value = '';
-            return;
-        }
-        
-        currentIconFile = file;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            iconPreviewImg.src = e.target.result;
-            iconPreview.style.display = 'block';
-            
-            // Add remove button to preview if not editing with existing icon
-            if (!iconPreview.querySelector('.remove-icon-btn')) {
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button';
-                removeBtn.className = 'remove-icon-btn';
-                removeBtn.innerHTML = '<i class="fas fa-times"></i> Remove';
-                removeBtn.onclick = function() {
-                    iconInput.value = '';
-                    currentIconFile = null;
-                    iconPreview.style.display = 'none';
-                };
-                iconPreview.appendChild(removeBtn);
+if (iconInput) {
+    iconInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file size
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Icon file is too large. Maximum size is 2MB.');
+                iconInput.value = '';
+                return;
             }
-        };
-        reader.readAsDataURL(file);
-    }
-});
+            
+            currentIconFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                iconPreviewImg.src = e.target.result;
+                iconPreview.style.display = 'block';
+                
+                // Update file input label text
+                const label = document.querySelector('label[for="icon_image"].file-input-label');
+                if (label) {
+                    label.querySelector('span').textContent = file.name;
+                }
+                
+                // Add remove button if it doesn't exist
+                if (!iconPreview.querySelector('.remove-icon-preview-btn')) {
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'btn btn-sm btn-danger mt-1 remove-icon-preview-btn';
+                    removeBtn.style.cssText = 'font-size: 0.7rem; padding: 0.25rem 0.5rem;';
+                    removeBtn.innerHTML = '<i class="fa-solid fa-trash"></i> Remove';
+                    removeBtn.onclick = function() {
+                        iconInput.value = '';
+                        currentIconFile = null;
+                        iconPreview.style.display = 'none';
+                        iconPreviewImg.src = '';
+                        // Reset label text
+                        const label = document.querySelector('label[for="icon_image"].file-input-label');
+                        if (label) {
+                            label.querySelector('span').textContent = 'Choose Icon Image';
+                        }
+                        this.remove();
+                    };
+                    iconPreview.appendChild(removeBtn);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
 
 // Gallery Images Preview
 const galleryInput = document.getElementById('gallery_images');
 const galleryPreview = document.getElementById('galleryPreview');
+const galleryPreviewContainer = document.getElementById('galleryPreviewContainer');
 let selectedFiles = [];
 
-galleryInput.addEventListener('change', function(e) {
-    const newFiles = Array.from(e.target.files);
-    
-    // Add new files to existing selection
-    const combinedFiles = [...selectedFiles, ...newFiles];
-    
-    // Limit to 10 images
-    if (combinedFiles.length > 10) {
-        alert(`Maximum 10 images allowed. You can add ${10 - selectedFiles.length} more image(s).`);
-        galleryInput.value = '';
-        return;
-    }
-    
-    // Check file sizes
-    for (let file of newFiles) {
-        if (file.size > 2 * 1024 * 1024) { // 2MB
-            alert(`File ${file.name} is too large. Maximum size is 2MB.`);
-            galleryInput.value = '';
+if (galleryInput) {
+    galleryInput.addEventListener('change', function(e) {
+        const newFiles = Array.from(e.target.files);
+        
+        if (newFiles.length === 0) return;
+        
+        // Add new files to existing selection
+        const combinedFiles = [...selectedFiles, ...newFiles];
+        
+        // Limit to 10 images
+        if (combinedFiles.length > 10) {
+            alert(`Maximum 10 images allowed. You can add ${10 - selectedFiles.length} more image(s).`);
             return;
         }
-    }
-    
-    // Add new files to selection
-    selectedFiles = combinedFiles;
-    
-    // Clear the input to allow selecting the same file again
-    galleryInput.value = '';
-    
-    displayGalleryPreviews();
-});
+        
+        // Check file sizes
+        for (let file of newFiles) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB
+                alert(`File ${file.name} is too large. Maximum size is 5MB.`);
+                return;
+            }
+        }
+        
+        // Add new files to selection
+        selectedFiles = combinedFiles;
+        
+        // Update file input label text
+        const label = document.querySelector('label[for="gallery_images"].file-input-label');
+        if (label) {
+            const span = label.querySelector('span');
+            if (span) {
+                span.textContent = `${selectedFiles.length} image(s) selected`;
+            }
+        }
+        
+        displayGalleryPreviews();
+    });
+}
 
 function displayGalleryPreviews() {
-    galleryPreview.innerHTML = '';
+    if (!galleryPreviewContainer) return;
+    
+    galleryPreviewContainer.innerHTML = '';
     
     if (selectedFiles.length === 0) {
-        const galleryCount = document.getElementById('galleryCount');
-        if (galleryCount) galleryCount.style.display = 'none';
+        galleryPreview.style.display = 'none';
         return;
     }
     
-    // Update gallery count display
-    const galleryCount = document.getElementById('galleryCount');
-    const galleryCountText = document.getElementById('galleryCountText');
-    if (galleryCount && galleryCountText) {
-        galleryCount.style.display = 'block';
-        galleryCountText.textContent = `${selectedFiles.length} image(s) selected. You can add ${10 - selectedFiles.length} more.`;
-    }
+    galleryPreview.style.display = 'block';
     
     selectedFiles.forEach((file, index) => {
         const reader = new FileReader();
         
         reader.onload = function(e) {
             const div = document.createElement('div');
-            div.className = 'gallery-preview-item';
+            div.className = 'gallery-item';
+            div.style.cssText = 'position: relative; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 0.5rem;';
             div.innerHTML = `
-                <img src="${e.target.result}" alt="Gallery ${index + 1}">
-                <button type="button" class="remove-btn" data-index="${index}">
-                    <i class="fas fa-times"></i>
+                <img src="${e.target.result}" alt="Gallery ${index + 1}" 
+                     class="img-thumbnail"
+                     style="width: 100%; height: 100px; object-fit: cover; border: 1px solid #E2E8F0;">
+                <button type="button" class="btn btn-sm btn-danger mt-1" data-index="${index}" 
+                        style="font-size: 0.7rem; padding: 0.25rem 0.5rem; width: 100%;">
+                    <i class="fa-solid fa-trash"></i> Remove
                 </button>
-                <span class="image-index">${index + 1} / ${selectedFiles.length}</span>
             `;
             
             // Add click event to remove button
-            div.querySelector('.remove-btn').addEventListener('click', function() {
+            div.querySelector('button').addEventListener('click', function() {
                 removeGalleryPreview(parseInt(this.getAttribute('data-index')));
             });
             
-            galleryPreview.appendChild(div);
+            galleryPreviewContainer.appendChild(div);
         };
         
         reader.readAsDataURL(file);
@@ -188,7 +211,22 @@ function removeGalleryPreview(index) {
     // Update the file input with remaining files
     const dataTransfer = new DataTransfer();
     selectedFiles.forEach(file => dataTransfer.items.add(file));
-    galleryInput.files = dataTransfer.files;
+    if (galleryInput) {
+        galleryInput.files = dataTransfer.files;
+    }
+    
+    // Update label text
+    const label = document.querySelector('label[for="gallery_images"].file-input-label');
+    if (label) {
+        const span = label.querySelector('span');
+        if (span) {
+            if (selectedFiles.length > 0) {
+                span.textContent = `${selectedFiles.length} image(s) selected`;
+            } else {
+                span.textContent = 'Choose Gallery Images';
+            }
+        }
+    }
     
     displayGalleryPreviews();
 }
@@ -226,7 +264,9 @@ document.querySelector('form').addEventListener('submit', function(e) {
     if (selectedFiles.length > 0) {
         const dataTransfer = new DataTransfer();
         selectedFiles.forEach(file => dataTransfer.items.add(file));
-        galleryInput.files = dataTransfer.files;
+        if (galleryInput) {
+            galleryInput.files = dataTransfer.files;
+        }
     }
     
     // Validate gallery images count

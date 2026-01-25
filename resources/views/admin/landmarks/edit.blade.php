@@ -119,14 +119,20 @@
                                 <label class="form-check mt-2" style="display: flex; align-items: center; gap: 0.375rem; cursor: pointer; margin: 0.5rem 0 0 0;">
                                     <input class="form-check-input" type="checkbox" 
                                            name="remove_icon" value="1" style="width: 14px; height: 14px; margin: 0;">
-                                    <span class="text-danger" style="font-size: 0.75rem;"><i class="fa-solid fa-trash"></i> Remove</span>
+                                    <span class="remove-btn"><i class="fa-solid fa-trash"></i> Remove Icon</span>
                                 </label>
                             </div>
                         @endif
 
-                        <input type="file" class="form-control @error('icon_image') is-invalid @enderror" 
-                               id="icon_image" name="icon_image" 
-                               accept="image/jpeg,image/png,image/jpg,image/webp">
+                        <div class="file-input-wrapper">
+                            <input type="file" class="form-control file-input @error('icon_image') is-invalid @enderror" 
+                                   id="icon_image" name="icon_image" 
+                                   accept="image/jpeg,image/png,image/jpg,image/webp">
+                            <label for="icon_image" class="file-input-label">
+                                <i class="fa-solid fa-cloud-upload-alt"></i>
+                                <span>Choose Icon Image</span>
+                            </label>
+                        </div>
                         <div id="iconPreview" class="mt-2" style="display: none;">
                             <img id="iconPreviewImg" src="" alt="Icon Preview" 
                                  class="img-thumbnail" style="max-width: 100px;">
@@ -139,30 +145,40 @@
                     <!-- Gallery Images -->
                     <div class="form-group">
                         <label for="gallery_images">Gallery Images</label>
-
+                        
                         @if($landmark->gallery_images && count($landmark->gallery_images) > 0)
-                            <div class="current-gallery mb-2" style="padding: 0.75rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px;">
-                                <p class="small mb-2" style="margin: 0 0 0.5rem 0; font-weight: 500;">Current: {{ count($landmark->gallery_images) }} images</p>
-                                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            <div class="current-gallery mb-2">
+                                <div class="gallery-preview-grid">
                                     @foreach($landmark->gallery_images as $index => $image)
-                                        <div style="position: relative;">
+                                        <div class="gallery-item" style="position: relative; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 0.5rem;">
                                             <img src="{{ Storage::url($image) }}" 
                                                  alt="Gallery {{ $index + 1 }}" 
-                                                 style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #E2E8F0;">
-                                            <label style="display: block; text-align: center; margin-top: 0.25rem;">
-                                                <input type="checkbox" name="remove_gallery[]" value="{{ $image }}" style="width: 12px; height: 12px;">
+                                                 class="img-thumbnail"
+                                                 style="width: 100%; height: 100px; object-fit: cover; border: 1px solid #E2E8F0;">
+                                            <label class="form-check mt-1" style="display: flex; align-items: center; gap: 0.25rem; cursor: pointer; margin: 0;">
+                                                <input class="form-check-input" type="checkbox" 
+                                                       name="remove_gallery[]" value="{{ $index }}" style="width: 12px; height: 12px; margin: 0;">
+                                                <span class="remove-btn" style="font-size: 0.7rem;"><i class="fa-solid fa-trash"></i> Remove</span>
                                             </label>
                                         </div>
                                     @endforeach
                                 </div>
-                                <p class="text-muted" style="font-size: 0.7rem; margin: 0.5rem 0 0 0;">Check boxes to remove</p>
                             </div>
                         @endif
 
-                        <input type="file" class="form-control @error('gallery_images.*') is-invalid @enderror" 
-                               id="gallery_images" name="gallery_images[]" 
-                               accept="image/jpeg,image/png,image/jpg,image/webp" multiple>
-                        <div id="galleryPreview" class="gallery-preview mt-2"></div>
+                        <div class="file-input-wrapper">
+                            <input type="file" class="form-control file-input @error('gallery_images.*') is-invalid @enderror" 
+                                   id="gallery_images" name="gallery_images[]" 
+                                   accept="image/jpeg,image/png,image/jpg,image/webp" multiple>
+                            <label for="gallery_images" class="file-input-label">
+                                <i class="fa-solid fa-images"></i>
+                                <span>Add Gallery Images</span>
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">You can select multiple images</small>
+                        <div id="galleryPreview" class="mt-2" style="display: none;">
+                            <div id="galleryPreviewContainer" class="gallery-preview-grid"></div>
+                        </div>
                         @error('gallery_images.*')
                             <span class="error-text">{{ $message }}</span>
                         @enderror

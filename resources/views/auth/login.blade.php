@@ -61,13 +61,34 @@
     <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
         <span class="btn-text">Login</span>
         <span class="btn-loader" style="display: none;">
-            <i class="fa-solid fa-spinner fa-spin"></i>
         </span>
     </button>
 </form>
 
-<!-- Sign Up Link -->
-<div class="auth-footer">
-    <p>Don't have an account? <a href="{{ route('register') }}">Sign up</a></p>
-</div>
+
+@if($errors->any())
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        @foreach($errors->all() as $error)
+            showNotification('{{ $error }}', 'error');
+        @endforeach
+    });
+</script>
+@endif
+
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        showNotification('{{ session('success') }}', 'success');
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        showNotification('{{ session('error') }}', 'error');
+    });
+</script>
+@endif
 @endsection

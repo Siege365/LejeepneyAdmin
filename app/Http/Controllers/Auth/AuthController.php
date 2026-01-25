@@ -32,6 +32,14 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            // Check if user is admin
+            if (Auth::user()->role !== 'admin') {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Unauthorized. Admin access only.',
+                ])->onlyInput('email');
+            }
+
             return redirect()->intended('/dashboard');
         }
 
@@ -49,7 +57,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle registration request.
+     * Handle registration request (Admin only - creates new admin users).
      */
     public function register(Request $request)
     {
@@ -63,11 +71,10 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'role' => 'admin', // Always create admin users
         ]);
 
-        Auth::login($user);
-
-        return redirect('/dashboard');
+        return redirect('/dashboard')->with('success', 'Admin user "' . $user->name . '" created successfully!');
     }
 
     /**

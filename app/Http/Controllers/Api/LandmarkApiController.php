@@ -34,7 +34,7 @@ class LandmarkApiController extends Controller
         $landmarks = $query->select(
             'id', 'name', 'category', 'description', 
             'latitude', 'longitude', 'icon_image', 
-            'gallery_images', 'is_featured'
+            'is_featured'
         )
         ->orderBy('category')
         ->orderBy('name')
@@ -52,9 +52,6 @@ class LandmarkApiController extends Controller
                     'latitude' => (float) $landmark->latitude,
                     'longitude' => (float) $landmark->longitude,
                     'icon_url' => $landmark->icon_image ? asset('storage/' . $landmark->icon_image) : null,
-                    'gallery_urls' => $landmark->gallery_images ? collect($landmark->gallery_images)->map(function($img) {
-                        return asset('storage/' . $img);
-                    })->toArray() : [],
                     'is_featured' => (bool) $landmark->is_featured,
                     'coordinates' => [
                         'lat' => (float) $landmark->latitude,
@@ -90,9 +87,6 @@ class LandmarkApiController extends Controller
                 'latitude' => (float) $landmark->latitude,
                 'longitude' => (float) $landmark->longitude,
                 'icon_url' => $landmark->icon_image ? asset('storage/' . $landmark->icon_image) : null,
-                'gallery_urls' => $landmark->gallery_images ? collect($landmark->gallery_images)->map(function($img) {
-                    return asset('storage/' . $img);
-                })->toArray() : [],
                 'is_featured' => (bool) $landmark->is_featured,
                 'coordinates' => [
                     'lat' => (float) $landmark->latitude,

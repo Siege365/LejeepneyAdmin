@@ -25,11 +25,16 @@ class JeepneyRoute extends Model
     const BASE_DISTANCE_KM = 4;
 
     protected $fillable = [
+        'route_number',
         'name',
         'terminal',
+        'start_point',
+        'end_point',
         'path',
         'waypoints',
         'total_distance',
+        'estimated_time',
+        'fare',
         'status',
         'color',
         'description'
@@ -38,7 +43,9 @@ class JeepneyRoute extends Model
     protected $casts = [
         'path' => 'array',
         'waypoints' => 'array',
-        'total_distance' => 'decimal:2'
+        'total_distance' => 'decimal:2',
+        'fare' => 'decimal:2',
+        'estimated_time' => 'integer'
     ];
 
     /**
