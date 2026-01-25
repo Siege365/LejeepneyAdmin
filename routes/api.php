@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // API v1 Routes (Public - for Flutter App)
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     
     // Routes
     Route::get('/routes', [RouteApiController::class, 'index']);

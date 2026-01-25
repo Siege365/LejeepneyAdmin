@@ -171,8 +171,8 @@
     // Pass initial data to JavaScript
     window.routeFormConfig = {
         mode: 'edit',
-        initialPath: {!! old('path', json_encode($route->path)) !!},
-        initialWaypoints: {!! old('waypoints', json_encode($route->waypoints ?? $route->path)) !!},
+        initialPath: @json(old('path', $route->path)),
+        initialWaypoints: @json(old('waypoints', $route->waypoints ?? $route->path)),
         initialColor: '{{ old('color', $route->color ?? '#EBAF3E') }}',
         davaoCenter: [7.0731, 125.6128]
     };

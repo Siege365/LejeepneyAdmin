@@ -56,8 +56,8 @@ class LandmarkController extends Controller
             'description' => 'nullable|string',
             'category' => 'required|string|in:' . implode(',', array_keys(Landmark::CATEGORIES)),
             'is_featured' => 'boolean',
-            'icon_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120'
+            'icon_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=50,min_height=50,max_width=2048,max_height=2048',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:min_width=100,min_height=100,max_width=4096,max_height=4096'
         ]);
 
         // Handle icon image upload
@@ -111,9 +111,9 @@ class LandmarkController extends Controller
             'description' => 'nullable|string',
             'category' => 'required|string|in:' . implode(',', array_keys(Landmark::CATEGORIES)),
             'is_featured' => 'boolean',
-            'icon_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'icon_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=50,min_height=50,max_width=2048,max_height=2048',
             'remove_icon' => 'boolean',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:min_width=100,min_height=100,max_width=4096,max_height=4096',
             'remove_gallery' => 'nullable|array',
             'remove_gallery.*' => 'integer'
         ]);
