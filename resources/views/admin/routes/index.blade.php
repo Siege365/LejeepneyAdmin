@@ -22,17 +22,17 @@
 <div class="card">
     <div class="card-header">
         <h3>All Routes ({{ $routes->total() }})</h3>
-        <div style="display: flex; gap: 1rem; align-items: center;">
+        <form method="GET" action="{{ route('admin.routes.index') }}" style="display: flex; gap: 1rem; align-items: center;">
             <div class="search-box">
                 <i class="fa-solid fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Search routes...">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search routes...">
             </div>
-            <select class="form-control" id="statusFilter" style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem;">
+            <select class="form-control" name="status" style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem;" onchange="this.form.submit()">
                 <option value="">All Status</option>
-                <option value="available">Available</option>
-                <option value="unavailable">Unavailable</option>
+                <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
+                <option value="unavailable" {{ request('status') == 'unavailable' ? 'selected' : '' }}>Unavailable</option>
             </select>
-        </div>
+        </form>
     </div>
     
     <div class="table-container">
@@ -129,7 +129,7 @@
             Showing {{ $routes->firstItem() }} to {{ $routes->lastItem() }} of {{ $routes->total() }} routes
         </div>
         <div>
-            {{ $routes->withQueryString()->links('vendor.pagination.custom') }}
+            {{ $routes->withQueryString()->onEachSide(2)->links('vendor.pagination.custom') }}
         </div>
     </div>
     @endif

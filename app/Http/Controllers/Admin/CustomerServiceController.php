@@ -12,9 +12,22 @@ class CustomerServiceController extends Controller
     /**
      * Display a listing of support tickets
      */
-    public function index()
+    public function index(Request $request)
     {
-        $tickets = SupportTicket::latest()->paginate(10);
+        $query = SupportTicket::query();
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('subject', 'like', "%{$search}%")
+                  ->orWhere('message', 'like', "%{$search}%");
+            });
+        }
+
+        $tickets = $query->latest()->paginate(10);
         
         return view('admin.customer-service.index', compact('tickets'));
     }

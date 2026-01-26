@@ -267,7 +267,7 @@
      */
     function addManualArrows(polyline, color) {
         const latlngs = polyline.getLatLngs();
-        const arrowSpacing = 500; // meters (500m intervals)
+        const arrowSpacing = 1000; // meters (1km intervals)
         
         // Remove old arrows if they exist
         if (pathPolyline.arrowMarkers) {

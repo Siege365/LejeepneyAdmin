@@ -22,21 +22,21 @@
 <div class="card">
     <div class="card-header">
         <h3>All Landmarks ({{ $landmarks->total() }})</h3>
-        <div style="display: flex; gap: 1rem; align-items: center;">
+        <form method="GET" action="{{ route('admin.landmarks.index') }}" style="display: flex; gap: 1rem; align-items: center;">
             <div class="search-box">
                 <i class="fa-solid fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Search landmarks...">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search landmarks...">
             </div>
-            <select class="form-control" id="categoryFilter" style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem;">
+            <select class="form-control" name="category" style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem;" onchange="this.form.submit()">
                 <option value="">All Categories</option>
-                <option value="city_center">City Center</option>
-                <option value="mall">Mall</option>
-                <option value="school">School</option>
-                <option value="hospital">Hospital</option>
-                <option value="transport">Transport</option>
-                <option value="other">Other</option>
+                <option value="city_center" {{ request('category') == 'city_center' ? 'selected' : '' }}>City Center</option>
+                <option value="mall" {{ request('category') == 'mall' ? 'selected' : '' }}>Mall</option>
+                <option value="school" {{ request('category') == 'school' ? 'selected' : '' }}>School</option>
+                <option value="hospital" {{ request('category') == 'hospital' ? 'selected' : '' }}>Hospital</option>
+                <option value="transport" {{ request('category') == 'transport' ? 'selected' : '' }}>Transport</option>
+                <option value="other" {{ request('category') == 'other' ? 'selected' : '' }}>Other</option>
             </select>
-        </div>
+        </form>
     </div>
     
     <div class="table-container">
@@ -142,7 +142,7 @@
             Showing {{ $landmarks->firstItem() }} to {{ $landmarks->lastItem() }} of {{ $landmarks->total() }} landmarks
         </div>
         <div>
-            {{ $landmarks->withQueryString()->links('vendor.pagination.custom') }}
+            {{ $landmarks->withQueryString()->onEachSide(2)->links('vendor.pagination.custom') }}
         </div>
     </div>
     @endif

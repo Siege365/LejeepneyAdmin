@@ -25,13 +25,15 @@ class RouteController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('terminal', 'like', "%{$search}%")
+                $q->where('route_number', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
+                  ->orWhere('start_point', 'like', "%{$search}%")
+                  ->orWhere('end_point', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        $routes = $query->orderBy('name')->paginate(10);
+        $routes = $query->orderBy('route_number')->paginate(10);
 
         return view('admin.routes.index', compact('routes'));
     }

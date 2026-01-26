@@ -46,10 +46,20 @@
 <div class="card">
     <div class="card-header">
         <h3>Support Tickets</h3>
-        <div class="search-box">
-            <i class="fa-solid fa-search"></i>
-            <input type="text" placeholder="Search tickets...">
-        </div>
+        <form method="GET" action="{{ route('admin.customer-service.index') }}" style="display: flex; gap: 1rem; align-items: center;">
+            <div class="search-box">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search tickets...">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-search"></i>
+            </button>
+            @if(request('search'))
+                <a href="{{ route('admin.customer-service.index') }}" class="btn btn-outline btn-sm">
+                    <i class="fa-solid fa-times"></i> Clear
+                </a>
+            @endif
+        </form>
     </div>
     
     <div class="table-container">
@@ -167,7 +177,7 @@
     <!-- Pagination -->
     @if($tickets->hasPages())
         <div style="padding: 1rem 1.5rem; border-top: 1px solid #E2E8F0;">
-            {{ $tickets->links('vendor.pagination.custom') }}
+            {{ $tickets->onEachSide(2)->links('vendor.pagination.custom') }}
         </div>
     @endif
 </div>
