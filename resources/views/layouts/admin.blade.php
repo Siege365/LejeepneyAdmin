@@ -16,8 +16,14 @@
     
     <!-- Admin Styles -->
     <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}?v={{ time() }}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('assets/images/Logo.svg') }}" type="image/svg+xml">
+    <link rel="shortcut icon" href="{{ asset('assets/images/Logo.svg') }}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{{ asset('assets/images/LogoSignInPage.png') }}">
+    <meta name="theme-color" content="#F59E0B">
     
-    @stack('styles')
+    @stack('styles'}
 </head>
 <body>
     <!-- Sidebar -->
