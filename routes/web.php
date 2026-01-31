@@ -38,7 +38,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         $totalLandmarks = \App\Models\Landmark::count();
         $totalRoutes = \App\Models\JeepneyRoute::count();
         $activeUsers = \App\Models\User::where('role', 'admin')->count();
-        $pendingRequests = 0; // Placeholder
+        $pendingRequests = \App\Models\SupportTicket::where('status', 'pending')->count();
         $recentActivities = \App\Models\ActivityLog::latest()->paginate(5);
         
         return view('admin.dashboard', compact(
@@ -73,11 +73,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
     });
     
     // Customer Service
-    Route::prefix('customer-service')->name('customer-service.')->group(function () {
+    Route::prefix('customer-service')->name('admin.customer-service.')->group(function () {
         Route::get('/', [CustomerServiceController::class, 'index'])->name('index');
+        Route::post('/bulk-action', [CustomerServiceController::class, 'bulkAction'])->name('bulk-action');
         Route::get('/{id}', [CustomerServiceController::class, 'show'])->name('show');
         Route::post('/{id}/reply', [CustomerServiceController::class, 'reply'])->name('reply');
         Route::post('/{id}/status', [CustomerServiceController::class, 'updateStatus'])->name('updateStatus');
-        Route::delete('/{id}', [CustomerServiceController::class, 'archive'])->name('archive');
+        Route::post('/{id}/flag', [CustomerServiceController::class, 'toggleFlag'])->name('toggleFlag');
+        Route::post('/{id}/archive', [CustomerServiceController::class, 'archive'])->name('archive');
+        Route::post('/{id}/restore', [CustomerServiceController::class, 'restore'])->name('restore');
     });
 });

@@ -5,40 +5,90 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicket;
 use App\Models\TicketReply;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CustomerServiceController extends Controller
 {
     /**
-     * Display a listing of support tickets
+     * Display a listing of support tickets with filtering
      */
     public function index(Request $request)
     {
-        $query = SupportTicket::query();
+        $query = SupportTicket::with(['user', 'admin']);
 
-        // Search
+        // Search by name, email, subject, message, or ticket ID
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = trim($request->search);
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
                   ->orWhere('subject', 'like', "%{$search}%")
                   ->orWhere('message', 'like', "%{$search}%");
             });
         }
 
-        $tickets = $query->latest()->paginate(10);
+        // Filter by status
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->filterByStatus($request->status);
+        }
+
+        // Filter by type
+        if ($request->filled('type') && $request->type !== 'all') {
+            $query->filterByType($request->type);
+        }
+
+        // Filter by priority
+        if ($request->filled('priority') && $request->priority !== 'all') {
+            $query->filterByPriority($request->priority);
+        }
+
+        // Filter flagged only
+        if ($request->boolean('flagged')) {
+            $query->flagged();
+        }
+
+        // Filter archived/active
+        if ($request->filled('archived')) {
+            if ($request->archived === 'archived') {
+                $query->archived();
+            } elseif ($request->archived === 'active') {
+                $query->active();
+            }
+        } else {
+            // Default: show only active tickets
+            $query->active();
+        }
+
+        // Order: flagged first, then by latest
+        $tickets = $query->orderByDesc('is_flagged')
+                         ->orderByDesc('created_at')
+                         ->paginate(15)
+                         ->withQueryString();
+
+        // Get counts for the sidebar/stats
+        $stats = [
+            'total' => SupportTicket::active()->count(),
+            'pending' => SupportTicket::active()->pending()->count(),
+            'in_progress' => SupportTicket::active()->inProgress()->count(),
+            'resolved' => SupportTicket::active()->resolved()->count(),
+            'flagged' => SupportTicket::active()->flagged()->count(),
+            'archived' => SupportTicket::archived()->count(),
+        ];
         
-        return view('admin.customer-service.index', compact('tickets'));
+        return view('admin.customer-service.index', compact('tickets', 'stats'));
     }
 
     /**
-     * Display the specified ticket
+     * Display the specified ticket with replies
      */
     public function show($id)
     {
-        $ticket = SupportTicket::with('replies')->findOrFail($id);
-        $replies = $ticket->replies;
+        $ticket = SupportTicket::with(['replies.admin', 'user', 'admin'])->findOrFail($id);
+        $replies = $ticket->replies()->orderBy('created_at', 'asc')->get();
         
         return view('admin.customer-service.show', compact('ticket', 'replies'));
     }
@@ -49,34 +99,75 @@ class CustomerServiceController extends Controller
     public function reply(Request $request, $id)
     {
         $request->validate([
-            'message' => 'required|string|min:10',
+            'message' => 'required|string|min:10|max:5000',
             'status' => 'required|in:pending,in-progress,resolved',
             'send_email' => 'nullable|boolean'
         ]);
 
         $ticket = SupportTicket::findOrFail($id);
+        $admin = Auth::user();
 
-        // Create the reply
-        $reply = TicketReply::create([
-            'support_ticket_id' => $ticket->id,
-            'message' => $request->message,
-            'admin_name' => 'Admin Support', // You can get from auth()->user() later
-            'email_sent' => $request->boolean('send_email')
-        ]);
+        DB::beginTransaction();
+        try {
+            // Create the reply
+            $reply = TicketReply::create([
+                'support_ticket_id' => $ticket->id,
+                'admin_id' => $admin->id,
+                'message' => strip_tags($request->message, '<p><br><strong><em><ul><ol><li>'),
+                'admin_name' => $admin->name,
+                'email_sent' => $request->boolean('send_email')
+            ]);
 
-        // Update ticket status
-        $ticket->update([
-            'status' => $request->status
-        ]);
+            $oldStatus = $ticket->status;
 
-        // TODO: Send email notification if requested
-        if ($request->boolean('send_email')) {
-            // Mail::to($ticket->customer_email)->send(new TicketReplyMail($ticket, $reply));
+            // Update ticket with admin who handled it
+            $ticket->update([
+                'status' => $request->status,
+                'admin_id' => $admin->id
+            ]);
+
+            // Log activity
+            ActivityLog::create([
+                'action' => 'ticket_reply',
+                'description' => "Replied to ticket #{$ticket->id}: {$ticket->subject}",
+                'performed_by' => $admin->name,
+                'ip_address' => $request->ip()
+            ]);
+
+            if ($oldStatus !== $request->status) {
+                ActivityLog::create([
+                    'action' => 'ticket_status_change',
+                    'description' => "Changed ticket #{$ticket->id} status from {$oldStatus} to {$request->status}",
+                    'performed_by' => $admin->name,
+                    'ip_address' => $request->ip()
+                ]);
+            }
+
+            DB::commit();
+
+            // Return email data for client-side EmailJS sending
+            if ($request->boolean('send_email')) {
+                return redirect()
+                    ->route('admin.customer-service.show', $ticket->id)
+                    ->with('success', 'Reply sent successfully!')
+                    ->with('emailData', [
+                        'to_email' => $ticket->email,
+                        'to_name' => $ticket->name,
+                        'subject' => "Re: {$ticket->subject}",
+                        'message' => $request->message,
+                        'ticket_id' => $ticket->id,
+                        'admin_name' => $admin->name
+                    ]);
+            }
+
+            return redirect()
+                ->route('admin.customer-service.show', $ticket->id)
+                ->with('success', 'Reply sent successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to send reply. Please try again.');
         }
-
-        return redirect()
-            ->route('customer-service.show', $ticket->id)
-            ->with('success', 'Reply sent successfully!');
     }
 
     /**
@@ -89,23 +180,172 @@ class CustomerServiceController extends Controller
         ]);
 
         $ticket = SupportTicket::findOrFail($id);
-        $ticket->update(['status' => $request->status]);
+        $oldStatus = $ticket->status;
+        $admin = Auth::user();
+
+        $ticket->update([
+            'status' => $request->status,
+            'admin_id' => $admin->id
+        ]);
+
+        ActivityLog::create([
+            'action' => 'ticket_status_change',
+            'description' => "Changed ticket #{$ticket->id} status from {$oldStatus} to {$request->status}",
+            'performed_by' => $admin->name,
+            'ip_address' => $request->ip()
+        ]);
 
         return redirect()
-            ->route('customer-service.show', $ticket->id)
+            ->route('admin.customer-service.show', $ticket->id)
             ->with('success', 'Ticket status updated successfully!');
     }
 
     /**
-     * Archive a ticket (soft delete or mark as archived)
+     * Toggle flag on a ticket
      */
-    public function archive($id)
+    public function toggleFlag(Request $request, $id)
     {
         $ticket = SupportTicket::findOrFail($id);
-        $ticket->delete();
+        $ticket->toggleFlag();
+        $admin = Auth::user();
+
+        $action = $ticket->is_flagged ? 'flagged' : 'unflagged';
+        
+        ActivityLog::create([
+            'action' => 'ticket_flag_toggle',
+            'description' => ucfirst($action) . " ticket #{$ticket->id}: {$ticket->subject}",
+            'performed_by' => $admin->name,
+            'ip_address' => $request->ip()
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'is_flagged' => $ticket->is_flagged,
+                'message' => "Ticket {$action} successfully!"
+            ]);
+        }
+
+        return back()->with('success', "Ticket {$action} successfully!");
+    }
+
+    /**
+     * Archive a ticket
+     */
+    public function archive(Request $request, $id)
+    {
+        $ticket = SupportTicket::findOrFail($id);
+        $ticket->archive();
+        $admin = Auth::user();
+
+        ActivityLog::create([
+            'action' => 'ticket_archived',
+            'description' => "Archived ticket #{$ticket->id}: {$ticket->subject}",
+            'performed_by' => $admin->name,
+            'ip_address' => $request->ip()
+        ]);
 
         return redirect()
-            ->route('customer-service.index')
+            ->route('admin.customer-service.index')
             ->with('success', 'Ticket archived successfully!');
+    }
+
+    /**
+     * Restore an archived ticket
+     */
+    public function restore(Request $request, $id)
+    {
+        $ticket = SupportTicket::findOrFail($id);
+        $ticket->restore();
+        $admin = Auth::user();
+
+        ActivityLog::create([
+            'action' => 'ticket_restored',
+            'description' => "Restored ticket #{$ticket->id}: {$ticket->subject}",
+            'performed_by' => $admin->name,
+            'ip_address' => $request->ip()
+        ]);
+
+        return redirect()
+            ->route('admin.customer-service.show', $ticket->id)
+            ->with('success', 'Ticket restored successfully!');
+    }
+
+    /**
+     * Bulk update tickets
+     */
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'ticket_ids' => 'required|array|min:1',
+            'ticket_ids.*' => 'integer|exists:support_tickets,id',
+            'action' => 'required|in:archive,restore,flag,unflag,mark_resolved'
+        ]);
+
+        $ticketIds = $request->ticket_ids;
+        $action = $request->action;
+        $admin = Auth::user();
+        $count = count($ticketIds);
+
+        DB::beginTransaction();
+        try {
+            switch ($action) {
+                case 'archive':
+                    SupportTicket::whereIn('id', $ticketIds)->update([
+                        'is_archived' => true,
+                        'archived_at' => now()
+                    ]);
+                    $message = "{$count} ticket(s) archived successfully!";
+                    break;
+
+                case 'restore':
+                    SupportTicket::whereIn('id', $ticketIds)->update([
+                        'is_archived' => false,
+                        'archived_at' => null
+                    ]);
+                    $message = "{$count} ticket(s) restored successfully!";
+                    break;
+
+                case 'flag':
+                    SupportTicket::whereIn('id', $ticketIds)->update(['is_flagged' => true]);
+                    $message = "{$count} ticket(s) flagged successfully!";
+                    break;
+
+                case 'unflag':
+                    SupportTicket::whereIn('id', $ticketIds)->update(['is_flagged' => false]);
+                    $message = "{$count} ticket(s) unflagged successfully!";
+                    break;
+
+                case 'mark_resolved':
+                    SupportTicket::whereIn('id', $ticketIds)->update([
+                        'status' => 'resolved',
+                        'admin_id' => $admin->id
+                    ]);
+                    $message = "{$count} ticket(s) marked as resolved!";
+                    break;
+            }
+
+            ActivityLog::create([
+                'action' => 'ticket_bulk_' . $action,
+                'description' => "Bulk {$action}: {$count} tickets",
+                'performed_by' => $admin->name,
+                'ip_address' => $request->ip()
+            ]);
+
+            DB::commit();
+
+            if ($request->ajax()) {
+                return response()->json(['success' => true, 'message' => $message]);
+            }
+
+            return back()->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Operation failed'], 500);
+            }
+            return back()->with('error', 'Operation failed. Please try again.');
+        }
     }
 }

@@ -153,9 +153,66 @@
         <div style="color: #64748B; font-size: 0.875rem;">
             Showing {{ $recentActivities->firstItem() }} to {{ $recentActivities->lastItem() }} of {{ $recentActivities->total() }} activities
         </div>
-        <div>
-            {{ $recentActivities->links('vendor.pagination.custom') }}
-        </div>
+        <nav style="display: flex; gap: 0.25rem; align-items: center;">
+            {{-- First Page --}}
+            @if($recentActivities->onFirstPage())
+                <span style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem; font-weight: 500;">
+                    « First
+                </span>
+            @else
+                <a href="{{ $recentActivities->url(1) }}" style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem; font-weight: 500;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
+                    « First
+                </a>
+            @endif
+
+            {{-- Previous Page --}}
+            @if($recentActivities->onFirstPage())
+                <span style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem;">
+                    «
+                </span>
+            @else
+                <a href="{{ $recentActivities->previousPageUrl() }}" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
+                    «
+                </a>
+            @endif
+
+            {{-- Pagination Elements --}}
+            @foreach(range(1, $recentActivities->lastPage()) as $page)
+                @if($page == $recentActivities->currentPage())
+                    <span style="min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0 0.5rem; border: 1px solid #3B82F6; background: #3B82F6; color: white; border-radius: 4px; font-size: 0.875rem; font-weight: 500;">
+                        {{ $page }}
+                    </span>
+                @elseif($page == 1 || $page == $recentActivities->lastPage() || abs($page - $recentActivities->currentPage()) <= 2)
+                    <a href="{{ $recentActivities->url($page) }}" style="min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0 0.5rem; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem; font-weight: 500;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
+                        {{ $page }}
+                    </a>
+                @elseif($page == 2 || $page == $recentActivities->lastPage() - 1)
+                    <span style="padding: 0 0.25rem; color: #94A3B8; font-size: 0.875rem;">...</span>
+                @endif
+            @endforeach
+
+            {{-- Next Page --}}
+            @if($recentActivities->hasMorePages())
+                <a href="{{ $recentActivities->nextPageUrl() }}" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
+                    »
+                </a>
+            @else
+                <span style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem;">
+                    »
+                </span>
+            @endif
+
+            {{-- Last Page --}}
+            @if($recentActivities->hasMorePages())
+                <a href="{{ $recentActivities->url($recentActivities->lastPage()) }}" style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem; font-weight: 500;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
+                    Last »
+                </a>
+            @else
+                <span style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem; font-weight: 500;">
+                    Last »
+                </span>
+            @endif
+        </nav>
     </div>
     @endif
 </div>

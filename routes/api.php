@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\RouteApiController;
 use App\Http\Controllers\Api\LandmarkApiController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\V1\SupportTicketController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -41,5 +42,18 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::get('/landmarks/category/{category}', [LandmarkApiController::class, 'byCategory']);
     Route::get('/landmarks/{id}', [LandmarkApiController::class, 'show']);
     Route::post('/landmarks/nearby', [LandmarkApiController::class, 'nearby']);
+    
+    // Support Tickets (Public - can create without auth)
+    Route::post('/support/tickets', [SupportTicketController::class, 'store']);
+    
+    // Support Tickets (Protected - requires auth or email verification)
+    Route::get('/support/tickets', [SupportTicketController::class, 'index']);
+    Route::get('/support/tickets/{id}', [SupportTicketController::class, 'show']);
+    Route::post('/support/tickets/{id}/message', [SupportTicketController::class, 'addMessage']);
+    
+    // Support Tickets (Authenticated only)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/support/stats', [SupportTicketController::class, 'stats']);
+    });
     
 });

@@ -33,7 +33,7 @@ class RouteController extends Controller
             });
         }
 
-        $routes = $query->orderBy('route_number')->paginate(10);
+        $routes = $query->orderBy('name')->paginate(10);
 
         return view('admin.routes.index', compact('routes'));
     }

@@ -8,6 +8,7 @@ class TicketReply extends Model
 {
     protected $fillable = [
         'support_ticket_id',
+        'admin_id',
         'message',
         'admin_name',
         'email_sent'
@@ -25,5 +26,13 @@ class TicketReply extends Model
     public function ticket()
     {
         return $this->belongsTo(SupportTicket::class, 'support_ticket_id');
+    }
+
+    /**
+     * Get the admin who wrote this reply
+     */
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
     }
 }
