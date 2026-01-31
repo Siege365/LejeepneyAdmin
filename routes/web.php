@@ -37,7 +37,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', function () {
         $totalLandmarks = \App\Models\Landmark::count();
         $totalRoutes = \App\Models\JeepneyRoute::count();
-        $activeUsers = \App\Models\User::where('role', 'admin')->count();
+        $activeUsers = \App\Models\User::count();
         $pendingRequests = \App\Models\SupportTicket::where('status', 'pending')->count();
         $recentActivities = \App\Models\ActivityLog::latest()->paginate(5);
         
