@@ -5,11 +5,11 @@
 
 @section('content')
 <!-- Page Header -->
-<div class="card" style="margin-bottom: 1.5rem;">
-    <div class="card-header" style="margin-bottom: 0;">
+<div class="card cs-page-header">
+    <div class="card-header">
         <div>
-            <h2 style="font-size: 1.25rem; margin-bottom: 0.25rem;">Landmarks Management</h2>
-            <p style="color: var(--text-muted); font-size: 0.875rem;">View, add, edit, and manage landmark locations.</p>
+            <h2 class="cs-page-title">Landmarks Management</h2>
+            <p class="cs-page-subtitle">View, add, edit, and manage landmark locations.</p>
         </div>
         <a href="{{ route('admin.landmarks.create') }}" class="btn btn-primary">
             <i class="fa-solid fa-plus"></i>
@@ -20,14 +20,14 @@
 
 <!-- Landmarks Table -->
 <div class="card">
-    <div class="card-header">
+    <div class="card-header filters-header">
         <h3>All Landmarks ({{ $landmarks->total() }})</h3>
-        <form method="GET" action="{{ route('admin.landmarks.index') }}" style="display: flex; gap: 1rem; align-items: center;">
+        <form method="GET" action="{{ route('admin.landmarks.index') }}" class="filters-form">
             <div class="search-box">
                 <i class="fa-solid fa-search"></i>
                 <input id="searchInput" type="text" name="search" value="{{ request('search') }}" placeholder="Search landmarks...">
             </div>
-            <select id="categoryFilter" class="form-control" name="category" style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem;" onchange="this.form.submit()">
+            <select id="categoryFilter" class="filter-select" name="category" onchange="this.form.submit()">
                 <option value="">All Categories</option>
                 <option value="city_center" {{ request('category') == 'city_center' ? 'selected' : '' }}>City Center</option>
                 <option value="mall" {{ request('category') == 'mall' ? 'selected' : '' }}>Mall</option>
@@ -40,15 +40,15 @@
     </div>
     
     <div class="table-container">
-        <table class="table" id="landmarksTable">
+        <table class="table data-table" id="landmarksTable">
             <thead>
                 <tr>
-                    <th style="width: 60px;">Icon</th>
+                    <th class="th-icon">Icon</th>
                     <th>Name</th>
-                    <th style="width: 120px;">Category</th>
-                    <th style="width: 200px;">Location</th>
-                    <th style="width: 80px;">Featured</th>
-                    <th style="width: 60px;">Actions</th>
+                    <th class="th-category">Category</th>
+                    <th class="th-location">Location</th>
+                    <th class="th-featured">Featured</th>
+                    <th class="th-actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,18 +58,17 @@
                             @if($landmark->icon_image)
                                 <img src="{{ Storage::url($landmark->icon_image) }}" 
                                      alt="{{ $landmark->name }}" 
-                                     class="rounded"
-                                     style="width: 45px; height: 45px; object-fit: cover; border: 2px solid #E2E8F0;">
+                                     class="table-icon-img">
                             @else
-                                <div style="width: 45px; height: 45px; background: #E2E8F0; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
-                                    <i class="fa-solid fa-image" style="color: #94A3B8; font-size: 1.25rem;"></i>
+                                <div class="table-icon-placeholder">
+                                    <i class="fa-solid fa-image"></i>
                                 </div>
                             @endif
                         </td>
                         <td>
-                            <div style="font-weight: 600; color: #1E293B; margin-bottom: 0.25rem;">{{ $landmark->name }}</div>
+                            <div class="table-cell-title">{{ $landmark->name }}</div>
                             @if($landmark->description)
-                                <div style="color: #64748B; font-size: 0.875rem;">{{ Str::limit($landmark->description, 60) }}</div>
+                                <div class="table-cell-subtitle">{{ Str::limit($landmark->description, 60) }}</div>
                             @endif
                         </td>
                         <td>
@@ -84,21 +83,21 @@
                                 ];
                                 $config = $categoryConfig[$landmark->category] ?? $categoryConfig['other'];
                             @endphp
-                            <span style="background: {{ $config['bg'] }}; color: {{ $config['color'] }}; padding: 0.375rem 0.875rem; border-radius: 9999px; font-size: 0.8125rem; font-weight: 600; display: inline-block; white-space: nowrap;">
+                            <span class="badge" style="background: {{ $config['bg'] }}; color: {{ $config['color'] }};">
                                 {{ $config['label'] }}
                             </span>
                         </td>
                         <td>
-                            <div style="font-size: 0.8125rem; color: #64748B;">
-                                <i class="fa-solid fa-location-dot" style="margin-right: 0.25rem;"></i>
+                            <div class="table-cell-location">
+                                <i class="fa-solid fa-location-dot"></i>
                                 {{ number_format($landmark->latitude, 6) }}, {{ number_format($landmark->longitude, 6) }}
                             </div>
                         </td>
-                        <td style="text-align: center;">
+                        <td class="text-center">
                             @if($landmark->is_featured)
-                                <i class="fa-solid fa-star" style="color: #F59E0B; font-size: 1.125rem;" title="Featured"></i>
+                                <i class="fa-solid fa-star featured-icon" title="Featured"></i>
                             @else
-                                <span style="color: #CBD5E1;">—</span>
+                                <span class="text-muted">—</span>
                             @endif
                         </td>
                         <td>
@@ -125,9 +124,10 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 3rem;">
-                            <i class="fa-solid fa-map-marker-alt" style="font-size: 3rem; color: #CBD5E1; margin-bottom: 1rem;"></i>
-                            <p style="color: #64748B; margin: 0;">No landmarks found. Add your first landmark!</p>
+                        <td colspan="6" class="empty-state">
+                            <i class="fa-solid fa-map-marker-alt empty-icon"></i>
+                            <p class="empty-title">No landmarks found</p>
+                            <p class="empty-subtitle">Add your first landmark!</p>
                         </td>
                     </tr>
                 @endforelse
@@ -136,107 +136,13 @@
     </div>
     
     <!-- Pagination -->
-    @if($landmarks->hasPages())
-    <div style="padding: 1rem 1.5rem; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
-        <div style="color: #64748B; font-size: 0.875rem;">
-            Showing {{ $landmarks->firstItem() }} to {{ $landmarks->lastItem() }} of {{ $landmarks->total() }} landmarks
-        </div>
-        <nav style="display: flex; gap: 0.25rem; align-items: center;">
-            {{-- First Page --}}
-            @if($landmarks->onFirstPage())
-                <span style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem; font-weight: 500;">
-                    « First
-                </span>
-            @else
-                <a href="{{ $landmarks->url(1) }}" style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem; font-weight: 500;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
-                    « First
-                </a>
-            @endif
-
-            {{-- Previous Page --}}
-            @if($landmarks->onFirstPage())
-                <span style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem;">
-                    «
-                </span>
-            @else
-                <a href="{{ $landmarks->previousPageUrl() }}" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
-                    «
-                </a>
-            @endif
-
-            {{-- Pagination Elements --}}
-            @foreach(range(1, $landmarks->lastPage()) as $page)
-                @if($page == $landmarks->currentPage())
-                    <span style="min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0 0.5rem; border: 1px solid #3B82F6; background: #3B82F6; color: white; border-radius: 4px; font-size: 0.875rem; font-weight: 500;">
-                        {{ $page }}
-                    </span>
-                @elseif($page == 1 || $page == $landmarks->lastPage() || abs($page - $landmarks->currentPage()) <= 2)
-                    <a href="{{ $landmarks->url($page) }}" style="min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0 0.5rem; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem; font-weight: 500;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
-                        {{ $page }}
-                    </a>
-                @elseif($page == 2 || $page == $landmarks->lastPage() - 1)
-                    <span style="padding: 0 0.25rem; color: #94A3B8; font-size: 0.875rem;">...</span>
-                @endif
-            @endforeach
-
-            {{-- Next Page --}}
-            @if($landmarks->hasMorePages())
-                <a href="{{ $landmarks->nextPageUrl() }}" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
-                    »
-                </a>
-            @else
-                <span style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem;">
-                    »
-                </span>
-            @endif
-
-            {{-- Last Page --}}
-            @if($landmarks->hasMorePages())
-                <a href="{{ $landmarks->url($landmarks->lastPage()) }}" style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem; font-weight: 500;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
-                    Last »
-                </a>
-            @else
-                <span style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem; font-weight: 500;">
-                    Last »
-                </span>
-            @endif
-        </nav>
+    <div class="table-footer">
+        @include('components.admin.pagination', ['paginator' => $landmarks])
     </div>
-    @endif
 </div>
 
-<script>
-// Search functionality
-document.getElementById('searchInput').addEventListener('keyup', function() {
-    const searchValue = this.value.toLowerCase();
-    const categoryFilter = document.getElementById('categoryFilter').value.toLowerCase();
-    const tableRows = document.querySelectorAll('#landmarksTable tbody tr');
-    
-    tableRows.forEach(row => {
-        if (row.querySelector('td[colspan]')) return; // Skip empty state row
-        
-        const name = row.cells[1].textContent.toLowerCase();
-        const category = row.cells[2].textContent.toLowerCase();
-        
-        const matchesSearch = name.includes(searchValue);
-        const matchesCategory = !categoryFilter || category.includes(categoryFilter);
-        
-        row.style.display = matchesSearch && matchesCategory ? '' : 'none';
-    });
-});
-
-// Category filter
-document.getElementById('categoryFilter').addEventListener('change', function() {
-    document.getElementById('searchInput').dispatchEvent(new Event('keyup'));
-});
-
-// Auto-dismiss alerts
-document.querySelectorAll('.alert').forEach(alert => {
-    setTimeout(() => {
-        const bsAlert = new bootstrap.Alert(alert);
-        bsAlert.close();
-    }, 5000);
-});
-</script>
-
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/js/pages/landmarks-index.js') }}?v={{ time() }}"></script>
+@endpush

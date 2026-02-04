@@ -1,0 +1,141 @@
+/* ========================================
+   CONVERSATION THREAD COMPONENT
+   Chat/message thread styles
+   ======================================== */
+
+/* Conversation Container */
+.conversation-thread {
+    padding: 1.5rem;
+}
+
+/* Message Block */
+.message-block {
+    margin-bottom: 2rem;
+}
+
+/* Message Container */
+.message-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Message Avatar */
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.message-avatar.customer {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.message-avatar.admin {
+    background: linear-gradient(135deg, #EBAF3E 0%, #D4941E 100%);
+}
+
+/* Message Content */
+.message-content {
+    flex: 1;
+}
+
+/* Message Header */
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.message-author {
+    font-weight: 600;
+    color: #1E293B;
+}
+
+.message-badge {
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.message-badge.customer {
+    background: #E0E7FF;
+    color: #6366F1;
+}
+
+.message-badge.admin {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.message-badge.emailed {
+    background: #D1FAE5;
+    color: #059669;
+    margin-left: 0.25rem;
+}
+
+.message-time {
+    font-size: 0.875rem;
+    color: #94A3B8;
+}
+
+/* Message Bubble */
+.message-bubble {
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.message-bubble.customer {
+    background: #F8FAFC;
+    border-left: 3px solid #667eea;
+}
+
+.message-bubble.admin {
+    background: #FFFBEB;
+    border-left: 3px solid #EBAF3E;
+}
+
+.message-bubble p {
+    margin: 0;
+    color: #475569;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+/* Empty Conversation */
+.conversation-empty {
+    text-align: center;
+    padding: 2rem;
+    background: #F8FAFC;
+    border-radius: 0.5rem;
+    border: 2px dashed #CBD5E1;
+}
+
+.conversation-empty i {
+    font-size: 2rem;
+    color: #CBD5E1;
+    margin-bottom: 0.5rem;
+}
+
+.conversation-empty p {
+    color: #64748B;
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Quick Reply Section */
+.conversation-reply-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #E2E8F0;
+}

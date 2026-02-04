@@ -1,0 +1,97 @@
+/* ========================================
+   QUICK ACTIONS DROPDOWN COMPONENT
+   Top bar quick actions button & dropdown
+   ======================================== */
+
+/* Quick Actions Container */
+.quick-actions-container {
+    position: relative;
+    margin-right: 1rem;
+}
+
+/* Quick Actions Button */
+.quick-actions-btn {
+    padding: 0.625rem 1.25rem;
+    background: #F59E0B;
+    color: #1E293B;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.quick-actions-btn:hover {
+    background: #D97706;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.quick-actions-btn .chevron {
+    font-size: 0.75rem;
+}
+
+/* Quick Actions Dropdown */
+.quick-actions-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    z-index: 1000;
+}
+
+.quick-actions-dropdown.show {
+    display: block;
+}
+
+/* Quick Actions Items */
+.quick-actions-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #1E293B;
+    text-decoration: none;
+    border-bottom: 1px solid #F1F5F9;
+    transition: background 0.2s;
+}
+
+.quick-actions-item:last-child {
+    border-bottom: none;
+}
+
+.quick-actions-item:hover {
+    background: #F8FAFC;
+}
+
+.quick-actions-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.quick-actions-item i.text-gold {
+    color: var(--primary-gold);
+}
+
+.quick-actions-item i.text-blue {
+    color: var(--secondary-blue);
+}
+
+.quick-actions-item i.text-green {
+    color: var(--success);
+}
+
+.quick-actions-item span {
+    font-weight: 500;
+    font-size: 0.875rem;
+}

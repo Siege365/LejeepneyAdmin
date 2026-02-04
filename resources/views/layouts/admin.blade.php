@@ -16,6 +16,16 @@
     
     <!-- Admin Styles -->
     <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}?v={{ time() }}">
+    
+    <!-- Component Styles -->
+    <link rel="stylesheet" href="{{ asset('assets/css/components/toast.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/components/pagination.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/components/modal.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/components/stats-cards.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/components/quick-actions.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/components/filters.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/components/table.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/components/conversation.css') }}?v={{ time() }}">
 
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('assets/images/Logo.svg') }}" type="image/svg+xml">
@@ -98,24 +108,24 @@
             
             <div class="top-bar-right">
                 <!-- Quick Actions Dropdown -->
-                <div style="position: relative; margin-right: 1rem;">
-                    <button onclick="toggleQuickActions(event)" style="padding: 0.625rem 1.25rem; background: #F59E0B; color: #1E293B; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 0.875rem; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" onmouseenter="this.style.background='#D97706'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.15)'" onmouseleave="this.style.background='#F59E0B'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+                <div class="quick-actions">
+                    <button class="quick-actions-btn">
                         <i class="fa-solid fa-plus"></i>
                         Quick Actions
-                        <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem;"></i>
+                        <i class="fa-solid fa-chevron-down quick-actions-chevron"></i>
                     </button>
-                    <div id="quickActionsDropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 0.5rem; background: white; border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 200px; z-index: 1000;">
-                        <a href="{{ route('admin.landmarks.create') }}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: #1E293B; text-decoration: none; border-bottom: 1px solid #F1F5F9; transition: background 0.2s;" onmouseenter="this.style.background='#F8FAFC'" onmouseleave="this.style.background='white'">
-                            <i class="fa-solid fa-map-marker-alt" style="color: var(--gold); width: 20px;"></i>
-                            <span style="font-weight: 500; font-size: 0.875rem;">Add Landmark</span>
+                    <div class="quick-actions-menu">
+                        <a href="{{ route('admin.landmarks.create') }}" class="quick-actions-item">
+                            <i class="fa-solid fa-map-marker-alt quick-actions-icon quick-actions-icon-gold"></i>
+                            <span>Add Landmark</span>
                         </a>
-                        <a href="{{ route('admin.routes.create') }}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: #1E293B; text-decoration: none; border-bottom: 1px solid #F1F5F9; transition: background 0.2s;" onmouseenter="this.style.background='#F8FAFC'" onmouseleave="this.style.background='white'">
-                            <i class="fa-solid fa-route" style="color: var(--secondary-blue); width: 20px;"></i>
-                            <span style="font-weight: 500; font-size: 0.875rem;">Add Route</span>
+                        <a href="{{ route('admin.routes.create') }}" class="quick-actions-item">
+                            <i class="fa-solid fa-route quick-actions-icon quick-actions-icon-blue"></i>
+                            <span>Add Route</span>
                         </a>
-                        <a href="{{ route('register') }}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: #1E293B; text-decoration: none; transition: background 0.2s;" onmouseenter="this.style.background='#F8FAFC'" onmouseleave="this.style.background='white'">
-                            <i class="fa-solid fa-user-plus" style="color: var(--success); width: 20px;"></i>
-                            <span style="font-weight: 500; font-size: 0.875rem;">Add Admin User</span>
+                        <a href="{{ route('register') }}" class="quick-actions-item quick-actions-item-last">
+                            <i class="fa-solid fa-user-plus quick-actions-icon quick-actions-icon-green"></i>
+                            <span>Add Admin User</span>
                         </a>
                     </div>
                 </div>
@@ -156,25 +166,15 @@
     <!-- Admin Scripts -->
     <script src="{{ asset('assets/js/admin.js') }}?v={{ time() }}"></script>
     
-    <script>
-    function toggleQuickActions(event) {
-        event.stopPropagation();
-        const dropdown = document.getElementById('quickActionsDropdown');
-        if (!dropdown) return;
-        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-    }
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        const dropdown = document.getElementById('quickActionsDropdown');
-        if (!dropdown) return;
-        const quickActionsContainer = event.target.closest('[style*="position: relative"]');
-        
-        if (!quickActionsContainer && !dropdown.contains(event.target)) {
-            dropdown.style.display = 'none';
-        }
-    });
-    </script>
+    <!-- Component Scripts -->
+    <script src="{{ asset('assets/js/components/toast.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('assets/js/components/quick-actions.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('assets/js/components/modal.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('assets/js/components/bulk-actions.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('assets/js/components/filters.js') }}?v={{ time() }}"></script>
+    
+    <!-- Toast Container -->
+    @include('components.admin.toast-container')
     
     @stack('scripts')
 </body>

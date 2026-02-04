@@ -1,0 +1,133 @@
+/* ========================================
+   FILTERS COMPONENT
+   Filter dropdowns and search styles
+   ======================================== */
+
+/* Filters Container */
+.filters-container {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Filter Select */
+.filter-select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: white;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+    min-width: 120px;
+}
+
+.filter-select:hover {
+    border-color: #94A3B8;
+}
+
+.filter-select:focus {
+    border-color: var(--secondary-blue);
+    box-shadow: 0 0 0 3px rgba(12, 78, 148, 0.1);
+}
+
+/* Clear Filters Button */
+.filter-clear {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Bulk Actions Container */
+.bulk-actions-container {
+    display: none;
+}
+
+.bulk-actions-container.show {
+    display: block;
+}
+
+.bulk-actions-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.bulk-actions-select {
+    display: inline-block;
+    width: auto;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: white;
+}
+
+/* Archived Banner */
+.archived-banner {
+    background: #FEF3C7;
+    border-left: 4px solid #D97706;
+    color: #92400E;
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.archived-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.archived-banner-content i {
+    font-size: 1.25rem;
+    color: #D97706;
+}
+
+.archived-banner-content span {
+    font-weight: 500;
+}
+
+.archived-restore-btn {
+    background: #D97706;
+    color: white;
+    border: none;
+}
+
+.archived-restore-btn:hover {
+    background: #B45309;
+}
+
+/* Flag Icon */
+.flag-icon {
+    color: #DC2626;
+}
+
+/* Alert Error Box */
+.alert-error {
+    background: #FEE2E2;
+    border-left: 4px solid #EF4444;
+    color: #991B1B;
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: start;
+    gap: 0.5rem;
+}
+
+.alert-error i {
+    margin-top: 0.125rem;
+}
+
+/* Filters Form */
+.filters-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}

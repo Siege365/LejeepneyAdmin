@@ -3,11 +3,15 @@
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/pages/dashboard.css') }}?v={{ time() }}">
+@endpush
+
 @section('content')
 <!-- Welcome Section -->
-<div class="card" style="margin-bottom: 2rem;">
-    <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Welcome back, {{ Auth::user()->name }}! 👋</h2>
-    <p style="color: var(--text-muted);">Here's what's happening with your Lejeepney admin panel today.</p>
+<div class="card welcome-card">
+    <h2 class="welcome-title">Welcome back, {{ Auth::user()->name }}! 👋</h2>
+    <p class="welcome-subtitle">Here's what's happening with your Lejeepney admin panel today.</p>
 </div>
 
 <!-- Stats Grid -->
@@ -72,74 +76,51 @@
     </div>
     
     <div class="table-container">
-        <table class="table" style="font-size: 0.875rem;">
+        <table class="table activity-table">
             <thead>
-                <tr style="background: #F8FAFC; border-bottom: 1px solid #E2E8F0;">
-                    <th style="width: 40px; padding: 0.75rem; font-weight: 600; color: #64748B; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;"></th>
-                    <th style="padding: 0.75rem; font-weight: 600; color: #64748B; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px; max-width: 300px;">Activity</th>
-                    <th style="width: 250px; padding: 0.75rem; font-weight: 600; color: #64748B; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">User</th>
-                    <th style="width: 180px; padding: 0.75rem; font-weight: 600; color: #64748B; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">Date & Time</th>
-                    <th style="width: 150px; padding: 0.75rem; font-weight: 600; color: #64748B; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">Status</th>
+                <tr>
+                    <th class="th-icon"></th>
+                    <th>Activity</th>
+                    <th class="th-user">User</th>
+                    <th class="th-date">Date & Time</th>
+                    <th class="th-status">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($recentActivities as $activity)
-                    <tr style="border-bottom: 1px solid #E2E8F0; transition: background 0.2s;">
-                        <td style="text-align: center; padding: 0.75rem; vertical-align: middle;">
-                            <i class="fa-solid {{ $activity->icon }}" 
-                               style="color: 
-                                   @if($activity->action == 'created') #10B981
-                                   @elseif($activity->action == 'updated') #3B82F6
-                                   @elseif($activity->action == 'deleted') #EF4444
-                                   @else #6B7280 @endif; font-size: 1rem;">
-                            </i>
+                    <tr>
+                        <td class="activity-icon-cell">
+                            <i class="fa-solid {{ $activity->icon }} activity-icon {{ $activity->action }}"></i>
                         </td>
-                        <td style="padding: 0.75rem; vertical-align: middle; max-width: 300px;">
-                            <div style="font-weight: 600; color: #1E293B; word-break: break-word;">{{ $activity->description }}</div>
-                            <div style="color: #94A3B8; font-size: 0.75rem; margin-top: 0.25rem;">
+                        <td>
+                            <div class="activity-description">{{ $activity->description }}</div>
+                            <div class="activity-meta">
                                 {{ $activity->model_type }}{{ $activity->model_name ? ' • ' . $activity->model_name : '' }}
                             </div>
                         </td>
-                        <td style="padding: 0.75rem; vertical-align: middle;">
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <div style="width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.75rem; flex-shrink: 0;">
+                        <td>
+                            <div class="activity-user">
+                                <div class="activity-user-avatar">
                                     {{ substr($activity->user_name, 0, 1) }}
                                 </div>
-                                <span style="font-weight: 500; color: #475569; white-space: nowrap;">{{ $activity->user_name }}</span>
+                                <span class="activity-user-name">{{ $activity->user_name }}</span>
                             </div>
                         </td>
-                        <td style="padding: 0.75rem; vertical-align: middle;">
-                            <div style="color: #64748B; white-space: nowrap;">
-                                {{ $activity->created_at->format('M d, Y') }}<br>
-                                <span style="font-size: 0.8rem;">{{ $activity->created_at->format('h:i A') }}</span>
-                            </div>
+                        <td class="activity-date">
+                            {{ $activity->created_at->format('M d, Y') }}<br>
+                            <span class="activity-time">{{ $activity->created_at->format('h:i A') }}</span>
                         </td>
-                        <td style="padding: 0.75rem; vertical-align: middle;">
-                            <span style="
-                                padding: 0.375rem 0.625rem; 
-                                border-radius: 9999px; 
-                                font-size: 0.75rem; 
-                                font-weight: 600; 
-                                display: inline-block;
-                                @if($activity->action == 'created') 
-                                    background: #D1FAE5; color: #10B981;
-                                @elseif($activity->action == 'updated') 
-                                    background: #DBEAFE; color: #3B82F6;
-                                @elseif($activity->action == 'deleted') 
-                                    background: #FEE2E2; color: #EF4444;
-                                @else 
-                                    background: #F3F4F6; color: #6B7280;
-                                @endif
-                            ">
+                        <td>
+                            <span class="activity-status {{ $activity->action }}">
                                 {{ ucfirst($activity->action) }}
                             </span>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 2rem; color: #94A3B8;">
-                            <i class="fa-solid fa-inbox fa-2x mb-2" style="color: #CBD5E1; display: block; margin-bottom: 0.75rem;"></i>
-                            <p style="margin: 0;">No recent activity yet. Start by creating routes and landmarks!</p>
+                        <td colspan="5" class="activity-empty">
+                            <i class="fa-solid fa-inbox fa-2x"></i>
+                            <p>No recent activity yet. Start by creating routes and landmarks!</p>
                         </td>
                     </tr>
                 @endforelse
@@ -148,72 +129,12 @@
     </div>
     
     <!-- Pagination -->
-    @if($recentActivities->hasPages())
-    <div style="padding: 1rem 1.5rem; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;">
-        <div style="color: #64748B; font-size: 0.875rem;">
-            Showing {{ $recentActivities->firstItem() }} to {{ $recentActivities->lastItem() }} of {{ $recentActivities->total() }} activities
-        </div>
-        <nav style="display: flex; gap: 0.25rem; align-items: center;">
-            {{-- First Page --}}
-            @if($recentActivities->onFirstPage())
-                <span style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem; font-weight: 500;">
-                    « First
-                </span>
-            @else
-                <a href="{{ $recentActivities->url(1) }}" style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem; font-weight: 500;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
-                    « First
-                </a>
-            @endif
-
-            {{-- Previous Page --}}
-            @if($recentActivities->onFirstPage())
-                <span style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem;">
-                    «
-                </span>
-            @else
-                <a href="{{ $recentActivities->previousPageUrl() }}" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
-                    «
-                </a>
-            @endif
-
-            {{-- Pagination Elements --}}
-            @foreach(range(1, $recentActivities->lastPage()) as $page)
-                @if($page == $recentActivities->currentPage())
-                    <span style="min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0 0.5rem; border: 1px solid #3B82F6; background: #3B82F6; color: white; border-radius: 4px; font-size: 0.875rem; font-weight: 500;">
-                        {{ $page }}
-                    </span>
-                @elseif($page == 1 || $page == $recentActivities->lastPage() || abs($page - $recentActivities->currentPage()) <= 2)
-                    <a href="{{ $recentActivities->url($page) }}" style="min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0 0.5rem; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem; font-weight: 500;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
-                        {{ $page }}
-                    </a>
-                @elseif($page == 2 || $page == $recentActivities->lastPage() - 1)
-                    <span style="padding: 0 0.25rem; color: #94A3B8; font-size: 0.875rem;">...</span>
-                @endif
-            @endforeach
-
-            {{-- Next Page --}}
-            @if($recentActivities->hasMorePages())
-                <a href="{{ $recentActivities->nextPageUrl() }}" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
-                    »
-                </a>
-            @else
-                <span style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem;">
-                    »
-                </span>
-            @endif
-
-            {{-- Last Page --}}
-            @if($recentActivities->hasMorePages())
-                <a href="{{ $recentActivities->url($recentActivities->lastPage()) }}" style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: white; color: #475569; border-radius: 4px; text-decoration: none; transition: all 0.2s; font-size: 0.875rem; font-weight: 500;" onmouseenter="this.style.background='#F8FAFC'; this.style.borderColor='#CBD5E1'" onmouseleave="this.style.background='white'; this.style.borderColor='#E2E8F0'">
-                    Last »
-                </a>
-            @else
-                <span style="padding: 0.5rem 0.75rem; height: 32px; display: flex; align-items: center; justify-content: center; border: 1px solid #E2E8F0; background: #F8FAFC; color: #CBD5E1; border-radius: 4px; cursor: not-allowed; font-size: 0.875rem; font-weight: 500;">
-                    Last »
-                </span>
-            @endif
-        </nav>
+    <div class="table-footer">
+        @include('components.admin.pagination', ['paginator' => $recentActivities])
     </div>
-    @endif
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/js/pages/dashboard.js') }}?v={{ time() }}"></script>
+@endpush

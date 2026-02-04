@@ -1,0 +1,184 @@
+/* ========================================
+   DASHBOARD PAGE STYLES
+   Dashboard specific styles
+   ======================================== */
+
+/* Welcome Card */
+.welcome-card {
+    margin-bottom: 2rem;
+}
+
+.welcome-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-subtitle {
+    color: var(--text-muted);
+}
+
+/* Dashboard Stats Grid (already exists in admin.css, extends it) */
+.dashboard-stats {
+    margin-bottom: 2rem;
+}
+
+/* Recent Activity Table */
+.activity-table {
+    font-size: 0.875rem;
+}
+
+.activity-table thead tr {
+    background: #F8FAFC;
+    border-bottom: 1px solid #E2E8F0;
+}
+
+.activity-table th {
+    padding: 0.75rem;
+    font-weight: 600;
+    color: #64748B;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+}
+
+.activity-table th.th-icon {
+    width: 40px;
+}
+
+.activity-table th.th-user {
+    width: 250px;
+}
+
+.activity-table th.th-date {
+    width: 180px;
+}
+
+.activity-table th.th-status {
+    width: 150px;
+}
+
+.activity-table tbody tr {
+    border-bottom: 1px solid #E2E8F0;
+    transition: background 0.2s;
+}
+
+.activity-table tbody tr:hover {
+    background: #F8FAFC;
+}
+
+.activity-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+/* Activity Icon Cell */
+.activity-icon-cell {
+    text-align: center;
+}
+
+.activity-icon {
+    font-size: 1rem;
+}
+
+.activity-icon.created {
+    color: #10B981;
+}
+
+.activity-icon.updated {
+    color: #3B82F6;
+}
+
+.activity-icon.deleted {
+    color: #EF4444;
+}
+
+/* Activity Description Cell */
+.activity-description {
+    font-weight: 600;
+    color: #1E293B;
+    word-break: break-word;
+}
+
+.activity-meta {
+    color: #94A3B8;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* Activity User Cell */
+.activity-user {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.activity-user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.activity-user-name {
+    font-weight: 500;
+    color: #475569;
+    white-space: nowrap;
+}
+
+/* Activity Date Cell */
+.activity-date {
+    color: #64748B;
+    white-space: nowrap;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+}
+
+/* Activity Status Badge */
+.activity-status {
+    padding: 0.375rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.activity-status.created {
+    background: #D1FAE5;
+    color: #10B981;
+}
+
+.activity-status.updated {
+    background: #DBEAFE;
+    color: #3B82F6;
+}
+
+.activity-status.deleted {
+    background: #FEE2E2;
+    color: #EF4444;
+}
+
+/* Empty Activity State */
+.activity-empty {
+    text-align: center;
+    padding: 2rem;
+    color: #94A3B8;
+}
+
+.activity-empty i {
+    color: #CBD5E1;
+    display: block;
+    margin-bottom: 0.75rem;
+}
+
+.activity-empty p {
+    margin: 0;
+}
