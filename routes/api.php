@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\RouteApiController;
 use App\Http\Controllers\Api\LandmarkApiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\V1\SupportTicketController;
+use App\Http\Controllers\Api\V1\TicketNotificationController;
+use App\Http\Controllers\Api\V1\RecentActivityController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -54,6 +56,24 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     // Support Tickets (Authenticated only)
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/support/stats', [SupportTicketController::class, 'stats']);
+    });
+
+    // Ticket Notifications (Public - can fetch by email)
+    Route::get('/support/notifications', [TicketNotificationController::class, 'index']);
+    Route::get('/support/notifications/unread-count', [TicketNotificationController::class, 'unreadCount']);
+    Route::put('/support/notifications/mark-all-read', [TicketNotificationController::class, 'markAsRead']);
+    Route::put('/support/notifications/{id}/read', [TicketNotificationController::class, 'markAsRead']);
+    Route::delete('/support/notifications/{id}', [TicketNotificationController::class, 'destroy']);
+    
+    // Recent Activities (Public - can create without auth)
+    Route::get('/recent-activities', [RecentActivityController::class, 'index']);
+    Route::post('/recent-activities', [RecentActivityController::class, 'store']);
+    Route::post('/recent-activities/batch', [RecentActivityController::class, 'batch']);
+    
+    // Recent Activities (Authenticated only)
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::delete('/recent-activities/{id}', [RecentActivityController::class, 'destroy']);
+        Route::delete('/recent-activities/clear', [RecentActivityController::class, 'clear']);
     });
     
 });

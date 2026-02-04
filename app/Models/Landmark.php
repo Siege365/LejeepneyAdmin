@@ -14,6 +14,7 @@ class Landmark extends Model
         'latitude',
         'longitude',
         'description',
+        'url',
         'icon_image',
         'gallery_images',
         'category',

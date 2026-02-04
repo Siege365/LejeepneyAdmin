@@ -38,6 +38,14 @@ class SupportTicket extends Model
     }
 
     /**
+     * Get all notifications for this ticket
+     */
+    public function notifications()
+    {
+        return $this->hasMany(TicketNotification::class, 'ticket_id');
+    }
+
+    /**
      * Get the user who submitted this ticket (mobile user)
      */
     public function user()

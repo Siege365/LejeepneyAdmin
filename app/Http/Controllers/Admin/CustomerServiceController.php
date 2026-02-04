@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicket;
 use App\Models\TicketReply;
+use App\Models\TicketNotification;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -126,6 +127,16 @@ class CustomerServiceController extends Controller
                 'admin_id' => $admin->id
             ]);
 
+            // Create notification for admin reply
+            TicketNotification::createNotification(
+                $ticket->id,
+                $ticket->email,
+                'admin_message',
+                'New Reply from Support Team',
+                "{$admin->name} replied to your ticket '{$ticket->subject}'",
+                ['admin_name' => $admin->name, 'reply_preview' => substr(strip_tags($request->message), 0, 100)]
+            );
+
             // Log activity
             ActivityLog::create([
                 'action' => 'ticket_reply',
@@ -135,6 +146,16 @@ class CustomerServiceController extends Controller
             ]);
 
             if ($oldStatus !== $request->status) {
+                // Create notification for status change
+                TicketNotification::createNotification(
+                    $ticket->id,
+                    $ticket->email,
+                    'status_changed',
+                    'Ticket Status Updated',
+                    "Your ticket status changed from {$oldStatus} to {$request->status}",
+                    ['old_status' => $oldStatus, 'new_status' => $request->status]
+                );
+
                 ActivityLog::create([
                     'action' => 'ticket_status_change',
                     'description' => "Changed ticket #{$ticket->id} status from {$oldStatus} to {$request->status}",
@@ -187,6 +208,18 @@ class CustomerServiceController extends Controller
             'status' => $request->status,
             'admin_id' => $admin->id
         ]);
+
+        // Create notification for status change
+        if ($oldStatus !== $request->status) {
+            TicketNotification::createNotification(
+                $ticket->id,
+                $ticket->email,
+                $request->status === 'resolved' ? 'resolved' : 'status_changed',
+                $request->status === 'resolved' ? 'Ticket Resolved' : 'Ticket Status Updated',
+                "Your ticket '{$ticket->subject}' status changed from {$oldStatus} to {$request->status}",
+                ['old_status' => $oldStatus, 'new_status' => $request->status, 'admin_name' => $admin->name]
+            );
+        }
 
         ActivityLog::create([
             'action' => 'ticket_status_change',

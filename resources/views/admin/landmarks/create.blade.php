@@ -84,6 +84,20 @@
                         @enderror
                     </div>
 
+                    <!-- URL -->
+                    <div class="form-group form-group-full">
+                        <label for="url">
+                            <i class="fa-solid fa-link"></i> Website URL
+                        </label>
+                        <input type="url" class="form-control @error('url') is-invalid @enderror" 
+                               id="url" name="url" value="{{ old('url') }}" 
+                               placeholder="https://example.com or Google Maps link">
+                        <small class="form-text text-muted">Optional: Enter a website URL, Google Maps link, or social media profile</small>
+                        @error('url')
+                            <span class="error-text">{{ $message }}</span>
+                        @enderror
+                    </div>
+
                     <!-- Featured Checkbox -->
                     <div class="form-group form-group-full">
                         <label class="form-check" style="display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;">

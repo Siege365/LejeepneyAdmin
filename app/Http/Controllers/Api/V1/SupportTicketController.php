@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicket;
 use App\Models\TicketReply;
+use App\Models\TicketNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -47,6 +48,16 @@ class SupportTicketController extends Controller
             'is_flagged' => false,
             'is_archived' => false
         ]);
+
+        // Create notification for ticket creation
+        TicketNotification::createNotification(
+            $ticket->id,
+            $ticket->email,
+            'created',
+            'Support Ticket Created',
+            "Your support ticket '{$ticket->subject}' has been submitted and is pending review.",
+            ['ticket_id' => $ticket->id, 'subject' => $ticket->subject]
+        );
 
         return response()->json([
             'success' => true,

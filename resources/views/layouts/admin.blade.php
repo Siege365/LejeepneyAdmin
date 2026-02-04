@@ -23,7 +23,7 @@
     <link rel="apple-touch-icon" href="{{ asset('assets/images/LogoSignInPage.png') }}">
     <meta name="theme-color" content="#F59E0B">
     
-    @stack('styles'}
+    @stack('styles')
 </head>
 <body>
     <!-- Sidebar -->
