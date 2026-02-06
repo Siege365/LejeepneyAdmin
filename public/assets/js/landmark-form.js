@@ -63,6 +63,65 @@ function updateCoordinates(lat, lng) {
     document.getElementById('longitude').value = lng.toFixed(8);
 }
 
+// Toggle between file upload and URL input
+document.querySelectorAll('.input-type-toggle .toggle-option').forEach(option => {
+    option.addEventListener('click', function() {
+        const parent = this.closest('.form-group');
+        const targetId = this.dataset.target;
+        const radioInput = this.querySelector('input[type="radio"]');
+        
+        // Update active states for toggle buttons
+        parent.querySelectorAll('.toggle-option').forEach(opt => opt.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Check the radio button
+        if (radioInput) radioInput.checked = true;
+        
+        // Show/hide content sections
+        parent.querySelectorAll('.input-content').forEach(content => content.classList.remove('active'));
+        const targetContent = document.getElementById(targetId);
+        if (targetContent) targetContent.classList.add('active');
+        
+        // Clear values when switching
+        if (targetId === 'iconFileInput') {
+            document.getElementById('icon_image_url').value = '';
+            currentIconFile = null;
+        } else if (targetId === 'iconUrlInput') {
+            document.getElementById('icon_image').value = '';
+            currentIconFile = null;
+        } else if (targetId === 'galleryFileInput') {
+            document.getElementById('gallery_images_urls').value = '';
+        } else if (targetId === 'galleryUrlInput') {
+            document.getElementById('gallery_images').value = '';
+            selectedFiles = [];
+        }
+    });
+});
+
+// Icon URL Preview
+const iconUrlInput = document.getElementById('icon_image_url');
+if (iconUrlInput) {
+    iconUrlInput.addEventListener('input', function() {
+        const url = this.value.trim();
+        if (url && isValidImageUrl(url)) {
+            iconPreviewImg.src = url;
+            iconPreview.style.display = 'block';
+        } else {
+            iconPreview.style.display = 'none';
+        }
+    });
+}
+
+// Helper function to validate image URL
+function isValidImageUrl(url) {
+    try {
+        const urlObj = new URL(url);
+        return /\.(jpg|jpeg|png|webp|gif)$/i.test(urlObj.pathname);
+    } catch {
+        return false;
+    }
+}
+
 // Icon Image Preview
 const iconInput = document.getElementById('icon_image');
 const iconPreview = document.getElementById('iconPreview');
@@ -75,8 +134,8 @@ if (iconInput) {
         if (file) {
             // Validate file size
             if (file.size > 2 * 1024 * 1024) {
-                alert('Icon file is too large. Maximum size is 2MB.');
                 iconInput.value = '';
+                iconInput.classList.add('is-invalid');
                 return;
             }
             
@@ -136,14 +195,14 @@ if (galleryInput) {
         
         // Limit to 10 images
         if (combinedFiles.length > 10) {
-            alert(`Maximum 10 images allowed. You can add ${10 - selectedFiles.length} more image(s).`);
+            Toast.error(`Maximum 10 images allowed. You can add ${10 - selectedFiles.length} more image(s).`);
             return;
         }
         
         // Check file sizes
         for (let file of newFiles) {
             if (file.size > 5 * 1024 * 1024) { // 5MB
-                alert(`File ${file.name} is too large. Maximum size is 5MB.`);
+                Toast.error(`File ${file.name} is too large. Maximum size is 5MB.`);
                 return;
             }
         }
@@ -232,61 +291,92 @@ function removeGalleryPreview(index) {
 }
 
 // Form validation before submit
-document.querySelector('form').addEventListener('submit', function(e) {
-    const lat = document.getElementById('latitude').value;
-    const lng = document.getElementById('longitude').value;
-    
-    if (!lat || !lng || lat === '0' || lng === '0') {
-        e.preventDefault();
-        alert('Please select a location on the map');
-        return false;
-    }
-    
-    // Check if icon is required (for create form)
-    const isEditForm = window.landmarkData !== undefined;
-    const iconFile = currentIconFile !== null;
-    const removeIconChecked = document.getElementById('remove_icon')?.checked;
-    
-    if (!isEditForm && !iconFile) {
-        e.preventDefault();
-        alert('Please upload an icon image');
-        return false;
-    }
-    
-    // For edit form, ensure icon exists or is being uploaded
-    if (isEditForm && removeIconChecked && !iconFile) {
-        e.preventDefault();
-        alert('You cannot remove the icon without uploading a new one');
-        return false;
-    }
-    
-    // Update gallery input with selected files before submit
-    if (selectedFiles.length > 0) {
-        const dataTransfer = new DataTransfer();
-        selectedFiles.forEach(file => dataTransfer.items.add(file));
-        if (galleryInput) {
-            galleryInput.files = dataTransfer.files;
-        }
-    }
-    
-    // Validate gallery images count
-    const totalGalleryImages = selectedFiles.length;
-    if (totalGalleryImages > 10) {
-        e.preventDefault();
-        alert('Maximum 10 gallery images allowed');
-        return false;
-    }
-    
-    return true;
-});
-
-// Auto-dismiss alerts after 5 seconds
 document.addEventListener('DOMContentLoaded', function() {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }, 5000);
+    const landmarkForm = document.querySelector('#landmarkForm') || document.querySelector('form[action*="landmarks"]');
+
+    if (landmarkForm) {
+        // Helper function to show field error
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.classList.add('is-invalid');
+                // Remove error class after 3 seconds
+                setTimeout(() => field.classList.remove('is-invalid'), 3000);
+            }
+        }
+    
+    landmarkForm.addEventListener('submit', function(e) {
+        // Remove all previous error states
+        landmarkForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        
+        const lat = document.getElementById('latitude').value;
+        const lng = document.getElementById('longitude').value;
+        const name = document.getElementById('name').value;
+        const category = document.getElementById('category').value;
+        
+        // Validate name
+        if (!name || name.trim() === '') {
+            e.preventDefault();
+            showFieldError('name', 'Landmark name is required');
+            return false;
+        }
+        
+        // Validate category
+        if (!category) {
+            e.preventDefault();
+            showFieldError('category', 'Please select a category');
+            return false;
+        }
+        
+        // Validate location
+        if (!lat || !lng || lat === '0' || lng === '0') {
+            e.preventDefault();
+            showFieldError('latitude', 'Please select a location on the map');
+            return false;
+        }
+        
+        // Check if icon is required (for create form)
+        const isEditForm = window.landmarkData !== undefined;
+        const iconFile = currentIconFile !== null;
+        const removeIconChecked = document.getElementById('remove_icon')?.checked;
+        
+        if (!isEditForm && !iconFile) {
+            e.preventDefault();
+            const iconInput = document.getElementById('icon_image');
+            if (iconInput) iconInput.classList.add('is-invalid');
+            return false;
+        }
+        
+        // For edit form, ensure icon exists or is being uploaded
+        if (isEditForm && removeIconChecked && !iconFile) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Update gallery input with selected files before submit
+        if (selectedFiles.length > 0) {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            if (galleryInput) {
+                galleryInput.files = dataTransfer.files;
+            }
+        }
+        
+        // Validate gallery images count
+        const totalGalleryImages = selectedFiles.length;
+        if (totalGalleryImages > 10) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Show loading state before submit
+        const submitBtn = document.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
+        }
+        
+        return true;
     });
+    }
 });

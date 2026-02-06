@@ -534,6 +534,28 @@ body {
     border-radius: 2px;
 }
 
+/* Page Header Card - Shared across all pages */
+.cs-page-header {
+    margin-bottom: 1.5rem;
+}
+
+.cs-page-header .card-header {
+    margin-bottom: 0;
+}
+
+.cs-page-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 0.25rem;
+}
+
+.cs-page-subtitle {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin: 0;
+}
+
 /* Stats Cards */
 .stats-grid {
     display: grid;
@@ -833,14 +855,6 @@ body {
 .badge-info {
     background: linear-gradient(135deg, var(--info-light), rgba(59, 130, 246, 0.15));
     color: var(--info);
-}
-
-.badge::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
 }
 
 /* Action Buttons */

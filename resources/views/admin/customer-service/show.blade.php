@@ -220,42 +220,28 @@
             <div class="actions-card">
                 <div class="actions-stack">
                     @if($ticket->status !== 'resolved')
-                    <form action="{{ route('admin.customer-service.updateStatus', $ticket->id) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="status" value="resolved">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fa-solid fa-check-circle"></i>
-                            Mark as Resolved
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-success" onclick="showResolveModal()">
+                        <i class="fa-solid fa-check-circle"></i>
+                        Mark as Resolved
+                    </button>
                     @endif
                     
                     @if($ticket->status === 'pending')
-                    <form action="{{ route('admin.customer-service.updateStatus', $ticket->id) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="status" value="in-progress">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-spinner"></i>
-                            Mark In Progress
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-primary" onclick="showInProgressModal()">
+                        <i class="fa-solid fa-spinner"></i>
+                        Mark In Progress
+                    </button>
                     @endif
 
-                    <form action="{{ route('admin.customer-service.toggleFlag', $ticket->id) }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-outline {{ $ticket->is_flagged ? 'btn-flagged' : '' }}">
-                            <i class="fa-solid fa-flag"></i>
-                            {{ $ticket->is_flagged ? 'Remove Flag' : 'Flag as Important' }}
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-outline {{ $ticket->is_flagged ? 'btn-flagged' : '' }}" onclick="showFlagModal()">
+                        <i class="fa-solid fa-flag"></i>
+                        {{ $ticket->is_flagged ? 'Remove Flag' : 'Flag as Important' }}
+                    </button>
 
-                    <form action="{{ route('admin.customer-service.archive', $ticket->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this ticket?')">
-                        @csrf
-                        <button type="submit" class="btn btn-outline btn-danger-outline">
-                            <i class="fa-solid fa-archive"></i>
-                            Archive Ticket
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-outline btn-danger-outline" onclick="showArchiveModal()">
+                        <i class="fa-solid fa-archive"></i>
+                        Archive Ticket
+                    </button>
                 </div>
             </div>
         </div>
@@ -306,7 +292,7 @@
 
                 <div class="email-checkbox-section">
                     <label class="email-checkbox-label">
-                        <input type="checkbox" id="sendEmailCheckbox" name="send_email" checked>
+                        <input type="checkbox" id="sendEmailCheckbox" name="send_email" value="1" checked>
                         <span>Send email notification to customer</span>
                     </label>
                     <p class="email-checkbox-note">
@@ -325,6 +311,219 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Mark as Resolved Modal -->
+<div class="modal-backdrop" id="resolveModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-check-circle" style="color: #10B981;"></i> Mark as Resolved</h3>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to mark this ticket as resolved?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeResolveModal()">Cancel</button>
+            <button type="button" class="btn btn-success" onclick="showResolveConfirmModal()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<!-- Resolve Confirmation Modal -->
+<div class="modal-backdrop" id="resolveConfirmModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-exclamation-triangle" style="color: #F59E0B;"></i> Confirm Action</h3>
+        </div>
+        <div class="modal-body">
+            <p>This will mark ticket #{{ $ticket->id }} as resolved. Continue?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeResolveConfirmModal()">Cancel</button>
+            <form id="resolveForm" action="{{ route('admin.customer-service.updateStatus', $ticket->id) }}" method="POST" style="display: inline;">
+                @csrf
+                <input type="hidden" name="status" value="resolved">
+                <button type="submit" class="btn btn-success">Confirm Resolve</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Mark In Progress Modal -->
+<div class="modal-backdrop" id="inProgressModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-spinner" style="color: var(--secondary-blue);"></i> Mark In Progress</h3>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to mark this ticket as in progress?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeInProgressModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="showInProgressConfirmModal()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<!-- In Progress Confirmation Modal -->
+<div class="modal-backdrop" id="inProgressConfirmModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-exclamation-triangle" style="color: #F59E0B;"></i> Confirm Action</h3>
+        </div>
+        <div class="modal-body">
+            <p>This will mark ticket #{{ $ticket->id }} as in progress. Continue?</p>
+        </div>
+        <div class="modal-footer">
+      
+
+// Action modals functions
+function showResolveModal() {
+    document.getElementById('resolveModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeResolveModal() {
+    document.getElementById('resolveModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showResolveConfirmModal() {
+    closeResolveModal();
+    document.getElementById('resolveConfirmModal').style.display = 'flex';
+}
+function closeResolveConfirmModal() {
+    document.getElementById('resolveConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function showInProgressModal() {
+    document.getElementById('inProgressModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeInProgressModal() {
+    document.getElementById('inProgressModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showInProgressConfirmModal() {
+    closeInProgressModal();
+    document.getElementById('inProgressConfirmModal').style.display = 'flex';
+}
+function closeInProgressConfirmModal() {
+    document.getElementById('inProgressConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function showFlagModal() {
+    document.getElementById('flagModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeFlagModal() {
+    document.getElementById('flagModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showFlagConfirmModal() {
+    closeFlagModal();
+    document.getElementById('flagConfirmModal').style.display = 'flex';
+}
+function closeFlagConfirmModal() {
+    document.getElementById('flagConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function showArchiveModal() {
+    document.getElementById('archiveModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeArchiveModal() {
+    document.getElementById('archiveModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showArchiveConfirmModal() {
+    closeArchiveModal();
+    document.getElementById('archiveConfirmModal').style.display = 'flex';
+}
+function closeArchiveConfirmModal() {
+    document.getElementById('archiveConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+      <button type="button" class="btn btn-outline" onclick="closeInProgressConfirmModal()">Cancel</button>
+            <form id="inProgressForm" action="{{ route('admin.customer-service.updateStatus', $ticket->id) }}" method="POST" style="display: inline;">
+                @csrf
+                <input type="hidden" name="status" value="in-progress">
+                <button type="submit" class="btn btn-primary">Confirm</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Flag Modal -->
+<div class="modal-backdrop" id="flagModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-flag" style="color: #EF4444;"></i> {{ $ticket->is_flagged ? 'Remove Flag' : 'Flag as Important' }}</h3>
+        </div>
+        <div class="modal-body">
+            <p>{{ $ticket->is_flagged ? 'Are you sure you want to remove the flag from this ticket?' : 'Are you sure you want to flag this ticket as important?' }}</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeFlagModal()">Cancel</button>
+            <button type="button" class="btn btn-outline" onclick="showFlagConfirmModal()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<!-- Flag Confirmation Modal -->
+<div class="modal-backdrop" id="flagConfirmModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-exclamation-triangle" style="color: #F59E0B;"></i> Confirm Action</h3>
+        </div>
+        <div class="modal-body">
+            <p>{{ $ticket->is_flagged ? 'This will remove the flag from ticket #' . $ticket->id : 'This will flag ticket #' . $ticket->id . ' as important' }}. Continue?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeFlagConfirmModal()">Cancel</button>
+            <form id="flagForm" action="{{ route('admin.customer-service.toggleFlag', $ticket->id) }}" method="POST" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-outline">Confirm</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Archive Modal -->
+<div class="modal-backdrop" id="archiveModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-archive" style="color: #EF4444;"></i> Archive Ticket</h3>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to archive this ticket?</p>
+            <p class="text-muted" style="font-size: 0.875rem; margin-top: 0.5rem;">Archived tickets can be restored later.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeArchiveModal()">Cancel</button>
+            <button type="button" class="btn btn-outline btn-danger-outline" onclick="showArchiveConfirmModal()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<!-- Archive Confirmation Modal -->
+<div class="modal-backdrop" id="archiveConfirmModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-exclamation-triangle" style="color: #EF4444;"></i> Confirm Archive</h3>
+        </div>
+        <div class="modal-body">
+            <p>This will archive ticket #{{ $ticket->id }}. This action can be reversed. Continue?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeArchiveConfirmModal()">Cancel</button>
+            <form id="archiveForm" action="{{ route('admin.customer-service.archive', $ticket->id) }}" method="POST" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-danger">Confirm Archive</button>
+            </form>
+        </div>
     </div>
 </div>
 @endsection

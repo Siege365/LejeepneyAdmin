@@ -76,25 +76,11 @@
 
                     <!-- Description -->
                     <div class="form-group form-group-full">
-                        <label for="description">Description</label>
+                        <label for="description">Description <span class="required">*</span></label>
                         <textarea class="form-control @error('description') is-invalid @enderror" 
                                   id="description" name="description" rows="2" 
-                                  placeholder="Enter a brief description of this landmark">{{ old('description', $landmark->description) }}</textarea>
+                                  placeholder="Enter a brief description of this landmark" required>{{ old('description', $landmark->description) }}</textarea>
                         @error('description')
-                            <span class="error-text">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <!-- URL -->
-                    <div class="form-group form-group-full">
-                        <label for="url">
-                            <i class="fa-solid fa-link"></i> Website URL
-                        </label>
-                        <input type="url" class="form-control @error('url') is-invalid @enderror" 
-                               id="url" name="url" value="{{ old('url', $landmark->url) }}" 
-                               placeholder="https://example.com or Google Maps link">
-                        <small class="form-text text-muted">Optional: Enter a website URL, Google Maps link, or social media profile</small>
-                        @error('url')
                             <span class="error-text">{{ $message }}</span>
                         @enderror
                     </div>

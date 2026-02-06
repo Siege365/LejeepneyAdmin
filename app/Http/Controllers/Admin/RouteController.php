@@ -33,9 +33,36 @@ class RouteController extends Controller
             });
         }
 
-        $routes = $query->orderBy('name')->paginate(10);
+        // Sorting
+        $sortBy = $request->get('sort', 'id_desc');
+        
+        switch ($sortBy) {
+            case 'id_asc':
+                $query->orderBy('id', 'asc');
+                break;
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'id_desc':
+            default:
+                $query->orderBy('id', 'desc');
+                break;
+        }
 
-        return view('admin.routes.index', compact('routes'));
+        $routes = $query->paginate(10);
+
+        // Get statistics
+        $stats = [
+            'total' => JeepneyRoute::count(),
+            'available' => JeepneyRoute::where('status', 'available')->count(),
+            'unavailable' => JeepneyRoute::where('status', 'unavailable')->count(),
+            'total_distance' => JeepneyRoute::sum('total_distance'),
+        ];
+
+        return view('admin.routes.index', compact('routes', 'stats'));
     }
 
     /**
@@ -205,6 +232,53 @@ class RouteController extends Controller
         return response()->json([
             'success' => true,
             'data' => $route
+        ]);
+    }
+
+    /**
+     * Batch delete routes
+     */
+    public function batchDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'required|exists:jeepney_routes,id'
+        ]);
+
+        $ids = $validated['ids'];
+        $routes = JeepneyRoute::whereIn('id', $ids)->get();
+        
+        if ($routes->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No routes found to delete'
+            ], 404);
+        }
+
+        $deletedCount = 0;
+        $deletedNames = [];
+
+        foreach ($routes as $route) {
+            $deletedNames[] = $route->name;
+
+            // Delete the route
+            $route->delete();
+            $deletedCount++;
+
+            // Log activity
+            ActivityLog::log(
+                'deleted',
+                'Route',
+                null,
+                $route->name,
+                "Route '{$route->name}' was batch deleted"
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Successfully deleted {$deletedCount} route(s): " . implode(', ', $deletedNames),
+            'deleted_count' => $deletedCount
         ]);
     }
 }

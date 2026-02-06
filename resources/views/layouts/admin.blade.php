@@ -145,20 +145,6 @@
 
         <!-- Page Content -->
         <div class="content">
-            @if(session('success'))
-                <div class="alert alert-success">
-                    <i class="fa-solid fa-circle-check"></i>
-                    <span>{{ session('success') }}</span>
-                </div>
-            @endif
-            
-            @if(session('error'))
-                <div class="alert alert-error">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-                    <span>{{ session('error') }}</span>
-                </div>
-            @endif
-            
             @yield('content')
         </div>
     </main>

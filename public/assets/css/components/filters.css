@@ -45,7 +45,7 @@
     display: none;
 }
 
-.bulk-actions-container.show {
+.bulk-actions-container.active {
     display: block;
 }
 

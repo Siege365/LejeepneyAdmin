@@ -16,7 +16,7 @@
             <p class="cs-page-subtitle">Manage customer inquiries and support tickets.</p>
         </div>
         <div class="header-actions">
-            <a href="{{ route('admin.customer-service.index', ['archived' => 'archived']) }}" class="btn btn-outline btn-sm">
+            <a href="{{ route('admin.customer-service.index', ['archived' => 'archived']) }}" class="btn btn-primary">
                 <i class="fa-solid fa-archive"></i>
                 Archived ({{ $stats['archived'] ?? 0 }})
             </a>
@@ -26,61 +26,55 @@
 
 <!-- Stats Cards -->
 <div class="stats-grid stats-grid-5">
-    <a href="{{ route('admin.customer-service.index') }}" class="stat-card-link">
-        <div class="stat-card-mini stat-blue {{ !request('status') && !request('flagged') ? 'stat-active' : '' }}">
-            <div class="stat-content">
-                <p class="stat-label">Total</p>
-                <p class="stat-value">{{ $stats['total'] ?? 0 }}</p>
-            </div>
-            <div class="stat-icon stat-icon-blue">
-                <i class="fa-solid fa-ticket"></i>
-            </div>
+    <div class="stat-card-mini">
+        <div class="stat-content">
+            <p class="stat-label">Total</p>
+            <p class="stat-value">{{ $stats['total'] ?? 0 }}</p>
         </div>
-    </a>
-    <a href="{{ route('admin.customer-service.index', ['status' => 'pending']) }}" class="stat-card-link">
-        <div class="stat-card-mini stat-amber {{ request('status') === 'pending' ? 'stat-active' : '' }}">
-            <div class="stat-content">
-                <p class="stat-label">Pending</p>
-                <p class="stat-value stat-value-amber">{{ $stats['pending'] ?? 0 }}</p>
-            </div>
-            <div class="stat-icon stat-icon-amber">
-                <i class="fa-solid fa-clock"></i>
-            </div>
+        <div class="stat-icon stat-icon-blue">
+            <i class="fa-solid fa-ticket"></i>
         </div>
-    </a>
-    <a href="{{ route('admin.customer-service.index', ['status' => 'in-progress']) }}" class="stat-card-link">
-        <div class="stat-card-mini stat-blue {{ request('status') === 'in-progress' ? 'stat-active' : '' }}">
-            <div class="stat-content">
-                <p class="stat-label">In Progress</p>
-                <p class="stat-value stat-value-blue">{{ $stats['in_progress'] ?? 0 }}</p>
-            </div>
-            <div class="stat-icon stat-icon-blue">
-                <i class="fa-solid fa-spinner"></i>
-            </div>
+    </div>
+    
+    <div class="stat-card-mini">
+        <div class="stat-content">
+            <p class="stat-label">Pending</p>
+            <p class="stat-value stat-value-amber">{{ $stats['pending'] ?? 0 }}</p>
         </div>
-    </a>
-    <a href="{{ route('admin.customer-service.index', ['status' => 'resolved']) }}" class="stat-card-link">
-        <div class="stat-card-mini stat-green {{ request('status') === 'resolved' ? 'stat-active' : '' }}">
-            <div class="stat-content">
-                <p class="stat-label">Resolved</p>
-                <p class="stat-value stat-value-green">{{ $stats['resolved'] ?? 0 }}</p>
-            </div>
-            <div class="stat-icon stat-icon-green">
-                <i class="fa-solid fa-circle-check"></i>
-            </div>
+        <div class="stat-icon stat-icon-amber">
+            <i class="fa-solid fa-clock"></i>
         </div>
-    </a>
-    <a href="{{ route('admin.customer-service.index', ['flagged' => '1']) }}" class="stat-card-link">
-        <div class="stat-card-mini stat-red {{ request('flagged') ? 'stat-active' : '' }}">
-            <div class="stat-content">
-                <p class="stat-label">Flagged</p>
-                <p class="stat-value stat-value-red">{{ $stats['flagged'] ?? 0 }}</p>
-            </div>
-            <div class="stat-icon stat-icon-red">
-                <i class="fa-solid fa-flag"></i>
-            </div>
+    </div>
+    
+    <div class="stat-card-mini">
+        <div class="stat-content">
+            <p class="stat-label">In Progress</p>
+            <p class="stat-value stat-value-blue">{{ $stats['in_progress'] ?? 0 }}</p>
         </div>
-    </a>
+        <div class="stat-icon stat-icon-blue">
+            <i class="fa-solid fa-spinner"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card-mini">
+        <div class="stat-content">
+            <p class="stat-label">Resolved</p>
+            <p class="stat-value stat-value-green">{{ $stats['resolved'] ?? 0 }}</p>
+        </div>
+        <div class="stat-icon stat-icon-green">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+    </div>
+    
+    <div class="stat-card-mini">
+        <div class="stat-content">
+            <p class="stat-label">Flagged</p>
+            <p class="stat-value stat-value-red">{{ $stats['flagged'] ?? 0 }}</p>
+        </div>
+        <div class="stat-icon stat-icon-red">
+            <i class="fa-solid fa-flag"></i>
+        </div>
+    </div>
 </div>
 
 <!-- Tickets Table -->
@@ -113,7 +107,15 @@
                 <option value="low" {{ request('priority') === 'low' ? 'selected' : '' }}>Low</option>
             </select>
             
-            @if(request()->hasAny(['search', 'status', 'type', 'priority', 'flagged', 'archived']))
+            <!-- Sort Filter -->
+            <select name="sort" onchange="this.form.submit()" class="filter-select">
+                <option value="id_desc" {{ request('sort', 'id_desc') === 'id_desc' ? 'selected' : '' }}>ID: High to Low</option>
+                <option value="id_asc" {{ request('sort') === 'id_asc' ? 'selected' : '' }}>ID: Low to High</option>
+                <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>Newest First</option>
+                <option value="oldest" {{ request('sort') === 'oldest' ? 'selected' : '' }}>Oldest First</option>
+            </select>
+            
+            @if(request()->hasAny(['search', 'status', 'type', 'priority', 'flagged', 'archived', 'sort']))
                 <a href="{{ route('admin.customer-service.index') }}" class="btn btn-outline btn-sm">
                     <i class="fa-solid fa-times"></i> Clear
                 </a>

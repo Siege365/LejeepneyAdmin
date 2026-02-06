@@ -58,6 +58,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/{landmark}/edit', [LandmarkController::class, 'edit'])->name('edit');
         Route::put('/{landmark}', [LandmarkController::class, 'update'])->name('update');
         Route::delete('/{landmark}', [LandmarkController::class, 'destroy'])->name('destroy');
+        Route::post('/batch-delete', [LandmarkController::class, 'batchDelete'])->name('batch-delete');
     });
     
     // Routes Management
@@ -68,6 +69,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/{route}/edit', [RouteController::class, 'edit'])->name('edit');
         Route::put('/{route}', [RouteController::class, 'update'])->name('update');
         Route::delete('/{route}', [RouteController::class, 'destroy'])->name('destroy');
+        Route::post('/batch-delete', [RouteController::class, 'batchDelete'])->name('batch-delete');
         Route::post('/{route}/toggle-status', [RouteController::class, 'toggleStatus'])->name('toggle-status');
         Route::get('/{route}/show', [RouteController::class, 'show'])->name('show');
     });

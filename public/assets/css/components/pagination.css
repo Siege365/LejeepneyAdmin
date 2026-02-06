@@ -12,24 +12,38 @@
     align-items: center;
 }
 
+/* Pagination Nav Wrapper */
+.pagination-nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    flex: 1;
+}
+
 /* Pagination Info Text */
 .pagination-info {
     color: #64748B;
     font-size: 0.875rem;
 }
 
-/* Pagination Nav */
-.pagination-nav {
+/* Pagination Controls - Horizontal Layout */
+.pagination-controls {
     display: flex;
+    flex-direction: row;
     gap: 0.25rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 /* Base Pagination Link/Span */
 .pagination-btn {
     padding: 0.5rem 0.75rem;
+    min-width: 32px;
     height: 32px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     border: 1px solid #E2E8F0;
@@ -40,29 +54,24 @@
     transition: all 0.2s;
     font-size: 0.875rem;
     font-weight: 500;
+    cursor: pointer;
 }
 
-.pagination-btn:hover {
+.pagination-btn:hover:not(:disabled):not(.active) {
     background: #F8FAFC;
     border-color: #CBD5E1;
 }
 
-/* Square buttons (prev/next arrows) */
-.pagination-btn-icon {
-    width: 32px;
-    padding: 0;
-}
-
 /* Active Page */
 .pagination-btn.active {
-    min-width: 32px;
-    padding: 0 0.5rem;
     border-color: #3B82F6;
     background: #3B82F6;
     color: white;
+    cursor: default;
 }
 
 /* Disabled State */
+.pagination-btn:disabled,
 .pagination-btn.disabled {
     background: #F8FAFC;
     color: #CBD5E1;
@@ -79,18 +88,18 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-    .pagination-container {
+    .pagination-nav {
         flex-direction: column;
         gap: 1rem;
     }
 
     .pagination-info {
         order: 2;
+        text-align: center;
     }
 
-    .pagination-nav {
+    .pagination-controls {
         order: 1;
-        flex-wrap: wrap;
         justify-content: center;
     }
 }

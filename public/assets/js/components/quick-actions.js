@@ -5,34 +5,34 @@
 
 const QuickActions = {
     init() {
+        const container = document.querySelector('.quick-actions');
         const trigger = document.querySelector('.quick-actions-btn');
-        const menu = document.querySelector('.quick-actions-menu');
         
-        if (!trigger || !menu) return;
+        if (!trigger || !container) return;
         
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
-            menu.classList.toggle('active');
+            container.classList.toggle('open');
         });
         
         // Close when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.quick-actions')) {
-                menu.classList.remove('active');
+                container.classList.remove('open');
             }
         });
         
         // Close on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                menu.classList.remove('active');
+                container.classList.remove('open');
             }
         });
     },
     
     close() {
-        const menu = document.querySelector('.quick-actions-menu');
-        if (menu) menu.classList.remove('active');
+        const container = document.querySelector('.quick-actions');
+        if (container) container.classList.remove('open');
     }
 };
 

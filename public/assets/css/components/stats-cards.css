@@ -3,7 +3,25 @@
    KPI/Statistics card styles
    ======================================== */
 
-/* Stats Grid */
+/* Stats Grid Base */
+.stats-grid {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* 5-column Stats Grid */
+.stats-grid.stats-grid-5 {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+/* 4-column Stats Grid */
+.stats-grid.stats-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Standalone classes */
 .stats-grid-5 {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -28,9 +46,16 @@
 .stat-card-mini {
     background: white;
     border-radius: 10px;
-    padding: 1rem;
+    padding: 1.25rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border: 2px solid transparent;
+    border-top: 3px solid #F59E0B;
+    position: relative;
+    overflow: hidden;
 }
 
 .stat-card-mini:hover {
@@ -38,8 +63,9 @@
     transform: translateY(-2px);
 }
 
-.stat-card-mini.active {
-    border: 2px solid var(--secondary-blue);
+/* Active States - No longer needed for clickable cards */
+.stat-card-mini.stat-active {
+    border-color: var(--secondary-blue);
 }
 
 .stat-card-mini.active-pending {
@@ -58,14 +84,90 @@
     border: 2px solid #DC2626;
 }
 
-/* Stats Card Inner */
+/* Stats Card Content */
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #64748B;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1E293B;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.stat-value-amber {
+    color: #D97706;
+}
+
+.stat-value-blue {
+    color: #2563EB;
+}
+
+.stat-value-green {
+    color: #059669;
+}
+
+.stat-value-red {
+    color: #DC2626;
+}
+
+/* Stats Card Icon */
+.stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.25rem;
+}
+
+.stat-icon-indigo {
+    background: #E0E7FF;
+    color: #6366F1;
+}
+
+.stat-icon-amber {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.stat-icon-blue {
+    background: #DBEAFE;
+    color: #2563EB;
+}
+
+.stat-icon-green {
+    background: #D1FAE5;
+    color: #059669;
+}
+
+.stat-icon-red {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+/* Legacy class support */
 .stat-card-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-/* Stats Card Info */
 .stat-card-label {
     font-size: 0.75rem;
     color: #64748B;
@@ -97,7 +199,6 @@
     color: #DC2626;
 }
 
-/* Stats Card Icon */
 .stat-card-icon {
     width: 40px;
     height: 40px;
@@ -135,21 +236,26 @@
 
 /* Responsive */
 @media (max-width: 1200px) {
-    .stats-grid-5 {
+    .stats-grid-5,
+    .stats-grid.stats-grid-5 {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
 @media (max-width: 768px) {
     .stats-grid-5,
-    .stats-grid-4 {
+    .stats-grid-4,
+    .stats-grid.stats-grid-5,
+    .stats-grid.stats-grid-4 {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 480px) {
     .stats-grid-5,
-    .stats-grid-4 {
+    .stats-grid-4,
+    .stats-grid.stats-grid-5,
+    .stats-grid.stats-grid-4 {
         grid-template-columns: 1fr;
     }
 }

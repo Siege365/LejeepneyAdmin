@@ -28,6 +28,7 @@
     let pathPolyline = null;
     let isLoading = false;
     let isRouteSet = false;   // Track if route is finalized/set
+    let routingTimeout = null; // For debouncing routing calls
 
     // DOM Elements
     const elements = {
@@ -88,8 +89,61 @@
         waypoints.push(point);
         addMarker(point, waypoints.length);
         
-        // Fetch road-snapped route
-        await updatePathWithRouting();
+        // Debounce routing to avoid lag when adding multiple points quickly
+        debouncedUpdatePath();
+    }
+
+    /**
+     * Debounced path update - prevents lag from multiple rapid OSRM calls
+     */
+    function debouncedUpdatePath() {
+        // Clear any pending routing call
+        if (routingTimeout) {
+            clearTimeout(routingTimeout);
+        }
+        
+        // Draw a temporary straight line immediately for instant feedback
+        drawTemporaryPath();
+        
+        // Schedule the actual routing call
+        routingTimeout = setTimeout(async () => {
+            await updatePathWithRouting();
+            updatePathInfo();
+            saveToInput();
+        }, 300); // 300ms debounce delay
+    }
+
+    /**
+     * Draw temporary straight-line path for instant feedback
+     */
+    function drawTemporaryPath() {
+        if (waypoints.length < 2) return;
+        
+        const color = elements.colorInput ? elements.colorInput.value : config.initialColor;
+        
+        // Remove existing polyline
+        if (pathPolyline) {
+            if (pathPolyline.arrowMarkers) {
+                pathPolyline.arrowMarkers.forEach(marker => map.removeLayer(marker));
+            }
+            if (pathPolyline.decorator) {
+                map.removeLayer(pathPolyline.decorator);
+            }
+            map.removeLayer(pathPolyline);
+        }
+        
+        // Draw dashed temporary line
+        pathPolyline = L.polyline(
+            waypoints.map(p => [p.lat, p.lng]),
+            {
+                color: color,
+                weight: 3,
+                opacity: 0.5,
+                dashArray: '10, 10',
+                lineCap: 'round'
+            }
+        ).addTo(map);
+        
         updatePathInfo();
         saveToInput();
     }
@@ -116,9 +170,8 @@
                     lat: parseFloat(e.target.getLatLng().lat.toFixed(6)),
                     lng: parseFloat(e.target.getLatLng().lng.toFixed(6))
                 };
-                await updatePathWithRouting();
-                updatePathInfo();
-                saveToInput();
+                // Use debounced update for dragging too
+                debouncedUpdatePath();
             }
         });
 
@@ -716,17 +769,49 @@
      * Handle form submission
      */
     function handleFormSubmit(e) {
-        // Validate minimum points
+        // Remove all previous error states
+        if (elements.form) {
+            elements.form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        }
+        
+        // Get form fields
+        const nameField = document.getElementById('name');
+        const terminalField = document.getElementById('terminal');
+        const descriptionField = document.getElementById('description');
+        
+        // Helper to show field error
+        function showError(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.classList.add('is-invalid');
+                setTimeout(() => field.classList.remove('is-invalid'), 3000);
+            }
+        }
+        
+        // Validate route name
+        if (nameField && (!nameField.value || nameField.value.trim() === '')) {
+            e.preventDefault();
+            showError('name');
+            return false;
+        }
+        
+        // Validate terminal
+        if (terminalField && (!terminalField.value || terminalField.value.trim() === '')) {
+            e.preventDefault();
+            showError('terminal');
+            return false;
+        }
+        
+        // Validate minimum waypoints
         if (waypoints.length < 2) {
             e.preventDefault();
-            alert('Please add at least 2 waypoints to create a valid route path.');
             return false;
         }
 
         // Show loading state
         if (elements.submitBtn) {
             elements.submitBtn.disabled = true;
-            elements.submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+            elements.submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving Route...';
         }
 
         return true;

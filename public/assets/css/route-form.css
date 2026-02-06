@@ -490,3 +490,67 @@ select.form-control {
     margin-top: 0.25rem;
     display: block;
 }
+
+/* ========================================
+   INPUT TYPE TOGGLE
+   Toggle between file upload and URL input
+   ======================================== */
+.input-type-toggle {
+    display: inline-flex;
+    background: #F1F5F9;
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.input-type-toggle .toggle-option {
+    padding: 8px 16px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748B;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+}
+
+.input-type-toggle .toggle-option:hover {
+    color: #334155;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.input-type-toggle .toggle-option.active {
+    background: #FFFFFF;
+    color: #2563EB;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.input-type-toggle .toggle-option i {
+    font-size: 0.875rem;
+}
+
+/* Input Content Containers */
+.input-content {
+    display: none;
+    animation: fadeIn 0.2s ease;
+}
+
+.input-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

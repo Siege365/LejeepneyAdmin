@@ -31,9 +31,37 @@ class LandmarkController extends Controller
             });
         }
 
-        $landmarks = $query->orderBy('category')->orderBy('name')->paginate(10);
+        // Sorting
+        $sortBy = $request->get('sort', 'id_desc');
+        
+        switch ($sortBy) {
+            case 'id_asc':
+                $query->orderBy('id', 'asc');
+                break;
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'id_desc':
+            default:
+                $query->orderBy('id', 'desc');
+                break;
+        }
 
-        return view('admin.landmarks.index', compact('landmarks'));
+        $landmarks = $query->paginate(10);
+
+        // Get statistics
+        $stats = [
+            'total' => Landmark::count(),
+            'city_center' => Landmark::where('category', 'city_center')->count(),
+            'malls' => Landmark::where('category', 'mall')->count(),
+            'schools' => Landmark::where('category', 'school')->count(),
+            'hospitals' => Landmark::where('category', 'hospital')->count(),
+        ];
+
+        return view('admin.landmarks.index', compact('landmarks', 'stats'));
     }
 
     /**
@@ -53,29 +81,47 @@ class LandmarkController extends Controller
             'name' => 'required|string|max:255',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
-            'description' => 'nullable|string',
-            'url' => 'nullable|url|max:500',
+            'description' => 'required|string',
             'category' => 'required|string|in:' . implode(',', array_keys(Landmark::CATEGORIES)),
             'is_featured' => 'boolean',
-            'icon_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=50,min_height=50,max_width=2048,max_height=2048',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:min_width=100,min_height=100,max_width=4096,max_height=4096'
+            'icon_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=50,min_height=50,max_width=2048,max_height=2048',
+            'icon_image_url' => 'nullable|url|max:500',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:min_width=100,min_height=100,max_width=4096,max_height=4096',
+            'gallery_images_urls' => 'nullable|string'
         ]);
 
-        // Handle icon image upload
-        if ($request->hasFile('icon_image')) {
-            $validated['icon_image'] = $request->file('icon_image')->store('landmarks/icons', 'public');
+        // Validate that at least one icon source is provided
+        if (!$request->hasFile('icon_image') && !$request->filled('icon_image_url')) {
+            return back()->withErrors(['icon_image' => 'Please provide an icon image file or URL'])->withInput();
         }
 
-        // Handle gallery images upload
+        // Handle icon image upload or URL
+        if ($request->hasFile('icon_image')) {
+            $validated['icon_image'] = $request->file('icon_image')->store('landmarks/icons', 'public');
+        } elseif ($request->filled('icon_image_url')) {
+            $validated['icon_image'] = $request->icon_image_url;
+        }
+
+        // Handle gallery images upload or URLs
         $galleryPaths = [];
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $image) {
                 $galleryPaths[] = $image->store('landmarks/gallery', 'public');
             }
+        } elseif ($request->filled('gallery_images_urls')) {
+            $urls = array_filter(array_map('trim', explode("\n", $request->gallery_images_urls)));
+            foreach ($urls as $url) {
+                if (filter_var($url, FILTER_VALIDATE_URL)) {
+                    $galleryPaths[] = $url;
+                }
+            }
         }
         $validated['gallery_images'] = $galleryPaths;
 
         $validated['is_featured'] = $request->has('is_featured');
+        
+        // Remove URL fields that shouldn't be stored
+        unset($validated['icon_image_url'], $validated['gallery_images_urls']);
 
         $landmark = Landmark::create($validated);
 
@@ -109,32 +155,39 @@ class LandmarkController extends Controller
             'name' => 'required|string|max:255',
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
-            'description' => 'nullable|string',
-            'url' => 'nullable|url|max:500',
+            'description' => 'required|string',
             'category' => 'required|string|in:' . implode(',', array_keys(Landmark::CATEGORIES)),
             'is_featured' => 'boolean',
             'icon_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048|dimensions:min_width=50,min_height=50,max_width=2048,max_height=2048',
+            'icon_image_url' => 'nullable|url|max:500',
             'remove_icon' => 'boolean',
             'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120|dimensions:min_width=100,min_height=100,max_width=4096,max_height=4096',
+            'gallery_images_urls' => 'nullable|string',
             'remove_gallery' => 'nullable|array',
             'remove_gallery.*' => 'integer'
         ]);
 
         // Handle removing icon image
         if ($request->has('remove_icon') && $request->remove_icon == '1') {
-            if ($landmark->icon_image) {
+            if ($landmark->icon_image && !filter_var($landmark->icon_image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete($landmark->icon_image);
             }
             $validated['icon_image'] = null;
         }
         
-        // Handle uploading new icon image
+        // Handle uploading new icon image or URL
         if ($request->hasFile('icon_image')) {
             // Delete old icon if exists and not already removed
-            if ($landmark->icon_image && !$request->has('remove_icon')) {
+            if ($landmark->icon_image && !$request->has('remove_icon') && !filter_var($landmark->icon_image, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete($landmark->icon_image);
             }
             $validated['icon_image'] = $request->file('icon_image')->store('landmarks/icons', 'public');
+        } elseif ($request->filled('icon_image_url')) {
+            // Use URL if provided
+            if ($landmark->icon_image && !filter_var($landmark->icon_image, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($landmark->icon_image);
+            }
+            $validated['icon_image'] = $request->icon_image_url;
         } elseif (!$request->has('remove_icon')) {
             // Keep existing icon if not removing and not uploading new one
             unset($validated['icon_image']);
@@ -147,7 +200,9 @@ class LandmarkController extends Controller
         if ($request->has('remove_gallery')) {
             foreach ($request->remove_gallery as $index) {
                 if (isset($existingGallery[$index])) {
-                    Storage::disk('public')->delete($existingGallery[$index]);
+                    if (!filter_var($existingGallery[$index], FILTER_VALIDATE_URL)) {
+                        Storage::disk('public')->delete($existingGallery[$index]);
+                    }
                     unset($existingGallery[$index]);
                 }
             }
@@ -159,12 +214,21 @@ class LandmarkController extends Controller
             foreach ($request->file('gallery_images') as $image) {
                 $existingGallery[] = $image->store('landmarks/gallery', 'public');
             }
+        } elseif ($request->filled('gallery_images_urls')) {
+            $urls = array_filter(array_map('trim', explode("\n", $request->gallery_images_urls)));
+            foreach ($urls as $url) {
+                if (filter_var($url, FILTER_VALIDATE_URL)) {
+                    $existingGallery[] = $url;
+                }
+            }
         }
         
         $validated['gallery_images'] = $existingGallery;
 
         $validated['is_featured'] = $request->has('is_featured');
-
+        
+        // Remove URL fields that shouldn't be stored
+        unset($validated['icon_image_url'], $validated['gallery_images_urls'], $validated['remove_icon'], $validated['remove_gallery']);
         $landmark->update($validated);
 
         // Log activity
@@ -212,5 +276,66 @@ class LandmarkController extends Controller
 
         return redirect()->route('admin.landmarks.index')
             ->with('success', 'Landmark "' . $name . '" deleted successfully!');
+    }
+
+    /**
+     * Batch delete landmarks
+     */
+    public function batchDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'required|exists:landmarks,id'
+        ]);
+
+        $ids = $validated['ids'];
+        $landmarks = Landmark::whereIn('id', $ids)->get();
+        
+        if ($landmarks->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No landmarks found to delete'
+            ], 404);
+        }
+
+        $deletedCount = 0;
+        $deletedNames = [];
+
+        foreach ($landmarks as $landmark) {
+            $deletedNames[] = $landmark->name;
+
+            // Delete icon image
+            if ($landmark->icon_image && Storage::disk('public')->exists($landmark->icon_image)) {
+                Storage::disk('public')->delete($landmark->icon_image);
+            }
+
+            // Delete gallery images
+            if (!empty($landmark->gallery_images)) {
+                foreach ($landmark->gallery_images as $image) {
+                    if (Storage::disk('public')->exists($image)) {
+                        Storage::disk('public')->delete($image);
+                    }
+                }
+            }
+
+            // Delete the landmark
+            $landmark->delete();
+            $deletedCount++;
+
+            // Log activity
+            ActivityLog::log(
+                'deleted',
+                'Landmark',
+                null,
+                $landmark->name,
+                "Landmark '{$landmark->name}' was batch deleted from {$landmark->category} category"
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Successfully deleted {$deletedCount} landmark(s): " . implode(', ', $deletedNames),
+            'deleted_count' => $deletedCount
+        ]);
     }
 }

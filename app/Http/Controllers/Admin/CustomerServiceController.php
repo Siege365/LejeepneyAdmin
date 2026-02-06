@@ -64,10 +64,26 @@ class CustomerServiceController extends Controller
             $query->active();
         }
 
-        // Order: flagged first, then by latest
-        $tickets = $query->orderByDesc('is_flagged')
-                         ->orderByDesc('created_at')
-                         ->paginate(15)
+        // Sorting
+        $sortBy = $request->get('sort', 'newest');
+        
+        switch ($sortBy) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'id_asc':
+                $query->orderBy('id', 'asc');
+                break;
+            case 'newest':
+                $query->orderByDesc('created_at');
+                break;
+            case 'id_desc':
+            default:
+                $query->orderBy('id', 'desc');
+                break;
+        }
+
+        $tickets = $query->paginate(10)
                          ->withQueryString();
 
         // Get counts for the sidebar/stats
@@ -99,14 +115,32 @@ class CustomerServiceController extends Controller
      */
     public function reply(Request $request, $id)
     {
-        $request->validate([
-            'message' => 'required|string|min:10|max:5000',
-            'status' => 'required|in:pending,in-progress,resolved',
-            'send_email' => 'nullable|boolean'
+        \Log::info('Reply attempt started', [
+            'ticket_id' => $id,
+            'has_message' => $request->has('message'),
+            'has_status' => $request->has('status'),
+            'has_send_email' => $request->has('send_email'),
+            'all_data' => $request->all()
         ]);
+
+        try {
+            $request->validate([
+                'message' => 'required|string|min:10|max:5000',
+                'status' => 'required|in:pending,in-progress,resolved',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Validation failed', ['error' => $e->getMessage()]);
+            return back()->withErrors($e->validator->errors())->withInput();
+        }
 
         $ticket = SupportTicket::findOrFail($id);
         $admin = Auth::user();
+
+        \Log::info('Creating reply', [
+            'ticket_id' => $ticket->id,
+            'admin_id' => $admin->id,
+            'admin_name' => $admin->name
+        ]);
 
         DB::beginTransaction();
         try {
@@ -116,8 +150,10 @@ class CustomerServiceController extends Controller
                 'admin_id' => $admin->id,
                 'message' => strip_tags($request->message, '<p><br><strong><em><ul><ol><li>'),
                 'admin_name' => $admin->name,
-                'email_sent' => $request->boolean('send_email')
+                'email_sent' => $request->has('send_email') ? true : false
             ]);
+
+            \Log::info('Reply created', ['reply_id' => $reply->id]);
 
             $oldStatus = $ticket->status;
 
@@ -126,6 +162,8 @@ class CustomerServiceController extends Controller
                 'status' => $request->status,
                 'admin_id' => $admin->id
             ]);
+
+            \Log::info('Ticket updated', ['new_status' => $request->status]);
 
             // Create notification for admin reply
             TicketNotification::createNotification(
@@ -140,8 +178,12 @@ class CustomerServiceController extends Controller
             // Log activity
             ActivityLog::create([
                 'action' => 'ticket_reply',
+                'model_type' => 'SupportTicket',
+                'model_id' => $ticket->id,
+                'model_name' => $ticket->subject,
+                'user_id' => $admin->id,
+                'user_name' => $admin->name,
                 'description' => "Replied to ticket #{$ticket->id}: {$ticket->subject}",
-                'performed_by' => $admin->name,
                 'ip_address' => $request->ip()
             ]);
 
@@ -158,28 +200,19 @@ class CustomerServiceController extends Controller
 
                 ActivityLog::create([
                     'action' => 'ticket_status_change',
+                    'model_type' => 'SupportTicket',
+                    'model_id' => $ticket->id,
+                    'model_name' => $ticket->subject,
+                    'user_id' => $admin->id,
+                    'user_name' => $admin->name,
                     'description' => "Changed ticket #{$ticket->id} status from {$oldStatus} to {$request->status}",
-                    'performed_by' => $admin->name,
                     'ip_address' => $request->ip()
                 ]);
             }
 
             DB::commit();
-
-            // Return email data for client-side EmailJS sending
-            if ($request->boolean('send_email')) {
-                return redirect()
-                    ->route('admin.customer-service.show', $ticket->id)
-                    ->with('success', 'Reply sent successfully!')
-                    ->with('emailData', [
-                        'to_email' => $ticket->email,
-                        'to_name' => $ticket->name,
-                        'subject' => "Re: {$ticket->subject}",
-                        'message' => $request->message,
-                        'ticket_id' => $ticket->id,
-                        'admin_name' => $admin->name
-                    ]);
-            }
+            
+            \Log::info('Reply completed successfully');
 
             return redirect()
                 ->route('admin.customer-service.show', $ticket->id)
@@ -187,7 +220,13 @@ class CustomerServiceController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to send reply. Please try again.');
+            \Log::error('Reply failed with exception', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to send reply: ' . $e->getMessage());
         }
     }
 
