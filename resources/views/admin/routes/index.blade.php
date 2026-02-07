@@ -88,7 +88,6 @@
                     <th class="th-checkbox">
                         <input type="checkbox" id="selectAllRoutes" class="select-all">
                     </th>
-                    <th class="th-id">#</th>
                     <th>Route Name</th>
                     <th>Terminal</th>
                     <th>Distance</th>
@@ -104,7 +103,6 @@
                     <td>
                         <input type="checkbox" class="row-checkbox" value="{{ $route->id }}" data-name="{{ $route->name }}">
                     </td>
-                    <td>{{ $loop->iteration }}</td>
                     <td>
                         <strong class="route-name">{{ $route->name }}</strong>
                     </td>

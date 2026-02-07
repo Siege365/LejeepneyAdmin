@@ -4,18 +4,19 @@
    ======================================== */
 
 /* Table Header Widths */
-.th-checkbox { width: 40px; }
-.th-id { width: 80px; }
-.th-icon { width: 60px; }
-.th-category { width: 120px; }
-.th-customer { width: 180px; }
-.th-type { width: 110px; }
-.th-date { width: 120px; }
-.th-priority { width: 100px; }
-.th-status { width: 120px; }
-.th-location { width: 200px; }
-.th-featured { width: 80px; }
-.th-actions { width: 60px; }
+.th-checkbox { width: 50px; min-width: 50px; }
+.th-id { width: 80px; min-width: 80px; }
+.th-icon { width: 70px; min-width: 70px; }
+.th-category { width: 140px; min-width: 140px; }
+.th-customer { width: 200px; min-width: 180px; }
+.th-type { width: 130px; min-width: 110px; }
+.th-date { width: 140px; min-width: 130px; }
+.th-priority { width: 120px; min-width: 100px; }
+.th-status { width: 140px; min-width: 130px; }
+.th-location { width: 220px; min-width: 200px; }
+.th-featured { width: 100px; min-width: 80px; }
+.th-actions { width: 80px; min-width: 80px; }
+.th-user { width: 150px; min-width: 140px; }
 
 /* Table Icon Image */
 .table-icon-img {

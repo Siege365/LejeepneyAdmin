@@ -21,7 +21,6 @@
             <h3>Total Landmarks</h3>
             <div class="stat-number">{{ $totalLandmarks ?? 0 }}</div>
             <div class="stat-change positive">
-                <i class="fa-solid fa-arrow-up"></i> 12% from last month
             </div>
         </div>
         <div class="stat-icon gold">
@@ -34,7 +33,6 @@
             <h3>Total Routes</h3>
             <div class="stat-number">{{ $totalRoutes ?? 0 }}</div>
             <div class="stat-change positive">
-                <i class="fa-solid fa-arrow-up"></i> 8% from last month
             </div>
         </div>
         <div class="stat-icon blue">
@@ -47,7 +45,6 @@
             <h3>Active Users</h3>
             <div class="stat-number">{{ $activeUsers ?? 0 }}</div>
             <div class="stat-change positive">
-                <i class="fa-solid fa-arrow-up"></i> 24% from last month
             </div>
         </div>
         <div class="stat-icon green">
@@ -60,7 +57,6 @@
             <h3>Pending Requests</h3>
             <div class="stat-number">{{ $pendingRequests ?? 0 }}</div>
             <div class="stat-change negative">
-                <i class="fa-solid fa-arrow-down"></i> 5% from last week
             </div>
         </div>
         <div class="stat-icon orange">

@@ -1,59 +1,163 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🚍 LeJeepney Admin
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Jeepney Route Management System — Admin Panel & API**
 
-## About Laravel
+A Laravel-based web admin panel for managing jeepney routes, landmarks, and customer support tickets in Cebu. Includes a REST API consumed by the **LeJeepney Flutter mobile app**.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Table of Contents
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- [Tech Stack](#tech-stack)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Documentation](#documentation)
+- [Team](#team)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## ⚙️ Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+| Layer      | Technology                          |
+| ---------- | ----------------------------------- |
+| Backend    | Laravel 12, PHP 8.2+                |
+| Frontend   | Blade, Vite 7, Tailwind CSS 4       |
+| Database   | MySQL                               |
+| Auth (Web) | Laravel built-in (session-based)    |
+| Auth (API) | Laravel Sanctum (token-based)       |
+| Email      | EmailJS (client-side notifications) |
+| Maps       | Leaflet.js / OpenStreetMap          |
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## ✨ Features
 
-### Premium Partners
+### Admin Panel (Web)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+- **Dashboard** — Overview with stats cards and recent activity logs
+- **Routes Management** — CRUD for jeepney routes with interactive map drawing
+- **Landmarks Management** — CRUD for landmarks with categories, gallery images, and map picker
+- **Customer Service** — Support ticket system with replies, status management, flagging, archiving
+- **Email Notifications** — EmailJS integration to notify customers on ticket replies
+- **Account Settings** — Profile update, password change, account deletion
+- **Notifications** — In-app notification system
 
-## Contributing
+### REST API (for Flutter App)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- **Routes** — List, search, find routes between points, get route paths
+- **Landmarks** — List, filter by category, featured, nearby search
+- **Support Tickets** — Create tickets, add messages, view notifications
+- **Authentication** — Register, login, token-based auth via Sanctum
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 🚀 Quick Start
 
-## Security Vulnerabilities
+### Prerequisites
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- PHP 8.2+
+- Composer
+- Node.js 18+ & npm
+- MySQL
+- [Laragon](https://laragon.org/) (recommended for Windows)
 
-## License
+### Installation
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+# 1. Clone the repository
+git clone <repo-url> LejeepneyAdmin
+cd LejeepneyAdmin
+
+# 2. Install PHP dependencies
+composer install
+
+# 3. Install JS dependencies
+npm install
+
+# 4. Setup environment
+cp .env.example .env
+php artisan key:generate
+
+# 5. Configure database in .env
+# DB_DATABASE=lejeepneyadmin
+# DB_USERNAME=root
+# DB_PASSWORD=
+
+# 6. Run migrations & seeders
+php artisan migrate
+php artisan db:seed
+
+# 7. Start development servers (two terminals)
+php artisan serve        # Terminal 1: Laravel at http://localhost:8000
+npm run dev              # Terminal 2: Vite HMR at http://localhost:5173
+```
+
+> 📖 See [docs/setup.md](docs/setup.md) for detailed setup instructions.
+
+---
+
+## 📁 Project Structure
+
+```
+LejeepneyAdmin/
+├── app/
+│   ├── Http/Controllers/
+│   │   ├── Admin/           # Web admin controllers
+│   │   ├── Api/             # API controllers (Flutter app)
+│   │   └── Auth/            # Authentication
+│   ├── Models/              # Eloquent models
+│   └── Providers/
+├── config/                  # App configuration
+├── database/
+│   ├── migrations/          # Database schema
+│   └── seeders/             # Sample data
+├── docs/                    # 📖 Team documentation
+├── resources/
+│   ├── css/                 # Stylesheets (Vite-processed)
+│   │   ├── admin-bundle.css # Master CSS import
+│   │   ├── components/      # Reusable component styles
+│   │   └── pages/           # Page-specific styles
+│   ├── js/                  # JavaScript (Vite-processed)
+│   │   ├── admin-bundle.js  # Master JS import
+│   │   ├── components/      # Reusable components (toast, modal)
+│   │   └── pages/           # Page-specific scripts
+│   └── views/               # Blade templates
+│       ├── admin/           # Admin page views
+│       ├── auth/            # Login/register views
+│       ├── components/      # Blade components
+│       └── layouts/         # Layout templates
+├── routes/
+│   ├── web.php              # Admin panel routes
+│   └── api.php              # REST API routes
+├── public/                  # Public assets
+└── vite.config.js           # Vite build config
+```
+
+---
+
+## 📖 Documentation
+
+Detailed documentation is in the [`docs/`](docs/) folder:
+
+| Document                                 | Description                                   |
+| ---------------------------------------- | --------------------------------------------- |
+| [Setup Guide](docs/setup.md)             | Local development environment setup           |
+| [Deployment Guide](docs/deployment.md)   | Production deployment & environment checklist |
+| [API Reference](docs/api-reference.md)   | All REST API endpoints with params & examples |
+| [Admin Panel Guide](docs/admin-panel.md) | Features, modules, and usage guide            |
+| [Database Schema](docs/database.md)      | Models, tables, relationships                 |
+| [Security](docs/security.md)             | Security measures & best practices            |
+| [EmailJS Integration](docs/emailjs.md)   | Email notification setup & configuration      |
+
+---
+
+## 👥 Team
+
+LeJeepney Admin is developed and maintained by the LeJeepney team.
+
+---
+
+## 📄 License
+
+This project is proprietary software. All rights reserved.

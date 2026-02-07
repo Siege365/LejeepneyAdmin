@@ -28,17 +28,6 @@
             <form method="POST" action="{{ route('admin.account.update-profile') }}">
                 @csrf
                 @method('PUT')
-
-                <div class="settings-avatar-section">
-                    <div class="settings-avatar">
-                        {{ substr($user->name, 0, 1) }}
-                    </div>
-                    <div>
-                        <h4>{{ $user->name }}</h4>
-                        <p class="text-muted">Administrator</p>
-                    </div>
-                </div>
-
                 <div class="form-group">
                     <label for="name">Full Name</label>
                     <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" class="form-input" required>
