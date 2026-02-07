@@ -21,7 +21,7 @@
             <h3>Total Landmarks</h3>
             <div class="stat-number">{{ $totalLandmarks ?? 0 }}</div>
             <div class="stat-change positive">
-            </div>
+X            </div>
         </div>
         <div class="stat-icon gold">
             <i class="fa-solid fa-map-marker-alt"></i>
