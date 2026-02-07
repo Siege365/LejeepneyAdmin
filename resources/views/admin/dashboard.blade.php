@@ -20,8 +20,7 @@
         <div class="stat-info">
             <h3>Total Landmarks</h3>
             <div class="stat-number">{{ $totalLandmarks ?? 0 }}</div>
-            <div class="stat-change positive">
-X            </div>
+           
         </div>
         <div class="stat-icon gold">
             <i class="fa-solid fa-map-marker-alt"></i>
@@ -32,8 +31,7 @@ X            </div>
         <div class="stat-info">
             <h3>Total Routes</h3>
             <div class="stat-number">{{ $totalRoutes ?? 0 }}</div>
-            <div class="stat-change positive">
-            </div>
+            
         </div>
         <div class="stat-icon blue">
             <i class="fa-solid fa-route"></i>
@@ -44,8 +42,7 @@ X            </div>
         <div class="stat-info">
             <h3>Active Users</h3>
             <div class="stat-number">{{ $activeUsers ?? 0 }}</div>
-            <div class="stat-change positive">
-            </div>
+            
         </div>
         <div class="stat-icon green">
             <i class="fa-solid fa-users"></i>
@@ -56,8 +53,7 @@ X            </div>
         <div class="stat-info">
             <h3>Pending Requests</h3>
             <div class="stat-number">{{ $pendingRequests ?? 0 }}</div>
-            <div class="stat-change negative">
-            </div>
+            
         </div>
         <div class="stat-icon orange">
             <i class="fa-solid fa-clock"></i>
