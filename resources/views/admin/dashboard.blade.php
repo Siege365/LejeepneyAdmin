@@ -4,7 +4,7 @@
 @section('page-title', 'Dashboard')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/pages/dashboard.css') }}?v={{ time() }}">
+@vite('resources/css/pages/dashboard.css')
 @endpush
 
 @section('content')
@@ -136,5 +136,5 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/pages/dashboard.js') }}?v={{ time() }}"></script>
+@vite('resources/js/pages/dashboard.js')
 @endpush

@@ -17,36 +17,38 @@ class LandmarkController extends Controller
     {
         $query = Landmark::query();
 
-        // Filter by category
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
+        // Combined filter (category + sort)
+        $filter = $request->get('filter', 'all');
+
+        // Category filters
+        $categoryFilters = ['city_center', 'mall', 'school', 'hospital', 'transport', 'other', 'featured'];
+        if (in_array($filter, $categoryFilters)) {
+            if ($filter === 'featured') {
+                $query->where('is_featured', true);
+            } else {
+                $query->where('category', $filter);
+            }
         }
 
         // Search
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = str_replace(['%', '_'], ['\%', '\_'], trim($request->search));
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
-        // Sorting
-        $sortBy = $request->get('sort', 'id_desc');
-        
-        switch ($sortBy) {
-            case 'id_asc':
-                $query->orderBy('id', 'asc');
-                break;
+        // Sorting — featured first, then alphabetical by default
+        switch ($filter) {
             case 'name_asc':
                 $query->orderBy('name', 'asc');
                 break;
             case 'name_desc':
                 $query->orderBy('name', 'desc');
                 break;
-            case 'id_desc':
             default:
-                $query->orderBy('id', 'desc');
+                $query->orderByDesc('is_featured')->orderBy('name', 'asc');
                 break;
         }
 

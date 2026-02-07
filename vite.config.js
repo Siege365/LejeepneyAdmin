@@ -5,7 +5,33 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.js'],
+            input: [
+                // Admin layout bundles (core + all shared components)
+                'resources/css/admin-bundle.css',
+                'resources/js/admin-bundle.js',
+
+                // Auth layout
+                'resources/css/auth.css',
+                'resources/js/auth.js',
+
+                // Page-specific CSS
+                'resources/css/pages/dashboard.css',
+                'resources/css/pages/customer-service.css',
+                'resources/css/pages/account-settings.css',
+                'resources/css/route-form.css',
+                'resources/css/landmark-form.css',
+
+                // Page-specific JS
+                'resources/js/pages/dashboard.js',
+                'resources/js/pages/customer-service-index.js',
+                'resources/js/pages/customer-service-show.js',
+                'resources/js/pages/account-settings.js',
+                'resources/js/pages/routes-batch.js',
+                'resources/js/pages/landmarks-index.js',
+                'resources/js/pages/landmarks-batch.js',
+                'resources/js/route-map.js',
+                'resources/js/landmark-form.js',
+            ],
             refresh: true,
         }),
         tailwindcss(),

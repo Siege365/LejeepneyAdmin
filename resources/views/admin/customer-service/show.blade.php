@@ -4,7 +4,7 @@
 @section('page-title', 'Ticket Details')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/pages/customer-service.css') }}?v={{ time() }}">
+@vite('resources/css/pages/customer-service.css')
 @endpush
 
 @section('content')
@@ -376,77 +376,7 @@
             <p>This will mark ticket #{{ $ticket->id }} as in progress. Continue?</p>
         </div>
         <div class="modal-footer">
-      
-
-// Action modals functions
-function showResolveModal() {
-    document.getElementById('resolveModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-function closeResolveModal() {
-    document.getElementById('resolveModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-function showResolveConfirmModal() {
-    closeResolveModal();
-    document.getElementById('resolveConfirmModal').style.display = 'flex';
-}
-function closeResolveConfirmModal() {
-    document.getElementById('resolveConfirmModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-
-function showInProgressModal() {
-    document.getElementById('inProgressModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-function closeInProgressModal() {
-    document.getElementById('inProgressModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-function showInProgressConfirmModal() {
-    closeInProgressModal();
-    document.getElementById('inProgressConfirmModal').style.display = 'flex';
-}
-function closeInProgressConfirmModal() {
-    document.getElementById('inProgressConfirmModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-
-function showFlagModal() {
-    document.getElementById('flagModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-function closeFlagModal() {
-    document.getElementById('flagModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-function showFlagConfirmModal() {
-    closeFlagModal();
-    document.getElementById('flagConfirmModal').style.display = 'flex';
-}
-function closeFlagConfirmModal() {
-    document.getElementById('flagConfirmModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-
-function showArchiveModal() {
-    document.getElementById('archiveModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-function closeArchiveModal() {
-    document.getElementById('archiveModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-function showArchiveConfirmModal() {
-    closeArchiveModal();
-    document.getElementById('archiveConfirmModal').style.display = 'flex';
-}
-function closeArchiveConfirmModal() {
-    document.getElementById('archiveConfirmModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-      <button type="button" class="btn btn-outline" onclick="closeInProgressConfirmModal()">Cancel</button>
+            <button type="button" class="btn btn-outline" onclick="closeInProgressConfirmModal()">Cancel</button>
             <form id="inProgressForm" action="{{ route('admin.customer-service.updateStatus', $ticket->id) }}" method="POST" style="display: inline;">
                 @csrf
                 <input type="hidden" name="status" value="in-progress">
@@ -529,50 +459,7 @@ function closeArchiveConfirmModal() {
 @endsection
 
 @push('scripts')
-<!-- EmailJS Integration for Client-Side Email Sending -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script>
-// EmailJS Configuration
-window.EMAILJS_PUBLIC_KEY = '{{ env("EMAILJS_PUBLIC_KEY", "") }}';
-window.EMAILJS_SERVICE_ID = '{{ env("EMAILJS_SERVICE_ID", "") }}';
-window.EMAILJS_TEMPLATE_ID = '{{ env("EMAILJS_TEMPLATE_ID", "") }}';
-window.EMAILJS_ENABLED = !!window.EMAILJS_PUBLIC_KEY;
-window.TICKET_EMAIL = '{{ $ticket->email }}';
-window.TICKET_NAME = '{{ $ticket->name }}';
-window.TICKET_SUBJECT = '{{ $ticket->subject }}';
-
-if (window.EMAILJS_PUBLIC_KEY) {
-    emailjs.init(window.EMAILJS_PUBLIC_KEY);
-}
-
-// Check if there's email data to send (from session)
-@if(session('emailData'))
-(function() {
-    const emailData = @json(session('emailData'));
-    
-    if (window.EMAILJS_PUBLIC_KEY && window.EMAILJS_SERVICE_ID && window.EMAILJS_TEMPLATE_ID) {
-        const templateParams = {
-            to_email: emailData.to_email,
-            to_name: emailData.to_name,
-            from_name: emailData.admin_name || 'LeJeepney Support',
-            subject: emailData.subject,
-            message: emailData.message,
-            ticket_id: emailData.ticket_id,
-            reply_to: 'support@lejeepney.com'
-        };
-        
-        emailjs.send(window.EMAILJS_SERVICE_ID, window.EMAILJS_TEMPLATE_ID, templateParams)
-            .then(function(response) {
-                console.log('Email sent successfully!', response.status, response.text);
-                Toast?.success('Email notification sent to customer!');
-            }, function(error) {
-                console.error('Failed to send email:', error);
-                Toast?.warning('Failed to send email notification. The reply was saved.');
-            });
-    }
-})();
-@endif
-
 // Modal controls
 document.getElementById('replyModal').addEventListener('click', function(e) {
     if (e.target === this) {
@@ -590,9 +477,90 @@ document.addEventListener('keydown', function(e) {
 @if($errors->any())
 document.getElementById('replyModal').style.display = 'flex';
 @endif
+
+// Action modals functions
+function showResolveModal() {
+    document.getElementById('resolveModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeResolveModal() {
+    document.getElementById('resolveModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showResolveConfirmModal() {
+    closeResolveModal();
+    document.getElementById('resolveConfirmModal').style.display = 'flex';
+}
+function closeResolveConfirmModal() {
+    document.getElementById('resolveConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function showInProgressModal() {
+    document.getElementById('inProgressModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeInProgressModal() {
+    document.getElementById('inProgressModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showInProgressConfirmModal() {
+    closeInProgressModal();
+    document.getElementById('inProgressConfirmModal').style.display = 'flex';
+}
+function closeInProgressConfirmModal() {
+    document.getElementById('inProgressConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function showFlagModal() {
+    document.getElementById('flagModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeFlagModal() {
+    document.getElementById('flagModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showFlagConfirmModal() {
+    closeFlagModal();
+    document.getElementById('flagConfirmModal').style.display = 'flex';
+}
+function closeFlagConfirmModal() {
+    document.getElementById('flagConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function showArchiveModal() {
+    document.getElementById('archiveModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeArchiveModal() {
+    document.getElementById('archiveModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showArchiveConfirmModal() {
+    closeArchiveModal();
+    document.getElementById('archiveConfirmModal').style.display = 'flex';
+}
+function closeArchiveConfirmModal() {
+    document.getElementById('archiveConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
 </script>
-<script src="{{ asset('assets/js/pages/customer-service-show.js') }}?v={{ time() }}"></script>
+@vite('resources/js/pages/customer-service-show.js')
+<!-- EmailJS SDK -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-    CustomerServiceShow.init({{ $ticket->id }});
+    // EmailJS Configuration (loaded from server-side .env)
+    window.EMAILJS_PUBLIC_KEY = '{{ config("services.emailjs.public_key", "") }}';
+    window.EMAILJS_SERVICE_ID = '{{ config("services.emailjs.service_id", "") }}';
+    window.EMAILJS_TEMPLATE_ID = '{{ config("services.emailjs.template_id", "") }}';
+    
+    // Initialize CustomerServiceShow with ticket data
+    CustomerServiceShow.init({{ $ticket->id }}, {
+        email: @json($ticket->email),
+        name: @json($ticket->name),
+        subject: @json($ticket->subject)
+    });
 </script>
 @endpush

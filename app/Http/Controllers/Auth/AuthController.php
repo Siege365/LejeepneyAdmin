@@ -71,8 +71,11 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'admin', // Always create admin users
         ]);
+        
+        // Explicitly set role (not mass-assignable for security)
+        $user->role = 'admin';
+        $user->save();
 
         return redirect('/dashboard')->with('success', 'Admin user "' . $user->name . '" created successfully!');
     }

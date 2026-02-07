@@ -1,0 +1,83 @@
+/* ========================================
+   FORMS - Shared Form Components
+   Reusable form inputs, labels, groups,
+   error messages, password toggles
+   ======================================== */
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+}
+
+/* Form Inputs */
+.form-input {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-family: inherit;
+    outline: none;
+    transition: var(--transition-fast);
+    background: white;
+}
+
+.form-input:focus {
+    border-color: var(--secondary-blue);
+    box-shadow: 0 0 0 3px rgba(12, 78, 148, 0.1);
+}
+
+/* Validation Messages */
+.form-error {
+    display: block;
+    color: var(--error);
+    font-size: 0.8125rem;
+    margin-top: 0.375rem;
+}
+
+.form-hint {
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+    margin-top: 0.375rem;
+}
+
+/* Form Actions */
+.form-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--light-gray);
+}
+
+/* Password Input Wrapper */
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-input-wrapper .form-input {
+    padding-right: 2.75rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.password-toggle:hover {
+    color: var(--dark-gray);
+}

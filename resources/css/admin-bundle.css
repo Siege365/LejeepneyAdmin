@@ -1,0 +1,19 @@
+/* ========================================
+   ADMIN BUNDLE - Master CSS Import
+   Imports admin base + all shared components
+   ======================================== */
+
+/* Core Admin Styles */
+@import './admin.css';
+
+/* Component Styles */
+@import './components/toast.css';
+@import './components/pagination.css';
+@import './components/modal.css';
+@import './components/stats-cards.css';
+@import './components/quick-actions.css';
+@import './components/filters.css';
+@import './components/table.css';
+@import './components/forms.css';
+@import './components/conversation.css';
+@import './components/notifications.css';

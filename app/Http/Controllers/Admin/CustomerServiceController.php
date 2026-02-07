@@ -22,7 +22,7 @@ class CustomerServiceController extends Controller
 
         // Search by name, email, subject, message, or ticket ID
         if ($request->filled('search')) {
-            $search = trim($request->search);
+            $search = str_replace(['%', '_'], ['\%', '\_'], trim($request->search));
             $query->where(function ($q) use ($search) {
                 $q->where('id', 'like', "%{$search}%")
                   ->orWhere('name', 'like', "%{$search}%")
@@ -32,23 +32,29 @@ class CustomerServiceController extends Controller
             });
         }
 
-        // Filter by status
-        if ($request->filled('status') && $request->status !== 'all') {
-            $query->filterByStatus($request->status);
+        // Combined filter
+        $filter = $request->get('filter', 'all');
+
+        // Type filters
+        $typeFilters = ['general', 'technical', 'billing', 'feedback', 'other'];
+        if (in_array($filter, $typeFilters)) {
+            $query->filterByType($filter);
         }
 
-        // Filter by type
-        if ($request->filled('type') && $request->type !== 'all') {
-            $query->filterByType($request->type);
+        // Priority filters
+        $priorityFilters = ['urgent', 'high', 'medium', 'low'];
+        if (in_array($filter, $priorityFilters)) {
+            $query->filterByPriority($filter);
         }
 
-        // Filter by priority
-        if ($request->filled('priority') && $request->priority !== 'all') {
-            $query->filterByPriority($request->priority);
+        // Status filters
+        $statusFilters = ['pending', 'in-progress', 'resolved'];
+        if (in_array($filter, $statusFilters)) {
+            $query->filterByStatus($filter);
         }
 
-        // Filter flagged only
-        if ($request->boolean('flagged')) {
+        // Flagged filter
+        if ($filter === 'flagged') {
             $query->flagged();
         }
 
@@ -64,22 +70,13 @@ class CustomerServiceController extends Controller
             $query->active();
         }
 
-        // Sorting
-        $sortBy = $request->get('sort', 'newest');
-        
-        switch ($sortBy) {
-            case 'oldest':
-                $query->orderBy('created_at', 'asc');
-                break;
-            case 'id_asc':
-                $query->orderBy('id', 'asc');
-                break;
+        // Sorting — default oldest to newest by ticket number
+        switch ($filter) {
             case 'newest':
                 $query->orderByDesc('created_at');
                 break;
-            case 'id_desc':
             default:
-                $query->orderBy('id', 'desc');
+                $query->orderBy('id', 'asc');
                 break;
         }
 
@@ -120,7 +117,6 @@ class CustomerServiceController extends Controller
             'has_message' => $request->has('message'),
             'has_status' => $request->has('status'),
             'has_send_email' => $request->has('send_email'),
-            'all_data' => $request->all()
         ]);
 
         try {
@@ -148,7 +144,7 @@ class CustomerServiceController extends Controller
             $reply = TicketReply::create([
                 'support_ticket_id' => $ticket->id,
                 'admin_id' => $admin->id,
-                'message' => strip_tags($request->message, '<p><br><strong><em><ul><ol><li>'),
+                'message' => strip_tags($request->message),
                 'admin_name' => $admin->name,
                 'email_sent' => $request->has('send_email') ? true : false
             ]);
@@ -183,7 +179,7 @@ class CustomerServiceController extends Controller
                 'model_name' => $ticket->subject,
                 'user_id' => $admin->id,
                 'user_name' => $admin->name,
-                'description' => "Replied to ticket #{$ticket->id}: {$ticket->subject}",
+                'description' => "Replied to ticket '#{$ticket->id}: {$ticket->subject}'",
                 'ip_address' => $request->ip()
             ]);
 
@@ -205,7 +201,7 @@ class CustomerServiceController extends Controller
                     'model_name' => $ticket->subject,
                     'user_id' => $admin->id,
                     'user_name' => $admin->name,
-                    'description' => "Changed ticket #{$ticket->id} status from {$oldStatus} to {$request->status}",
+                    'description' => "Changed status of ticket '#{$ticket->id}: {$ticket->subject}' from {$oldStatus} to {$request->status}",
                     'ip_address' => $request->ip()
                 ]);
             }
@@ -213,6 +209,14 @@ class CustomerServiceController extends Controller
             DB::commit();
             
             \Log::info('Reply completed successfully');
+
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Reply sent successfully!'
+                ]);
+            }
 
             return redirect()
                 ->route('admin.customer-service.show', $ticket->id)
@@ -224,9 +228,18 @@ class CustomerServiceController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
+            
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to send reply. Please try again.'
+                ], 500);
+            }
+            
             return back()
                 ->withInput()
-                ->with('error', 'Failed to send reply: ' . $e->getMessage());
+                ->with('error', 'Failed to send reply. Please try again.');
         }
     }
 
@@ -262,8 +275,12 @@ class CustomerServiceController extends Controller
 
         ActivityLog::create([
             'action' => 'ticket_status_change',
-            'description' => "Changed ticket #{$ticket->id} status from {$oldStatus} to {$request->status}",
-            'performed_by' => $admin->name,
+            'model_type' => 'SupportTicket',
+            'model_id' => $ticket->id,
+            'model_name' => $ticket->subject,
+            'user_id' => $admin->id,
+            'user_name' => $admin->name,
+            'description' => "Changed status of ticket '#{$ticket->id}: {$ticket->subject}' from {$oldStatus} to {$request->status}",
             'ip_address' => $request->ip()
         ]);
 
@@ -285,8 +302,12 @@ class CustomerServiceController extends Controller
         
         ActivityLog::create([
             'action' => 'ticket_flag_toggle',
-            'description' => ucfirst($action) . " ticket #{$ticket->id}: {$ticket->subject}",
-            'performed_by' => $admin->name,
+            'model_type' => 'SupportTicket',
+            'model_id' => $ticket->id,
+            'model_name' => $ticket->subject,
+            'user_id' => $admin->id,
+            'user_name' => $admin->name,
+            'description' => ucfirst($action) . " ticket '#{$ticket->id}: {$ticket->subject}'",
             'ip_address' => $request->ip()
         ]);
 
@@ -312,8 +333,12 @@ class CustomerServiceController extends Controller
 
         ActivityLog::create([
             'action' => 'ticket_archived',
-            'description' => "Archived ticket #{$ticket->id}: {$ticket->subject}",
-            'performed_by' => $admin->name,
+            'model_type' => 'SupportTicket',
+            'model_id' => $ticket->id,
+            'model_name' => $ticket->subject,
+            'user_id' => $admin->id,
+            'user_name' => $admin->name,
+            'description' => "Archived ticket '#{$ticket->id}: {$ticket->subject}'",
             'ip_address' => $request->ip()
         ]);
 
@@ -333,8 +358,12 @@ class CustomerServiceController extends Controller
 
         ActivityLog::create([
             'action' => 'ticket_restored',
-            'description' => "Restored ticket #{$ticket->id}: {$ticket->subject}",
-            'performed_by' => $admin->name,
+            'model_type' => 'SupportTicket',
+            'model_id' => $ticket->id,
+            'model_name' => $ticket->subject,
+            'user_id' => $admin->id,
+            'user_name' => $admin->name,
+            'description' => "Restored ticket '#{$ticket->id}: {$ticket->subject}'",
             'ip_address' => $request->ip()
         ]);
 
@@ -399,8 +428,12 @@ class CustomerServiceController extends Controller
 
             ActivityLog::create([
                 'action' => 'ticket_bulk_' . $action,
-                'description' => "Bulk {$action}: {$count} tickets",
-                'performed_by' => $admin->name,
+                'model_type' => 'SupportTicket',
+                'model_id' => 0,
+                'model_name' => "Bulk {$action}",
+                'user_id' => $admin->id,
+                'user_name' => $admin->name,
+                'description' => "Applied bulk action '{$action}' to {$count} ticket(s)",
                 'ip_address' => $request->ip()
             ]);
 

@@ -193,3 +193,91 @@
         transform: scale(1) translateY(0);
     }
 }
+
+/* Modal Size Variants */
+.modal-sm {
+    max-width: 440px;
+}
+
+/* Modal Close Button Variant */
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #94A3B8;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+    background: #F1F5F9;
+    color: #1E293B;
+}
+
+/* ========================================
+   MODAL UTILITY CLASSES
+   Reusable icon/title/body helpers
+   ======================================== */
+
+/* Icon Colors */
+.modal-icon-blue {
+    color: var(--secondary-blue) !important;
+}
+
+.modal-icon-danger {
+    color: var(--error) !important;
+}
+
+.modal-icon-warning {
+    color: var(--warning) !important;
+}
+
+/* Title Colors */
+.modal-title-warning {
+    color: var(--warning);
+}
+
+.modal-title-danger {
+    color: var(--error);
+}
+
+/* Body Text Helpers */
+.modal-body-bold {
+    font-weight: 600;
+}
+
+.modal-body-center {
+    text-align: center;
+}
+
+.modal-body-center-bold {
+    text-align: center;
+    font-weight: 600;
+}
+
+.modal-body-hint {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.modal-body-danger {
+    color: var(--error);
+    margin-top: 0.5rem;
+}
+
+.modal-body-danger-lg {
+    color: var(--error);
+    font-size: 1.1rem;
+}
+
+.modal-body-form {
+    margin-top: 1rem;
+}

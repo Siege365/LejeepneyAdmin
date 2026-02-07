@@ -93,28 +93,37 @@
 
 /* Empty State */
 .empty-state {
-    text-align: center;
-    padding: 3rem !important;
+    text-align: center !important;
+    padding: 3rem 2rem !important;
 }
 
-.empty-icon {
-    font-size: 3rem;
+.empty-state i,
+.empty-state .empty-icon {
+    display: block !important;
+    font-size: 3.5rem;
     color: #CBD5E1;
-    margin-bottom: 1rem;
-    display: block;
+    margin: 0 auto 1rem auto;
+    -webkit-text-fill-color: #CBD5E1 !important;
+    background: none !important;
 }
 
-.empty-title {
+.empty-state .empty-title {
     color: #64748B;
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 500;
+    margin: 0 auto;
+    font-size: 1.05rem;
+    font-weight: 600;
 }
 
-.empty-subtitle {
+.empty-state .empty-subtitle {
     color: #94A3B8;
-    margin-top: 0.5rem;
+    margin: 0.5rem auto 0 auto;
     font-size: 0.875rem;
+    max-width: 400px;
+}
+
+.empty-state .btn {
+    margin: 1.25rem auto 0 auto;
+    display: inline-block;
 }
 
 .empty-subtitle a {

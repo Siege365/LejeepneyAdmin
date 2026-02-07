@@ -3,9 +3,6 @@
 @section('title', 'Routes')
 @section('page-title', 'Routes')
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/components/stats-cards.css') }}?v={{ time() }}">
-@endpush
 
 @section('content')
 <!-- Page Header -->
@@ -74,16 +71,12 @@
                 <i class="fa-solid fa-search"></i>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search routes...">
             </div>
-            <select class="filter-select" name="status" onchange="this.form.submit()">
-                <option value="">All Status</option>
-                <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
-                <option value="unavailable" {{ request('status') == 'unavailable' ? 'selected' : '' }}>Unavailable</option>
-            </select>
-            <select class="filter-select" name="sort" onchange="this.form.submit()">
-                <option value="id_desc" {{ request('sort', 'id_desc') === 'id_desc' ? 'selected' : '' }}>ID: High to Low</option>
-                <option value="id_asc" {{ request('sort') === 'id_asc' ? 'selected' : '' }}>ID: Low to High</option>
-                <option value="name_asc" {{ request('sort') === 'name_asc' ? 'selected' : '' }}>Name: A to Z</option>
-                <option value="name_desc" {{ request('sort') === 'name_desc' ? 'selected' : '' }}>Name: Z to A</option>
+            <select class="filter-select" name="filter" onchange="this.form.submit()">
+                <option value="all" {{ request('filter', 'all') === 'all' ? 'selected' : '' }}>All Status</option>
+                <option value="available" {{ request('filter') === 'available' ? 'selected' : '' }}>Available</option>
+                <option value="unavailable" {{ request('filter') === 'unavailable' ? 'selected' : '' }}>Unavailable</option>
+                <option value="name_asc" {{ request('filter') === 'name_asc' ? 'selected' : '' }}>A to Z</option>
+                <option value="name_desc" {{ request('filter') === 'name_desc' ? 'selected' : '' }}>Z to A</option>
             </select>
         </form>
     </div>
@@ -142,22 +135,14 @@
                                 <a href="{{ route('admin.routes.edit', $route) }}" class="kebab-item">
                                     <i class="fa-solid fa-pen"></i> Edit
                                 </a>
-                                <form action="{{ route('admin.routes.toggle-status', $route) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="kebab-item kebab-btn">
-                                        <i class="fa-solid fa-toggle-{{ $route->status === 'available' ? 'off' : 'on' }}"></i>
-                                        {{ $route->status === 'available' ? 'Disable' : 'Enable' }}
-                                    </button>
-                                </form>
+                                <button type="button" class="kebab-item kebab-btn" onclick="showToggleStatusModal({{ $route->id }}, '{{ addslashes($route->name) }}', '{{ $route->status }}')">
+                                    <i class="fa-solid fa-toggle-{{ $route->status === 'available' ? 'off' : 'on' }}"></i>
+                                    {{ $route->status === 'available' ? 'Disable' : 'Enable' }}
+                                </button>
                                 <div class="kebab-divider"></div>
-                                <form action="{{ route('admin.routes.destroy', $route) }}" method="POST" 
-                                      onsubmit="return confirm('Are you sure you want to delete this route?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="kebab-item danger">
-                                        <i class="fa-solid fa-trash"></i> Delete
-                                    </button>
-                                </form>
+                                <button type="button" class="kebab-item danger" onclick="showDeleteRouteModal({{ $route->id }}, '{{ addslashes($route->name) }}')">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
                             </div>
                         </div>
                     </td>
@@ -168,10 +153,6 @@
                         <i class="fa-solid fa-route empty-icon"></i>
                         <p class="empty-title">No Routes Found</p>
                         <p class="empty-subtitle">Get started by adding your first jeepney route.</p>
-                        <a href="{{ route('admin.routes.create') }}" class="btn btn-primary">
-                            <i class="fa-solid fa-plus"></i>
-                            Add New Route
-                        </a>
                     </td>
                 </tr>
                 @endforelse
@@ -236,9 +217,134 @@
     </div>
 </div>
 
+<!-- Single Delete Modal -->
+<div class="modal-backdrop" id="deleteRouteModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-exclamation-triangle" style="color: #EF4444;"></i> Delete Route</h3>
+            <button class="modal-close-btn" onclick="closeDeleteRouteModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="deleteRouteName"></strong>?</p>
+            <p style="color: #EF4444; font-weight: 600; margin-top: 0.5rem;">This action cannot be undone!</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeDeleteRouteModal()">Cancel</button>
+            <button type="button" class="btn btn-danger" onclick="showDeleteRouteConfirm()"><i class="fa-solid fa-trash"></i> Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Single Delete Confirm Modal -->
+<div class="modal-backdrop" id="deleteRouteConfirmModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title" style="color: #EF4444;"><i class="fa-solid fa-triangle-exclamation"></i> Final Warning</h3>
+            <button class="modal-close-btn" onclick="closeDeleteRouteConfirm()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p style="text-align: center; font-weight: 600;">This route will be permanently deleted.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeDeleteRouteConfirm()">Cancel</button>
+            <form id="deleteRouteForm" method="POST" style="display: inline;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i> Permanently Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Status Modal -->
+<div class="modal-backdrop" id="toggleStatusModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title" id="toggleStatusTitle"><i class="fa-solid fa-toggle-on" style="color: var(--secondary-blue);"></i> Update Status</h3>
+            <button class="modal-close-btn" onclick="closeToggleStatusModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p id="toggleStatusMessage"></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeToggleStatusModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="showToggleStatusConfirm()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Status Confirm Modal -->
+<div class="modal-backdrop" id="toggleStatusConfirmModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-exclamation-triangle" style="color: #F59E0B;"></i> Confirm Status Change</h3>
+            <button class="modal-close-btn" onclick="closeToggleStatusConfirm()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p id="toggleStatusConfirmMessage" style="text-align: center; font-weight: 600;"></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeToggleStatusConfirm()">Cancel</button>
+            <form id="toggleStatusForm" method="POST" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-primary">Confirm</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/routes-index.js') }}"></script>
-<script src="{{ asset('assets/js/pages/routes-batch.js') }}?v={{ time() }}"></script>
+@vite('resources/js/pages/routes-batch.js')
+<script>
+// Single route delete - double confirmation
+let pendingDeleteRouteId = null;
+
+function showDeleteRouteModal(id, name) {
+    pendingDeleteRouteId = id;
+    document.getElementById('deleteRouteName').textContent = name;
+    document.getElementById('deleteRouteModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeDeleteRouteModal() {
+    document.getElementById('deleteRouteModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showDeleteRouteConfirm() {
+    closeDeleteRouteModal();
+    document.getElementById('deleteRouteForm').action = '/routes/' + pendingDeleteRouteId;
+    document.getElementById('deleteRouteConfirmModal').style.display = 'flex';
+}
+function closeDeleteRouteConfirm() {
+    document.getElementById('deleteRouteConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Toggle status - double confirmation
+let pendingToggleId = null;
+
+function showToggleStatusModal(id, name, currentStatus) {
+    pendingToggleId = id;
+    const newStatus = currentStatus === 'available' ? 'unavailable' : 'available';
+    const action = currentStatus === 'available' ? 'disable' : 'enable';
+    document.getElementById('toggleStatusMessage').textContent = 'Are you sure you want to ' + action + ' "' + name + '"?';
+    document.getElementById('toggleStatusConfirmMessage').textContent = 'This will ' + action + ' the route "' + name + '".';
+    document.getElementById('toggleStatusModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeToggleStatusModal() {
+    document.getElementById('toggleStatusModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showToggleStatusConfirm() {
+    closeToggleStatusModal();
+    document.getElementById('toggleStatusForm').action = '/routes/' + pendingToggleId + '/toggle-status';
+    document.getElementById('toggleStatusConfirmModal').style.display = 'flex';
+}
+function closeToggleStatusConfirm() {
+    document.getElementById('toggleStatusConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+</script>
 @endpush

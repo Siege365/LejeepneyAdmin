@@ -162,7 +162,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="{{ asset('assets/css/route-form.css') }}">
+@vite('resources/css/route-form.css')
 @endpush
 
 @push('scripts')
@@ -177,5 +177,5 @@
         davaoCenter: [7.0731, 125.6128]
     };
 </script>
-<script src="{{ asset('assets/js/route-map.js') }}"></script>
+@vite('resources/js/route-map.js')
 @endpush

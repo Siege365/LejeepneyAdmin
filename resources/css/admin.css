@@ -456,6 +456,7 @@ body {
 }
 
 /* User Menu */
+a.user-avatar-sm,
 .user-avatar-sm {
     width: 42px;
     height: 42px;
@@ -467,6 +468,7 @@ body {
     cursor: pointer;
     transition: var(--transition);
     border: 2px solid transparent;
+    text-decoration: none;
 }
 
 .user-avatar-sm:hover {
@@ -1114,35 +1116,8 @@ select.form-control {
 }
 
 /* ========================================
-   EMPTY STATE
+   EMPTY STATE — see table.css for styles
    ======================================== */
-.empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-}
-
-.empty-state i {
-    font-size: 4rem;
-    background: linear-gradient(135deg, var(--light-gray), var(--lighter-gray));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 1.5rem;
-}
-
-.empty-state h3 {
-    font-size: 1.25rem;
-    color: var(--dark-gray);
-    margin-bottom: 0.5rem;
-}
-
-.empty-state p {
-    color: var(--text-muted);
-    margin-bottom: 1.5rem;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-}
 
 /* ========================================
    LOADING STATES

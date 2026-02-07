@@ -4,7 +4,7 @@
 @section('page-title', 'Customer Service')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/pages/customer-service.css') }}?v={{ time() }}">
+@vite('resources/css/pages/customer-service.css')
 @endpush
 
 @section('content')
@@ -88,34 +88,34 @@
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search tickets...">
             </div>
             
-            <!-- Type Filter -->
-            <select name="type" onchange="this.form.submit()" class="filter-select">
-                <option value="all">All Types</option>
-                <option value="general" {{ request('type') === 'general' ? 'selected' : '' }}>General</option>
-                <option value="technical" {{ request('type') === 'technical' ? 'selected' : '' }}>Technical</option>
-                <option value="billing" {{ request('type') === 'billing' ? 'selected' : '' }}>Billing</option>
-                <option value="feedback" {{ request('type') === 'feedback' ? 'selected' : '' }}>Feedback</option>
-                <option value="other" {{ request('type') === 'other' ? 'selected' : '' }}>Other</option>
+            <!-- Combined Filter -->
+            <select name="filter" onchange="this.form.submit()" class="filter-select">
+                <option value="all" {{ request('filter', 'all') === 'all' ? 'selected' : '' }}>All Tickets</option>
+                <optgroup label="Status">
+                    <option value="pending" {{ request('filter') === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="in-progress" {{ request('filter') === 'in-progress' ? 'selected' : '' }}>In Progress</option>
+                    <option value="resolved" {{ request('filter') === 'resolved' ? 'selected' : '' }}>Resolved</option>
+                </optgroup>
+                <optgroup label="Type">
+                    <option value="general" {{ request('filter') === 'general' ? 'selected' : '' }}>General</option>
+                    <option value="technical" {{ request('filter') === 'technical' ? 'selected' : '' }}>Technical</option>
+                    <option value="billing" {{ request('filter') === 'billing' ? 'selected' : '' }}>Billing</option>
+                    <option value="feedback" {{ request('filter') === 'feedback' ? 'selected' : '' }}>Feedback</option>
+                    <option value="other" {{ request('filter') === 'other' ? 'selected' : '' }}>Other</option>
+                </optgroup>
+                <optgroup label="Priority">
+                    <option value="urgent" {{ request('filter') === 'urgent' ? 'selected' : '' }}>Urgent</option>
+                    <option value="high" {{ request('filter') === 'high' ? 'selected' : '' }}>High</option>
+                    <option value="medium" {{ request('filter') === 'medium' ? 'selected' : '' }}>Medium</option>
+                    <option value="low" {{ request('filter') === 'low' ? 'selected' : '' }}>Low</option>
+                </optgroup>
+                <optgroup label="Other">
+                    <option value="flagged" {{ request('filter') === 'flagged' ? 'selected' : '' }}>Flagged</option>
+                    <option value="newest" {{ request('filter') === 'newest' ? 'selected' : '' }}>Newest First</option>
+                </optgroup>
             </select>
             
-            <!-- Priority Filter -->
-            <select name="priority" onchange="this.form.submit()" class="filter-select">
-                <option value="all">All Priorities</option>
-                <option value="urgent" {{ request('priority') === 'urgent' ? 'selected' : '' }}>Urgent</option>
-                <option value="high" {{ request('priority') === 'high' ? 'selected' : '' }}>High</option>
-                <option value="medium" {{ request('priority') === 'medium' ? 'selected' : '' }}>Medium</option>
-                <option value="low" {{ request('priority') === 'low' ? 'selected' : '' }}>Low</option>
-            </select>
-            
-            <!-- Sort Filter -->
-            <select name="sort" onchange="this.form.submit()" class="filter-select">
-                <option value="id_desc" {{ request('sort', 'id_desc') === 'id_desc' ? 'selected' : '' }}>ID: High to Low</option>
-                <option value="id_asc" {{ request('sort') === 'id_asc' ? 'selected' : '' }}>ID: Low to High</option>
-                <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>Newest First</option>
-                <option value="oldest" {{ request('sort') === 'oldest' ? 'selected' : '' }}>Oldest First</option>
-            </select>
-            
-            @if(request()->hasAny(['search', 'status', 'type', 'priority', 'flagged', 'archived', 'sort']))
+            @if(request()->hasAny(['search', 'filter', 'archived']))
                 <a href="{{ route('admin.customer-service.index') }}" class="btn btn-outline btn-sm">
                     <i class="fa-solid fa-times"></i> Clear
                 </a>
@@ -204,27 +204,18 @@
                                     <i class="fa-solid fa-reply"></i> Reply
                                 </a>
                                 <div class="kebab-divider"></div>
-                                <form action="{{ route('admin.customer-service.toggleFlag', $ticket->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="kebab-item kebab-btn {{ $ticket->is_flagged ? 'flag-active' : '' }}">
-                                        <i class="fa-solid fa-flag"></i>
-                                        {{ $ticket->is_flagged ? 'Remove Flag' : 'Flag Important' }}
-                                    </button>
-                                </form>
+                                <button type="button" class="kebab-item kebab-btn {{ $ticket->is_flagged ? 'flag-active' : '' }}" onclick="showTicketFlagModal({{ $ticket->id }}, '{{ addslashes($ticket->subject) }}', {{ $ticket->is_flagged ? 'true' : 'false' }})">
+                                    <i class="fa-solid fa-flag"></i>
+                                    {{ $ticket->is_flagged ? 'Remove Flag' : 'Flag Important' }}
+                                </button>
                                 @if(!$ticket->is_archived)
-                                <form action="{{ route('admin.customer-service.archive', $ticket->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to archive this ticket?')">
-                                    @csrf
-                                    <button type="submit" class="kebab-item kebab-btn kebab-danger">
-                                        <i class="fa-solid fa-archive"></i> Archive
-                                    </button>
-                                </form>
+                                <button type="button" class="kebab-item kebab-btn kebab-danger" onclick="showTicketArchiveModal({{ $ticket->id }}, '{{ addslashes($ticket->subject) }}')">
+                                    <i class="fa-solid fa-archive"></i> Archive
+                                </button>
                                 @else
-                                <form action="{{ route('admin.customer-service.restore', $ticket->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="kebab-item kebab-btn kebab-success">
-                                        <i class="fa-solid fa-rotate-left"></i> Restore
-                                    </button>
-                                </form>
+                                <button type="button" class="kebab-item kebab-btn kebab-success" onclick="showTicketRestoreModal({{ $ticket->id }}, '{{ addslashes($ticket->subject) }}')">
+                                    <i class="fa-solid fa-rotate-left"></i> Restore
+                                </button>
                                 @endif
                             </div>
                         </div>
@@ -236,7 +227,7 @@
                         <i class="fa-solid fa-headset empty-icon"></i>
                         <p class="empty-title">No Support Tickets</p>
                         <p class="empty-subtitle">
-                            @if(request()->hasAny(['search', 'status', 'type', 'priority', 'flagged', 'archived']))
+                            @if(request()->hasAny(['search', 'filter', 'archived']))
                                 No tickets match your filters. <a href="{{ route('admin.customer-service.index') }}">Clear filters</a>
                             @else
                                 All caught up! There are no customer inquiries at the moment.
@@ -276,12 +267,194 @@
     </div>
 </div>
 
+<!-- Flag Modal -->
+<div class="modal-backdrop" id="ticketFlagModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-flag" style="color: #EF4444;"></i> <span id="flagModalTitle">Flag Ticket</span></h3>
+            <button class="modal-close-btn" onclick="closeTicketFlagModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p id="flagModalMessage"></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeTicketFlagModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="showTicketFlagConfirm()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="ticketFlagConfirmModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-exclamation-triangle" style="color: #F59E0B;"></i> Confirm Action</h3>
+        </div>
+        <div class="modal-body">
+            <p id="flagConfirmMessage" style="text-align: center; font-weight: 600;"></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeTicketFlagConfirm()">Cancel</button>
+            <form id="ticketFlagForm" method="POST" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-primary">Confirm</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Archive Modal -->
+<div class="modal-backdrop" id="ticketArchiveModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-archive" style="color: #EF4444;"></i> Archive Ticket</h3>
+            <button class="modal-close-btn" onclick="closeTicketArchiveModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to archive <strong id="archiveTicketSubject"></strong>?</p>
+            <p style="font-size: 0.875rem; color: #64748B; margin-top: 0.5rem;">Archived tickets can be restored later.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeTicketArchiveModal()">Cancel</button>
+            <button type="button" class="btn btn-danger" onclick="showTicketArchiveConfirm()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="ticketArchiveConfirmModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-exclamation-triangle" style="color: #EF4444;"></i> Confirm Archive</h3>
+        </div>
+        <div class="modal-body">
+            <p style="text-align: center; font-weight: 600;">This ticket will be archived. You can restore it later.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeTicketArchiveConfirm()">Cancel</button>
+            <form id="ticketArchiveForm" method="POST" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-danger">Confirm Archive</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Restore Modal -->
+<div class="modal-backdrop" id="ticketRestoreModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-rotate-left" style="color: #10B981;"></i> Restore Ticket</h3>
+            <button class="modal-close-btn" onclick="closeTicketRestoreModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to restore <strong id="restoreTicketSubject"></strong>?</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeTicketRestoreModal()">Cancel</button>
+            <button type="button" class="btn btn-success" onclick="showTicketRestoreConfirm()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" id="ticketRestoreConfirmModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-exclamation-triangle" style="color: #F59E0B;"></i> Confirm Restore</h3>
+        </div>
+        <div class="modal-body">
+            <p style="text-align: center; font-weight: 600;">This ticket will be restored to active tickets.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeTicketRestoreConfirm()">Cancel</button>
+            <form id="ticketRestoreForm" method="POST" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn btn-success">Confirm Restore</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/pages/customer-service-index.js') }}?v={{ time() }}"></script>
+@vite('resources/js/pages/customer-service-index.js')
 <script>
-// Page-specific initialization
+// Double confirmation modal functions for CS index
+let pendingFlagId = null;
+let pendingArchiveId = null;
+let pendingRestoreId = null;
+
+// Flag modals
+function showTicketFlagModal(id, subject, isFlagged) {
+    pendingFlagId = id;
+    const action = isFlagged ? 'Remove Flag' : 'Flag as Important';
+    const msg = isFlagged 
+        ? 'Are you sure you want to remove the flag from "' + subject + '"?' 
+        : 'Are you sure you want to flag "' + subject + '" as important?';
+    document.getElementById('flagModalTitle').textContent = action;
+    document.getElementById('flagModalMessage').textContent = msg;
+    document.getElementById('flagConfirmMessage').textContent = isFlagged 
+        ? 'The flag will be removed from this ticket.' 
+        : 'This ticket will be flagged as important.';
+    document.getElementById('ticketFlagModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeTicketFlagModal() {
+    document.getElementById('ticketFlagModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showTicketFlagConfirm() {
+    closeTicketFlagModal();
+    document.getElementById('ticketFlagForm').action = '/customer-service/' + pendingFlagId + '/flag';
+    document.getElementById('ticketFlagConfirmModal').style.display = 'flex';
+}
+function closeTicketFlagConfirm() {
+    document.getElementById('ticketFlagConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Archive modals
+function showTicketArchiveModal(id, subject) {
+    pendingArchiveId = id;
+    document.getElementById('archiveTicketSubject').textContent = subject;
+    document.getElementById('ticketArchiveModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeTicketArchiveModal() {
+    document.getElementById('ticketArchiveModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showTicketArchiveConfirm() {
+    closeTicketArchiveModal();
+    document.getElementById('ticketArchiveForm').action = '/customer-service/' + pendingArchiveId + '/archive';
+    document.getElementById('ticketArchiveConfirmModal').style.display = 'flex';
+}
+function closeTicketArchiveConfirm() {
+    document.getElementById('ticketArchiveConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Restore modals
+function showTicketRestoreModal(id, subject) {
+    pendingRestoreId = id;
+    document.getElementById('restoreTicketSubject').textContent = subject;
+    document.getElementById('ticketRestoreModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeTicketRestoreModal() {
+    document.getElementById('ticketRestoreModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showTicketRestoreConfirm() {
+    closeTicketRestoreModal();
+    document.getElementById('ticketRestoreForm').action = '/customer-service/' + pendingRestoreId + '/restore';
+    document.getElementById('ticketRestoreConfirmModal').style.display = 'flex';
+}
+function closeTicketRestoreConfirm() {
+    document.getElementById('ticketRestoreConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Existing bulk selection code
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize bulk selection
     const selectAll = document.getElementById('selectAll');

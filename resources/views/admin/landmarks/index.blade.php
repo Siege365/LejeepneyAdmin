@@ -3,9 +3,6 @@
 @section('title', 'Landmarks')
 @section('page-title', 'Landmarks')
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/components/stats-cards.css') }}?v={{ time() }}">
-@endpush
 
 @section('content')
 <!-- Page Header -->
@@ -84,20 +81,17 @@
                 <i class="fa-solid fa-search"></i>
                 <input id="searchInput" type="text" name="search" value="{{ request('search') }}" placeholder="Search landmarks...">
             </div>
-            <select id="categoryFilter" class="filter-select" name="category" onchange="this.form.submit()">
-                <option value="">All Categories</option>
-                <option value="city_center" {{ request('category') == 'city_center' ? 'selected' : '' }}>City Center</option>
-                <option value="mall" {{ request('category') == 'mall' ? 'selected' : '' }}>Mall</option>
-                <option value="school" {{ request('category') == 'school' ? 'selected' : '' }}>School</option>
-                <option value="hospital" {{ request('category') == 'hospital' ? 'selected' : '' }}>Hospital</option>
-                <option value="transport" {{ request('category') == 'transport' ? 'selected' : '' }}>Transport</option>
-                <option value="other" {{ request('category') == 'other' ? 'selected' : '' }}>Other</option>
-            </select>
-            <select class="filter-select" name="sort" onchange="this.form.submit()">
-                <option value="id_desc" {{ request('sort', 'id_desc') === 'id_desc' ? 'selected' : '' }}>ID: High to Low</option>
-                <option value="id_asc" {{ request('sort') === 'id_asc' ? 'selected' : '' }}>ID: Low to High</option>
-                <option value="name_asc" {{ request('sort') === 'name_asc' ? 'selected' : '' }}>Name: A to Z</option>
-                <option value="name_desc" {{ request('sort') === 'name_desc' ? 'selected' : '' }}>Name: Z to A</option>
+            <select id="filterSelect" class="filter-select" name="filter" onchange="this.form.submit()">
+                <option value="all" {{ request('filter', 'all') === 'all' ? 'selected' : '' }}>All Categories</option>
+                <option value="featured" {{ request('filter') === 'featured' ? 'selected' : '' }}>Featured</option>
+                <option value="mall" {{ request('filter') === 'mall' ? 'selected' : '' }}>Mall</option>
+                <option value="city_center" {{ request('filter') === 'city_center' ? 'selected' : '' }}>City Center</option>
+                <option value="school" {{ request('filter') === 'school' ? 'selected' : '' }}>School</option>
+                <option value="hospital" {{ request('filter') === 'hospital' ? 'selected' : '' }}>Hospital</option>
+                <option value="transport" {{ request('filter') === 'transport' ? 'selected' : '' }}>Transport</option>
+                <option value="other" {{ request('filter') === 'other' ? 'selected' : '' }}>Other</option>
+                <option value="name_asc" {{ request('filter') === 'name_asc' ? 'selected' : '' }}>A to Z</option>
+                <option value="name_desc" {{ request('filter') === 'name_desc' ? 'selected' : '' }}>Z to A</option>
             </select>
         </form>
     </div>
@@ -179,14 +173,9 @@
                                         <i class="fa-solid fa-pen"></i> Edit
                                     </a>
                                     <div class="kebab-divider"></div>
-                                    <form action="{{ route('admin.landmarks.destroy', $landmark) }}" method="POST" 
-                                          onsubmit="return confirm('Are you sure you want to delete {{ addslashes($landmark->name) }}?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="kebab-item danger">
-                                            <i class="fa-solid fa-trash"></i> Delete
-                                        </button>
-                                    </form>
+                                    <button type="button" class="kebab-item danger" onclick="showDeleteLandmarkModal({{ $landmark->id }}, '{{ addslashes($landmark->name) }}')">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
                                 </div>
                             </div>
                         </td>
@@ -261,12 +250,71 @@
     </div>
 </div>
 
+<!-- Single Delete Modal -->
+<div class="modal-backdrop" id="deleteLandmarkModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fa-solid fa-exclamation-triangle" style="color: #EF4444;"></i> Delete Landmark</h3>
+            <button class="modal-close-btn" onclick="closeDeleteLandmarkModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="deleteLandmarkName"></strong>?</p>
+            <p style="color: #EF4444; font-weight: 600; margin-top: 0.5rem;">This action cannot be undone!</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeDeleteLandmarkModal()">Cancel</button>
+            <button type="button" class="btn btn-danger" onclick="showDeleteLandmarkConfirm()"><i class="fa-solid fa-trash"></i> Yes, Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Single Delete Confirm Modal -->
+<div class="modal-backdrop" id="deleteLandmarkConfirmModal" style="display: none;">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3 class="modal-title" style="color: #EF4444;"><i class="fa-solid fa-triangle-exclamation"></i> Final Warning</h3>
+            <button class="modal-close-btn" onclick="closeDeleteLandmarkConfirm()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p style="text-align: center; font-weight: 600;">This landmark will be permanently deleted.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeDeleteLandmarkConfirm()">Cancel</button>
+            <form id="deleteLandmarkForm" method="POST" style="display: inline;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i> Permanently Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/js/pages/landmarks-batch.js') }}?v={{ time() }}"></script>
-@endpush
+@vite(['resources/js/pages/landmarks-index.js', 'resources/js/pages/landmarks-batch.js'])
+<script>
+// Single landmark delete - double confirmation
+let pendingDeleteLandmarkId = null;
 
-@push('scripts')
-<script src="{{ asset('assets/js/pages/landmarks-index.js') }}?v={{ time() }}"></script>
+function showDeleteLandmarkModal(id, name) {
+    pendingDeleteLandmarkId = id;
+    document.getElementById('deleteLandmarkName').textContent = name;
+    document.getElementById('deleteLandmarkModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeDeleteLandmarkModal() {
+    document.getElementById('deleteLandmarkModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showDeleteLandmarkConfirm() {
+    closeDeleteLandmarkModal();
+    document.getElementById('deleteLandmarkForm').action = '/landmarks/' + pendingDeleteLandmarkId;
+    document.getElementById('deleteLandmarkConfirmModal').style.display = 'flex';
+}
+function closeDeleteLandmarkConfirm() {
+    document.getElementById('deleteLandmarkConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+</script>
 @endpush

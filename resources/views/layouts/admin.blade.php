@@ -14,18 +14,8 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Admin Styles -->
-    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}?v={{ time() }}">
-    
-    <!-- Component Styles -->
-    <link rel="stylesheet" href="{{ asset('assets/css/components/toast.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components/pagination.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components/modal.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components/stats-cards.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components/quick-actions.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components/filters.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components/table.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components/conversation.css') }}?v={{ time() }}">
+    <!-- Admin Styles (Vite bundled) -->
+    @vite(['resources/css/admin-bundle.css', 'resources/js/admin-bundle.js'])
 
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('assets/images/Logo.svg') }}" type="image/svg+xml">
@@ -72,6 +62,12 @@
                 <a href="{{ route('register') }}" class="{{ request()->routeIs('register') ? 'active' : '' }}">
                     <i class="fa-solid fa-user-plus"></i>
                     <span>Add Admin User</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.account.settings') }}" class="{{ request()->routeIs('admin.account.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Account Settings</span>
                 </a>
             </li>
         </ul>
@@ -130,15 +126,62 @@
                     </div>
                 </div>
 
-                <button class="notification-btn">
-                    <i class="fa-solid fa-bell"></i>
-                    <span class="notification-badge">3</span>
-                </button>
+                <div class="notification-dropdown-wrapper">
+                    <button class="notification-btn" onclick="toggleNotificationDropdown()">
+                        <i class="fa-solid fa-bell"></i>
+                        @if($notificationCount > 0)
+                        <span class="notification-badge">{{ $notificationCount > 9 ? '9+' : $notificationCount }}</span>
+                        @endif
+                    </button>
+                    <div class="notification-dropdown" id="notificationDropdown">
+                        <div class="notification-dropdown-header">
+                            <h4>Notifications</h4>
+                            @if($notificationCount > 0)
+                            <button class="notification-mark-all" onclick="markAllNotificationsRead()">Mark all read</button>
+                            @endif
+                        </div>
+                        <div class="notification-dropdown-body">
+                            @forelse($headerNotifications as $notification)
+                            <div class="notification-item {{ !$notification->is_read ? 'unread' : '' }}" 
+                                 onclick="handleNotificationClick({{ $notification->id }}, '{{ $notification->ticket_id ? route('admin.customer-service.show', $notification->ticket_id) : '#' }}')">
+                                <div class="notification-item-icon">
+                                    @switch($notification->event_type)
+                                        @case('admin_message')
+                                            <i class="fa-solid fa-reply" style="color: var(--secondary-blue);"></i>
+                                            @break
+                                        @case('resolved')
+                                            <i class="fa-solid fa-check-circle" style="color: var(--success);"></i>
+                                            @break
+                                        @case('status_changed')
+                                            <i class="fa-solid fa-exchange-alt" style="color: var(--warning);"></i>
+                                            @break
+                                        @default
+                                            <i class="fa-solid fa-bell" style="color: var(--primary-gold);"></i>
+                                    @endswitch
+                                </div>
+                                <div class="notification-item-content">
+                                    <p class="notification-item-title">{{ $notification->title }}</p>
+                                    <p class="notification-item-text">{{ Str::limit($notification->message, 60) }}</p>
+                                    <span class="notification-item-time">{{ $notification->created_at->diffForHumans() }}</span>
+                                </div>
+                                @if(!$notification->is_read)
+                                <span class="notification-unread-dot"></span>
+                                @endif
+                            </div>
+                            @empty
+                            <div class="notification-empty">
+                                <i class="fa-solid fa-bell-slash"></i>
+                                <p>No notifications yet</p>
+                            </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="user-menu">
-                    <div class="user-avatar-sm">
+                    <a href="{{ route('admin.account.settings') }}" class="user-avatar-sm" title="Account Settings">
                         <i class="fa-solid fa-user"></i>
-                    </div>
+                    </a>
                 </div>
             </div>
         </header>
@@ -149,16 +192,6 @@
         </div>
     </main>
 
-    <!-- Admin Scripts -->
-    <script src="{{ asset('assets/js/admin.js') }}?v={{ time() }}"></script>
-    
-    <!-- Component Scripts -->
-    <script src="{{ asset('assets/js/components/toast.js') }}?v={{ time() }}"></script>
-    <script src="{{ asset('assets/js/components/quick-actions.js') }}?v={{ time() }}"></script>
-    <script src="{{ asset('assets/js/components/modal.js') }}?v={{ time() }}"></script>
-    <script src="{{ asset('assets/js/components/bulk-actions.js') }}?v={{ time() }}"></script>
-    <script src="{{ asset('assets/js/components/filters.js') }}?v={{ time() }}"></script>
-    
     <!-- Toast Container -->
     @include('components.admin.toast-container')
     

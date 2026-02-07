@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\RouteController;
 use App\Http\Controllers\Admin\LandmarkController;
 use App\Http\Controllers\Admin\CustomerServiceController;
+use App\Http\Controllers\Admin\AccountSettingsController;
+use App\Http\Controllers\Admin\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,7 +22,7 @@ Route::get('/', function () {
 // Guest routes (only accessible when not logged in)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
     
     Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
 });
@@ -84,5 +86,20 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/{id}/flag', [CustomerServiceController::class, 'toggleFlag'])->name('toggleFlag');
         Route::post('/{id}/archive', [CustomerServiceController::class, 'archive'])->name('archive');
         Route::post('/{id}/restore', [CustomerServiceController::class, 'restore'])->name('restore');
+    });
+
+    // Account Settings
+    Route::prefix('account')->name('admin.account.')->group(function () {
+        Route::get('/settings', [AccountSettingsController::class, 'index'])->name('settings');
+        Route::put('/profile', [AccountSettingsController::class, 'updateProfile'])->name('update-profile');
+        Route::put('/password', [AccountSettingsController::class, 'updatePassword'])->name('update-password');
+        Route::delete('/delete', [AccountSettingsController::class, 'deleteAccount'])->name('delete');
+    });
+
+    // Notifications
+    Route::prefix('notifications')->name('admin.notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('mark-read');
+        Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
     });
 });

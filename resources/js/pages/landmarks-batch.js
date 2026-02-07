@@ -217,3 +217,11 @@ document.addEventListener('keydown', function(event) {
         closeFinalConfirmation();
     }
 });
+
+// Expose to global scope for inline onclick handlers
+window.clearSelection = clearSelection;
+window.showBatchDeleteModal = showBatchDeleteModal;
+window.closeBatchDeleteModal = closeBatchDeleteModal;
+window.showFinalConfirmation = showFinalConfirmation;
+window.closeFinalConfirmation = closeFinalConfirmation;
+window.confirmBatchDelete = confirmBatchDelete;

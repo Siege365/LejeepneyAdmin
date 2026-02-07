@@ -7,8 +7,14 @@ const CustomerServiceShow = {
     ticketId: null,
     emailjsInitialized: false,
     
-    init(ticketId) {
+    // EmailJS Configuration (loaded from server-side env via window globals)
+    EMAILJS_PUBLIC_KEY: null,
+    EMAILJS_SERVICE_ID: null,
+    EMAILJS_TEMPLATE_ID: null,
+    
+    init(ticketId, ticketData = {}) {
         this.ticketId = ticketId;
+        this.ticketData = ticketData; // { email, name, subject }
         this.initEmailJS();
         this.initReplyForm();
         this.scrollToLatestMessage();
@@ -17,14 +23,21 @@ const CustomerServiceShow = {
     // Initialize EmailJS
     initEmailJS() {
         if (typeof emailjs !== 'undefined' && !this.emailjsInitialized) {
-            emailjs.init(window.EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY');
-            this.emailjsInitialized = true;
+            const publicKey = window.EMAILJS_PUBLIC_KEY;
+            if (publicKey) {
+                this.EMAILJS_PUBLIC_KEY = publicKey;
+                this.EMAILJS_SERVICE_ID = window.EMAILJS_SERVICE_ID;
+                this.EMAILJS_TEMPLATE_ID = window.EMAILJS_TEMPLATE_ID;
+                emailjs.init(publicKey);
+                this.emailjsInitialized = true;
+                console.log('EmailJS initialized');
+            }
         }
     },
     
     // Initialize reply form
     initReplyForm() {
-        const form = document.getElementById('reply-form');
+        const form = document.getElementById('replyForm');
         if (!form) return;
         
         form.addEventListener('submit', async (e) => {
@@ -38,6 +51,7 @@ const CustomerServiceShow = {
         const formData = new FormData(form);
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn?.innerHTML;
+        const sendEmail = form.querySelector('#sendEmailCheckbox')?.checked;
         
         if (submitBtn) {
             submitBtn.disabled = true;
@@ -56,12 +70,12 @@ const CustomerServiceShow = {
             const data = await response.json();
             
             if (data.success) {
-                Toast?.success('Reply sent successfully');
-                
-                // Send email notification if EmailJS is configured
-                if (window.EMAILJS_ENABLED) {
+                // Send email notification if checkbox is checked
+                if (sendEmail && this.emailjsInitialized) {
                     await this.sendEmailNotification(formData.get('message'));
                 }
+                
+                Toast?.success('Reply sent successfully');
                 
                 // Reload to show new reply
                 setTimeout(() => window.location.reload(), 1000);
@@ -79,25 +93,53 @@ const CustomerServiceShow = {
         }
     },
     
-    // Send email notification
+    // Send email notification via EmailJS
     async sendEmailNotification(message) {
-        if (typeof emailjs === 'undefined') return;
+        if (typeof emailjs === 'undefined' || !this.emailjsInitialized) {
+            console.warn('EmailJS not available');
+            return;
+        }
+        
+        const serviceId = this.EMAILJS_SERVICE_ID;
+        const templateId = this.EMAILJS_TEMPLATE_ID;
+        
+        // Get ticket data from window or stored data
+        const ticketEmail = this.ticketData.email || window.TICKET_EMAIL;
+        const ticketName = this.ticketData.name || window.TICKET_NAME;
+        const ticketSubject = this.ticketData.subject || window.TICKET_SUBJECT;
+        
+        if (!ticketEmail) {
+            console.error('No recipient email configured');
+            return;
+        }
+        
+        // Format current time
+        const now = new Date();
+        const timeFormatted = now.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
         
         try {
-            await emailjs.send(
-                window.EMAILJS_SERVICE_ID,
-                window.EMAILJS_TEMPLATE_ID,
-                {
-                    to_email: window.TICKET_EMAIL,
-                    to_name: window.TICKET_NAME,
-                    ticket_id: this.ticketId,
-                    message: message,
-                    subject: window.TICKET_SUBJECT
-                }
-            );
-            console.log('Email notification sent');
+            const result = await emailjs.send(serviceId, templateId, {
+                to_email: ticketEmail,
+                ticket_id: this.ticketId,
+                title: ticketSubject || 'Support Reply',
+                name: ticketName || 'Customer',
+                email: ticketEmail,
+                time: timeFormatted,
+                message: message
+            });
+            
+            console.log('Email notification sent successfully:', result);
+            Toast?.info('Email notification sent to customer');
         } catch (error) {
             console.error('EmailJS error:', error);
+            // Don't show error toast to user - the reply was still saved
+            console.warn('Email notification failed, but reply was saved');
         }
     },
     

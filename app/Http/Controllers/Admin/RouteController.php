@@ -16,14 +16,9 @@ class RouteController extends Controller
     {
         $query = JeepneyRoute::query();
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
         // Search
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = str_replace(['%', '_'], ['\%', '\_'], trim($request->search));
             $query->where(function ($q) use ($search) {
                 $q->where('route_number', 'like', "%{$search}%")
                   ->orWhere('name', 'like', "%{$search}%")
@@ -33,22 +28,28 @@ class RouteController extends Controller
             });
         }
 
-        // Sorting
-        $sortBy = $request->get('sort', 'id_desc');
-        
-        switch ($sortBy) {
-            case 'id_asc':
-                $query->orderBy('id', 'asc');
+        // Combined filter (status + sort)
+        $filter = $request->get('filter', 'all');
+
+        switch ($filter) {
+            case 'available':
+                $query->where('status', 'available');
                 break;
+            case 'unavailable':
+                $query->where('status', 'unavailable');
+                break;
+        }
+
+        // Sorting
+        switch ($filter) {
             case 'name_asc':
                 $query->orderBy('name', 'asc');
                 break;
             case 'name_desc':
                 $query->orderBy('name', 'desc');
                 break;
-            case 'id_desc':
             default:
-                $query->orderBy('id', 'desc');
+                $query->orderBy('name', 'asc');
                 break;
         }
 

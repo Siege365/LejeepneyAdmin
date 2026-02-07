@@ -14,8 +14,8 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Auth Styles -->
-    <link rel="stylesheet" href="{{ asset('assets/css/auth.css') }}">
+    <!-- Auth Styles (Vite) -->
+    @vite(['resources/css/auth.css', 'resources/js/auth.js'])
 </head>
 <body>
     <div class="auth-container">
@@ -28,8 +28,5 @@
             @yield('content')
         </div>
     </div>
-
-    <!-- Auth Scripts -->
-    <script src="{{ asset('assets/js/auth.js') }}"></script>
 </body>
 </html>
