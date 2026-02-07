@@ -175,6 +175,13 @@
                             </div>
                             @endforelse
                         </div>
+                        @if($headerNotifications->count() > 0)
+                        <div class="notification-dropdown-footer">
+                            <a href="{{ route('admin.customer-service.index') }}" class="notification-view-all">
+                                View All Notifications
+                            </a>
+                        </div>
+                        @endif
                     </div>
                 </div>
                 

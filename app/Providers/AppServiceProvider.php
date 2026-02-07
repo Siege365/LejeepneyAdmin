@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
                 $unreadCount = \App\Models\TicketNotification::unread()->count();
                 $notifications = \App\Models\TicketNotification::with('ticket')
                     ->orderByDesc('created_at')
-                    ->limit(10)
+                    ->limit(5)
                     ->get();
             }
             $view->with('notificationCount', $unreadCount)

@@ -33,7 +33,7 @@ class LandmarkApiController extends Controller
 
         $landmarks = $query->select(
             'id', 'name', 'category', 'description', 
-            'latitude', 'longitude', 'icon_image', 
+            'latitude', 'longitude', 'icon_image', 'gallery_images',
             'is_featured'
         )
         ->orderBy('category')
@@ -52,6 +52,7 @@ class LandmarkApiController extends Controller
                     'latitude' => (float) $landmark->latitude,
                     'longitude' => (float) $landmark->longitude,
                     'icon_url' => $landmark->icon_image ? asset('storage/' . $landmark->icon_image) : null,
+                    'gallery_urls' => $landmark->gallery_images ?? [],
                     'is_featured' => (bool) $landmark->is_featured,
                     'coordinates' => [
                         'lat' => (float) $landmark->latitude,
@@ -87,6 +88,7 @@ class LandmarkApiController extends Controller
                 'latitude' => (float) $landmark->latitude,
                 'longitude' => (float) $landmark->longitude,
                 'icon_url' => $landmark->icon_image ? asset('storage/' . $landmark->icon_image) : null,
+                'gallery_urls' => $landmark->gallery_images ?? [],
                 'is_featured' => (bool) $landmark->is_featured,
                 'coordinates' => [
                     'lat' => (float) $landmark->latitude,
@@ -103,7 +105,7 @@ class LandmarkApiController extends Controller
     public function byCategory($category)
     {
         $landmarks = Landmark::where('category', $category)
-            ->select('id', 'name', 'category', 'description', 'latitude', 'longitude', 'icon_image', 'is_featured')
+            ->select('id', 'name', 'category', 'description', 'latitude', 'longitude', 'icon_image', 'gallery_images', 'is_featured')
             ->orderBy('name')
             ->get();
 
@@ -120,6 +122,7 @@ class LandmarkApiController extends Controller
                     'latitude' => (float) $landmark->latitude,
                     'longitude' => (float) $landmark->longitude,
                     'icon_url' => $landmark->icon_image ? asset('storage/' . $landmark->icon_image) : null,
+                    'gallery_urls' => $landmark->gallery_images ?? [],
                     'is_featured' => (bool) $landmark->is_featured,
                     'coordinates' => [
                         'lat' => (float) $landmark->latitude,
@@ -137,7 +140,7 @@ class LandmarkApiController extends Controller
     public function featured()
     {
         $landmarks = Landmark::where('is_featured', true)
-            ->select('id', 'name', 'category', 'description', 'latitude', 'longitude', 'icon_image')
+            ->select('id', 'name', 'category', 'description', 'latitude', 'longitude', 'icon_image', 'gallery_images')
             ->orderBy('name')
             ->get();
 
@@ -153,6 +156,7 @@ class LandmarkApiController extends Controller
                     'latitude' => (float) $landmark->latitude,
                     'longitude' => (float) $landmark->longitude,
                     'icon_url' => $landmark->icon_image ? asset('storage/' . $landmark->icon_image) : null,
+                    'gallery_urls' => $landmark->gallery_images ?? [],
                     'coordinates' => [
                         'lat' => (float) $landmark->latitude,
                         'lng' => (float) $landmark->longitude
@@ -196,6 +200,7 @@ class LandmarkApiController extends Controller
                     'latitude' => (float) $landmark->latitude,
                     'longitude' => (float) $landmark->longitude,
                     'icon_url' => $landmark->icon_image ? asset('storage/' . $landmark->icon_image) : null,
+                    'gallery_urls' => $landmark->gallery_images ?? [],
                     'is_featured' => (bool) $landmark->is_featured,
                     'distance_km' => round($distance, 2),
                     'coordinates' => [

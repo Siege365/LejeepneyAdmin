@@ -95,6 +95,7 @@
                     <option value="pending" {{ request('filter') === 'pending' ? 'selected' : '' }}>Pending</option>
                     <option value="in-progress" {{ request('filter') === 'in-progress' ? 'selected' : '' }}>In Progress</option>
                     <option value="resolved" {{ request('filter') === 'resolved' ? 'selected' : '' }}>Resolved</option>
+                    <option value="cancelled" {{ request('filter') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                 </optgroup>
                 <optgroup label="Type">
                     <option value="general" {{ request('filter') === 'general' ? 'selected' : '' }}>General</option>
@@ -104,7 +105,6 @@
                     <option value="other" {{ request('filter') === 'other' ? 'selected' : '' }}>Other</option>
                 </optgroup>
                 <optgroup label="Priority">
-                    <option value="urgent" {{ request('filter') === 'urgent' ? 'selected' : '' }}>Urgent</option>
                     <option value="high" {{ request('filter') === 'high' ? 'selected' : '' }}>High</option>
                     <option value="medium" {{ request('filter') === 'medium' ? 'selected' : '' }}>Medium</option>
                     <option value="low" {{ request('filter') === 'low' ? 'selected' : '' }}>Low</option>

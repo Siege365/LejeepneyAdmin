@@ -130,27 +130,31 @@
                     </div>
                 </div>
 
-                <!-- Admin Replies -->
+                <!-- Replies -->
                 @forelse($replies ?? [] as $reply)
                 <div class="message-block">
                     <div class="message-container">
-                        <div class="message-avatar admin">
-                            {{ substr($reply->admin_name ?? 'A', 0, 1) }}
+                        <div class="message-avatar {{ $reply->sender_type === 'customer' ? 'customer' : 'admin' }}">
+                            {{ substr($reply->sender_display_name, 0, 1) }}
                         </div>
                         <div class="message-content">
                             <div class="message-header">
                                 <div>
-                                    <span class="message-author">{{ $reply->admin_name ?? 'Admin Support' }}</span>
-                                    <span class="message-badge admin">Admin</span>
-                                    @if($reply->email_sent)
-                                    <span class="message-badge emailed" title="Email sent to customer">
-                                        <i class="fa-solid fa-envelope-circle-check"></i> Emailed
-                                    </span>
+                                    <span class="message-author">{{ $reply->sender_display_name }}</span>
+                                    @if($reply->sender_type === 'customer')
+                                        <span class="message-badge customer">Customer</span>
+                                    @else
+                                        <span class="message-badge admin">Admin</span>
+                                        @if($reply->email_sent)
+                                        <span class="message-badge emailed" title="Email sent to customer">
+                                            <i class="fa-solid fa-envelope-circle-check"></i> Emailed
+                                        </span>
+                                        @endif
                                     @endif
                                 </div>
                                 <span class="message-time">{{ $reply->created_at->diffForHumans() }}</span>
                             </div>
-                            <div class="message-bubble admin">
+                            <div class="message-bubble {{ $reply->sender_type === 'customer' ? 'customer' : 'admin' }}">
                                 <p>{{ $reply->message }}</p>
                             </div>
                         </div>
@@ -286,7 +290,8 @@
                     <select name="status" class="reply-select">
                         <option value="pending" {{ $ticket->status === 'pending' ? 'selected' : '' }}>Pending</option>
                         <option value="in-progress" {{ $ticket->status === 'in-progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="resolved">Resolved</option>
+                        <option value="resolved" {{ $ticket->status === 'resolved' ? 'selected' : '' }}>Resolved</option>
+                        <option value="cancelled" {{ $ticket->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
                 </div>
 
@@ -556,11 +561,22 @@ function closeArchiveConfirmModal() {
     window.EMAILJS_SERVICE_ID = '{{ config("services.emailjs.service_id", "") }}';
     window.EMAILJS_TEMPLATE_ID = '{{ config("services.emailjs.template_id", "") }}';
     
-    // Initialize CustomerServiceShow with ticket data
-    CustomerServiceShow.init({{ $ticket->id }}, {
-        email: @json($ticket->email),
-        name: @json($ticket->name),
-        subject: @json($ticket->subject)
+    // Wait for CustomerServiceShow to be available, then initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        // Poll for CustomerServiceShow availability (in case Vite loads slowly)
+        const initWhenReady = setInterval(() => {
+            if (window.CustomerServiceShow) {
+                clearInterval(initWhenReady);
+                window.CustomerServiceShow.init({{ $ticket->id }}, {
+                    email: @json($ticket->email),
+                    name: @json($ticket->name),
+                    subject: @json($ticket->subject)
+                });
+            }
+        }, 50);
+        
+        // Timeout after 5 seconds
+        setTimeout(() => clearInterval(initWhenReady), 5000);
     });
 </script>
 @endpush

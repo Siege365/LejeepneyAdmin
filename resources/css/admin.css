@@ -859,6 +859,16 @@ a.user-avatar-sm,
     color: var(--info);
 }
 
+.badge-primary {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
+    color: #6366f1;
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.2), rgba(107, 114, 128, 0.1));
+    color: #6b7280;
+}
+
 /* Action Buttons */
 .action-btns {
     display: flex;

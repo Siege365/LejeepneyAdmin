@@ -64,7 +64,7 @@ class RecentActivityController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'activity_type' => 'required|in:route_calculated,fare_calculated,location_search,route_saved',
+            'activity_type' => 'required|in:route_calculated,fare_calculated,location_search,route_saved,ticket_created,ticket_replied,ticket_status_changed',
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string',
             'from_location' => 'nullable|string|max:255',
@@ -125,7 +125,7 @@ class RecentActivityController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'activities' => 'required|array|max:50',
-            'activities.*.activity_type' => 'required|in:route_calculated,fare_calculated,location_search,route_saved',
+            'activities.*.activity_type' => 'required|in:route_calculated,fare_calculated,location_search,route_saved,ticket_created,ticket_replied,ticket_status_changed',
             'activities.*.title' => 'required|string|max:255',
             'activities.*.subtitle' => 'nullable|string',
             'activities.*.from_location' => 'nullable|string|max:255',

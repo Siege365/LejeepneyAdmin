@@ -103,8 +103,8 @@
                             <span class="activity-time">{{ $activity->created_at->format('h:i A') }}</span>
                         </td>
                         <td>
-                            <span class="activity-status {{ $activity->action }}">
-                                {{ ucfirst($activity->action) }}
+                            <span class="badge badge-{{ $activity->color }}">
+                                {{ ucfirst(str_replace('_', ' ', $activity->action)) }}
                             </span>
                         </td>
                     </tr>

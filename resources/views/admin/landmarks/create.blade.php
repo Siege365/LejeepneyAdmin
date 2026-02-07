@@ -134,9 +134,9 @@
                             <small class="form-text text-muted">Maximum size: 2MB</small>
                         </div>
                         <div id="iconUrlInput" class="input-content">
-                            <input type="url" class="form-control" id="icon_image_url" name="icon_image_url" 
+                            <input type="text" class="form-control" id="icon_image_url" name="icon_image_url" 
                                    placeholder="https://example.com/image.jpg">
-                            <small class="form-text text-muted">Enter a direct image URL</small>
+                            <small class="form-text text-muted">Enter a direct image URL (supports complex URLs with parameters)</small>
                         </div>
                         <div id="iconPreview" class="mt-2" style="display: none;">
                             <img id="iconPreviewImg" src="" alt="Icon Preview" 

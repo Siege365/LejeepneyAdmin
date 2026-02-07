@@ -48,7 +48,7 @@ class CustomerServiceController extends Controller
         }
 
         // Status filters
-        $statusFilters = ['pending', 'in-progress', 'resolved'];
+        $statusFilters = ['pending', 'in-progress', 'resolved', 'cancelled'];
         if (in_array($filter, $statusFilters)) {
             $query->filterByStatus($filter);
         }
@@ -122,10 +122,19 @@ class CustomerServiceController extends Controller
         try {
             $request->validate([
                 'message' => 'required|string|min:10|max:5000',
-                'status' => 'required|in:pending,in-progress,resolved',
+                'status' => 'required|in:pending,in-progress,resolved,cancelled',
             ]);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Validation failed', ['error' => $e->getMessage()]);
+            
+            if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->validator->errors()
+                ], 422);
+            }
+            
             return back()->withErrors($e->validator->errors())->withInput();
         }
 
@@ -167,7 +176,7 @@ class CustomerServiceController extends Controller
                 $ticket->email,
                 'admin_message',
                 'New Reply from Support Team',
-                "{$admin->name} replied to your ticket '{$ticket->subject}'",
+                "{$admin->name} replied to ticket '{$ticket->subject}'",
                 ['admin_name' => $admin->name, 'reply_preview' => substr(strip_tags($request->message), 0, 100)]
             );
 
@@ -190,7 +199,7 @@ class CustomerServiceController extends Controller
                     $ticket->email,
                     'status_changed',
                     'Ticket Status Updated',
-                    "Your ticket status changed from {$oldStatus} to {$request->status}",
+                    "Ticket '{$ticket->subject}' status changed from {$oldStatus} to {$request->status}",
                     ['old_status' => $oldStatus, 'new_status' => $request->status]
                 );
 
@@ -211,7 +220,7 @@ class CustomerServiceController extends Controller
             \Log::info('Reply completed successfully');
 
             // Return JSON response for AJAX requests
-            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+            if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
                 return response()->json([
                     'success' => true,
                     'message' => 'Reply sent successfully!'
@@ -230,7 +239,7 @@ class CustomerServiceController extends Controller
             ]);
             
             // Return JSON response for AJAX requests
-            if ($request->expectsJson() || $request->header('Accept') === 'application/json') {
+            if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to send reply. Please try again.'
@@ -249,7 +258,7 @@ class CustomerServiceController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,in-progress,resolved'
+            'status' => 'required|in:pending,in-progress,resolved,cancelled'
         ]);
 
         $ticket = SupportTicket::findOrFail($id);
@@ -268,7 +277,7 @@ class CustomerServiceController extends Controller
                 $ticket->email,
                 $request->status === 'resolved' ? 'resolved' : 'status_changed',
                 $request->status === 'resolved' ? 'Ticket Resolved' : 'Ticket Status Updated',
-                "Your ticket '{$ticket->subject}' status changed from {$oldStatus} to {$request->status}",
+                "Ticket '{$ticket->subject}' status changed from {$oldStatus} to {$request->status}",
                 ['old_status' => $oldStatus, 'new_status' => $request->status, 'admin_name' => $admin->name]
             );
         }

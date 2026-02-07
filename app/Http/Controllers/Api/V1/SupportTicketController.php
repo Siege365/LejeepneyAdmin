@@ -24,7 +24,7 @@ class SupportTicketController extends Controller
             'email' => 'required|email|max:255',
             'subject' => 'required|string|max:255',
             'message' => 'required|string|min:10|max:5000',
-            'type' => 'nullable|in:general,technical,billing,feedback,other',
+            'type' => 'nullable|in:general,technical,billing,feedback,other,complaint,bug,inquiry,suggestion,report',
             'priority' => 'nullable|in:low,medium,high,urgent'
         ]);
 
@@ -55,7 +55,7 @@ class SupportTicketController extends Controller
             $ticket->email,
             'created',
             'Support Ticket Created',
-            "Your support ticket '{$ticket->subject}' has been submitted and is pending review.",
+            "Support ticket '{$ticket->subject}' has been submitted and is pending review.",
             ['ticket_id' => $ticket->id, 'subject' => $ticket->subject]
         );
 
@@ -178,6 +178,8 @@ class SupportTicketController extends Controller
                     return [
                         'id' => $reply->id,
                         'message' => $reply->message,
+                        'sender_type' => $reply->sender_type ?? 'admin',
+                        'sender_name' => $reply->sender_display_name,
                         'admin_name' => $reply->admin_name,
                         'created_at' => $reply->created_at->toIso8601String()
                     ];
@@ -235,18 +237,27 @@ class SupportTicketController extends Controller
             ], 404);
         }
 
-        // Append message to the ticket
-        $ticket->update([
-            'message' => $ticket->message . "\n\n---\n**Follow-up ({$ticket->created_at->format('M d, Y H:i')}):**\n" . strip_tags($request->message),
-            'status' => 'pending' // Reopen if resolved
+        // Create a separate reply from the customer
+        $reply = TicketReply::create([
+            'support_ticket_id' => $ticket->id,
+            'sender_type' => 'customer',
+            'user_id' => $user?->id,
+            'sender_name' => $user?->name ?? $ticket->name,
+            'message' => strip_tags($request->message),
         ]);
+
+        // Reopen ticket if resolved
+        if ($ticket->status === 'resolved') {
+            $ticket->update(['status' => 'pending']);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => 'Follow-up message added successfully',
+            'message' => 'Message sent successfully',
             'data' => [
                 'ticket_id' => $ticket->id,
-                'status' => $ticket->status
+                'reply_id' => $reply->id,
+                'status' => $ticket->fresh()->status
             ]
         ]);
     }
@@ -281,6 +292,65 @@ class SupportTicketController extends Controller
                 'in_progress' => (clone $baseQuery)->inProgress()->count(),
                 'resolved' => (clone $baseQuery)->resolved()->count()
             ]
+        ]);
+    }
+
+    /**
+     * Cancel a support ticket (Mobile user cancels their own ticket)
+     * 
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cancel(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $ticket = SupportTicket::where('id', $id)
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$ticket) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ticket not found or unauthorized'
+            ], 404);
+        }
+
+        if ($ticket->status === 'cancelled' || $ticket->status === 'resolved') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ticket is already ' . $ticket->status
+            ], 400);
+        }
+
+        $ticket->status = 'cancelled';
+        $ticket->save();
+
+        // Create notification for cancellation
+        TicketNotification::createNotification(
+            $ticket->id,
+            $ticket->email,
+            'status_changed',
+            'Ticket Cancelled',
+            "Ticket '{$ticket->subject}' has been cancelled.",
+            ['old_status' => $ticket->getOriginal('status'), 'new_status' => 'cancelled']
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ticket cancelled successfully',
+            'data' => $ticket
         ]);
     }
 }

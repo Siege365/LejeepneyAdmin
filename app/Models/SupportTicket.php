@@ -114,7 +114,7 @@ class SupportTicket extends Model
      */
     public function scopeFilterByStatus($query, $status)
     {
-        if ($status && in_array($status, ['pending', 'in-progress', 'resolved'])) {
+        if ($status && in_array($status, ['pending', 'in-progress', 'resolved', 'cancelled'])) {
             return $query->where('status', $status);
         }
         return $query;
@@ -125,7 +125,8 @@ class SupportTicket extends Model
      */
     public function scopeFilterByType($query, $type)
     {
-        if ($type && in_array($type, ['complaint', 'feedback', 'bug', 'inquiry', 'suggestion', 'report'])) {
+        $validTypes = ['general', 'technical', 'billing', 'feedback', 'other', 'complaint', 'bug', 'inquiry', 'suggestion', 'report'];
+        if ($type && in_array($type, $validTypes)) {
             return $query->where('type', $type);
         }
         return $query;
@@ -136,7 +137,7 @@ class SupportTicket extends Model
      */
     public function scopeFilterByPriority($query, $priority)
     {
-        if ($priority && in_array($priority, ['low', 'medium', 'high'])) {
+        if ($priority && in_array($priority, ['low', 'medium', 'high', 'urgent'])) {
             return $query->where('priority', $priority);
         }
         return $query;

@@ -124,27 +124,50 @@
                             </div>
                         @endif
 
-                        <div class="file-input-wrapper">
-                            <input type="file" class="form-control file-input @error('icon_image') is-invalid @enderror" 
-                                   id="icon_image" name="icon_image" 
-                                   accept="image/jpeg,image/png,image/jpg,image/webp">
-                            <label for="icon_image" class="file-input-label">
-                                <i class="fa-solid fa-cloud-upload-alt"></i>
-                                <span>Choose Icon Image</span>
-                            </label>
+                        <div class="mb-2">
+                            <div class="input-type-toggle">
+                                <label class="toggle-option active" data-target="iconFileInput">
+                                    <input type="radio" name="icon_input_type" value="file" checked hidden>
+                                    <i class="fa-solid fa-upload"></i> Upload File
+                                </label>
+                                <label class="toggle-option" data-target="iconUrlInput">
+                                    <input type="radio" name="icon_input_type" value="url" hidden>
+                                    <i class="fa-solid fa-link"></i> Image URL
+                                </label>
+                            </div>
+                        </div>
+                        <div id="iconFileInput" class="input-content active">
+                            <div class="file-input-wrapper">
+                                <input type="file" class="form-control file-input @error('icon_image') is-invalid @enderror" 
+                                       id="icon_image" name="icon_image" 
+                                       accept="image/jpeg,image/png,image/jpg,image/webp">
+                                <label for="icon_image" class="file-input-label">
+                                    <i class="fa-solid fa-cloud-upload-alt"></i>
+                                    <span>Choose Icon Image</span>
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">Maximum size: 2MB</small>
+                        </div>
+                        <div id="iconUrlInput" class="input-content">
+                            <input type="text" class="form-control" id="icon_image_url" name="icon_image_url" 
+                                   placeholder="https://example.com/image.jpg">
+                            <small class="form-text text-muted">Enter a direct image URL (supports complex URLs with parameters)</small>
                         </div>
                         <div id="iconPreview" class="mt-2" style="display: none;">
                             <img id="iconPreviewImg" src="" alt="Icon Preview" 
-                                 class="img-thumbnail" style="max-width: 100px;">
+                                 class="img-thumbnail" style="max-width: 120px;">
                         </div>
                         @error('icon_image')
+                            <span class="error-text">{{ $message }}</span>
+                        @enderror
+                        @error('icon_image_url')
                             <span class="error-text">{{ $message }}</span>
                         @enderror
                     </div>
 
                     <!-- Gallery Images -->
                     <div class="form-group">
-                        <label for="gallery_images">Gallery Images</label>
+                        <label for="gallery_images">Gallery Images (Optional)</label>
                         
                         @if($landmark->gallery_images && count($landmark->gallery_images) > 0)
                             <div class="current-gallery mb-2">
@@ -166,20 +189,42 @@
                             </div>
                         @endif
 
-                        <div class="file-input-wrapper">
-                            <input type="file" class="form-control file-input @error('gallery_images.*') is-invalid @enderror" 
-                                   id="gallery_images" name="gallery_images[]" 
-                                   accept="image/jpeg,image/png,image/jpg,image/webp" multiple>
-                            <label for="gallery_images" class="file-input-label">
-                                <i class="fa-solid fa-images"></i>
-                                <span>Add Gallery Images</span>
-                            </label>
+                        <div class="mb-2">
+                            <div class="input-type-toggle">
+                                <label class="toggle-option active" data-target="galleryFileInput">
+                                    <input type="radio" name="gallery_input_type" value="file" checked hidden>
+                                    <i class="fa-solid fa-upload"></i> Upload Files
+                                </label>
+                                <label class="toggle-option" data-target="galleryUrlInput">
+                                    <input type="radio" name="gallery_input_type" value="url" hidden>
+                                    <i class="fa-solid fa-link"></i> Image URLs
+                                </label>
+                            </div>
                         </div>
-                        <small class="form-text text-muted">You can select multiple images</small>
+                        <div id="galleryFileInput" class="input-content active">
+                            <div class="file-input-wrapper">
+                                <input type="file" class="form-control file-input @error('gallery_images.*') is-invalid @enderror" 
+                                       id="gallery_images" name="gallery_images[]" 
+                                       accept="image/jpeg,image/png,image/jpg,image/webp" multiple>
+                                <label for="gallery_images" class="file-input-label">
+                                    <i class="fa-solid fa-images"></i>
+                                    <span>Choose Gallery Images</span>
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">You can select multiple images (Max: 10 images, 5MB each)</small>
+                        </div>
+                        <div id="galleryUrlInput" class="input-content">
+                            <textarea class="form-control" id="gallery_images_urls" name="gallery_images_urls" rows="4"
+                                      placeholder="Enter image URLs, one per line&#10;https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+                            <small class="form-text text-muted">Enter one image URL per line (Max: 10 URLs)</small>
+                        </div>
                         <div id="galleryPreview" class="mt-2" style="display: none;">
                             <div id="galleryPreviewContainer" class="gallery-preview-grid"></div>
                         </div>
                         @error('gallery_images.*')
+                            <span class="error-text">{{ $message }}</span>
+                        @enderror
+                        @error('gallery_images_urls')
                             <span class="error-text">{{ $message }}</span>
                         @enderror
                     </div>

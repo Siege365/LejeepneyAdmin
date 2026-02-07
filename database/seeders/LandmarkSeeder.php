@@ -21,6 +21,11 @@ class LandmarkSeeder extends Seeder
                 'description' => 'A 4-hectare urban park in the heart of Davao City featuring sculptures, fountains, and green spaces.',
                 'category' => 'city_center',
                 'is_featured' => true,
+                'gallery_images' => [
+                    'https://lh5.googleusercontent.com/p/AF1QipOxqQRBQyFxVjHJkLtfVxYrTmYlqhWJZx0TqN4=w408-h725-k-no',
+                    'https://lh5.googleusercontent.com/p/AF1QipP5KPqr8Wj3f0JVxQjZqGxQfJq0qJYqgXqQq5s=w408-h306-k-no',
+                    'https://lh5.googleusercontent.com/p/AF1QipNrBqp2QzJqJqQqJqQqJqQqJqQqJqQqJqQqJq0=w408-h306-k-no',
+                ],
             ],
             [
                 'name' => 'San Pedro Cathedral',
@@ -29,6 +34,11 @@ class LandmarkSeeder extends Seeder
                 'description' => 'The oldest church in Mindanao, built in 1847. A historical and religious landmark.',
                 'category' => 'city_center',
                 'is_featured' => true,
+                'gallery_images' => [
+                    'https://lh5.googleusercontent.com/p/AF1QipMKqRxJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJq=w408-h306-k-no',
+                    'https://lh5.googleusercontent.com/p/AF1QipNxQqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJq0=w408-h306-k-no',
+                    'https://lh5.googleusercontent.com/p/AF1QipPqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJq8=w408-h725-k-no',
+                ],
             ],
             [
                 'name' => 'Magsaysay Park',
@@ -37,6 +47,10 @@ class LandmarkSeeder extends Seeder
                 'description' => 'A waterfront park along Davao Gulf, popular for evening strolls and events.',
                 'category' => 'city_center',
                 'is_featured' => false,
+                'gallery_images' => [
+                    'https://lh5.googleusercontent.com/p/AF1QipMRqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJq=w408-h306-k-no',
+                    'https://lh5.googleusercontent.com/p/AF1QipNqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqA=w408-h306-k-no',
+                ],
             ],
             [
                 'name' => 'Roxas Night Market',
@@ -45,6 +59,12 @@ class LandmarkSeeder extends Seeder
                 'description' => 'Famous night market along Roxas Avenue offering street food, shopping, and entertainment.',
                 'category' => 'city_center',
                 'is_featured' => true,
+                'gallery_images' => [
+                    'https://lh5.googleusercontent.com/p/AF1QipOqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqB=w408-h306-k-no',
+                    'https://lh5.googleusercontent.com/p/AF1QipPqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqC=w408-h306-k-no',
+                    'https://lh5.googleusercontent.com/p/AF1QipQqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqD=w408-h725-k-no',
+                    'https://lh5.googleusercontent.com/p/AF1QipRqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqE=w408-h306-k-no',
+                ],
             ],
             [
                 'name' => 'Rizal Park',
@@ -53,6 +73,10 @@ class LandmarkSeeder extends Seeder
                 'description' => 'Historic park featuring the Jose Rizal monument and open spaces for recreation.',
                 'category' => 'city_center',
                 'is_featured' => false,
+                'gallery_images' => [
+                    'https://lh5.googleusercontent.com/p/AF1QipSqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqF=w408-h306-k-no',
+                    'https://lh5.googleusercontent.com/p/AF1QipTqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqJqG=w408-h306-k-no',
+                ],
             ],
             [
                 'name' => 'Davao City Hall',

@@ -52,6 +52,7 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::get('/support/tickets', [SupportTicketController::class, 'index']);
     Route::get('/support/tickets/{id}', [SupportTicketController::class, 'show']);
     Route::post('/support/tickets/{id}/message', [SupportTicketController::class, 'addMessage']);
+    Route::put('/support/tickets/{id}/cancel', [SupportTicketController::class, 'cancel']);
     
     // Support Tickets (Authenticated only)
     Route::middleware('auth:sanctum')->group(function () {

@@ -47,6 +47,11 @@ class ActivityLog extends Model
      */
     public function getIconAttribute()
     {
+        // Check if it's a customer service ticket activity
+        if ($this->model_type === 'SupportTicket' || $this->model_type === 'App\\Models\\SupportTicket') {
+            return 'fa-ticket';
+        }
+
         return match($this->action) {
             'created' => 'fa-plus-circle',
             'updated' => 'fa-edit',
@@ -64,6 +69,9 @@ class ActivityLog extends Model
             'created' => 'success',
             'updated' => 'info',
             'deleted' => 'danger',
+            'ticket_reply' => 'primary',
+            'ticket_status_change' => 'warning',
+            'ticket_flag_toggle' => 'secondary',
             default => 'secondary',
         };
     }
