@@ -178,15 +178,6 @@
         initialColor: '{{ old('color', '#EBAF3E') }}',
         davaoCenter: [7.0731, 125.6128]
     };
-    
-      document.addEventListener('DOMContentLoaded', function() {
-          const colorInput = document.getElementById('color');
-          const colorValue = document.getElementById('colorValue');
-          const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
-          colorInput.value = randomColor;
-          colorValue.textContent = randomColor;
-                        });
-                    
 </script>
 @vite('resources/js/route-map.js')
 @endpush

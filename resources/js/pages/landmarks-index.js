@@ -95,3 +95,36 @@ document.addEventListener('DOMContentLoaded', () => LandmarksIndex.init());
 
 // Export for use
 window.LandmarksIndex = LandmarksIndex;
+
+/* ========================================
+   LANDMARK DELETE DOUBLE CONFIRMATION
+   Single landmark delete modal functions
+   ======================================== */
+
+let pendingDeleteLandmarkId = null;
+
+function showDeleteLandmarkModal(id, name) {
+    pendingDeleteLandmarkId = id;
+    document.getElementById('deleteLandmarkName').textContent = name;
+    document.getElementById('deleteLandmarkModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeDeleteLandmarkModal() {
+    document.getElementById('deleteLandmarkModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showDeleteLandmarkConfirm() {
+    closeDeleteLandmarkModal();
+    document.getElementById('deleteLandmarkForm').action = '/landmarks/' + pendingDeleteLandmarkId;
+    document.getElementById('deleteLandmarkConfirmModal').style.display = 'flex';
+}
+function closeDeleteLandmarkConfirm() {
+    document.getElementById('deleteLandmarkConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Expose to global scope for inline onclick handlers
+window.showDeleteLandmarkModal = showDeleteLandmarkModal;
+window.closeDeleteLandmarkModal = closeDeleteLandmarkModal;
+window.showDeleteLandmarkConfirm = showDeleteLandmarkConfirm;
+window.closeDeleteLandmarkConfirm = closeDeleteLandmarkConfirm;

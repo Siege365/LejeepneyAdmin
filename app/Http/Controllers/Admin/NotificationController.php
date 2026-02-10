@@ -9,9 +9,21 @@ use Illuminate\Http\Request;
 class NotificationController extends Controller
 {
     /**
-     * Get notifications for the bell dropdown (AJAX)
+     * Display all notifications page
      */
     public function index()
+    {
+        $notifications = TicketNotification::with('ticket')
+            ->orderByDesc('created_at')
+            ->paginate(20);
+
+        return view('admin.notifications.index', compact('notifications'));
+    }
+
+    /**
+     * Get notifications for the bell dropdown (AJAX)
+     */
+    public function dropdown()
     {
         $notifications = TicketNotification::with('ticket')
             ->orderByDesc('created_at')

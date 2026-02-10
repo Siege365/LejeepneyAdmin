@@ -119,7 +119,7 @@
                         </td>
                         <td>
                             @if($landmark->icon_image)
-                                <img src="{{ Storage::url($landmark->icon_image) }}" 
+                                <img src="{{ str_starts_with($landmark->icon_image, 'http') ? $landmark->icon_image : Storage::url($landmark->icon_image) }}" 
                                      alt="{{ $landmark->name }}" 
                                      class="table-icon-img">
                             @else
@@ -293,28 +293,4 @@
 
 @push('scripts')
 @vite(['resources/js/pages/landmarks-index.js', 'resources/js/pages/landmarks-batch.js'])
-<script>
-// Single landmark delete - double confirmation
-let pendingDeleteLandmarkId = null;
-
-function showDeleteLandmarkModal(id, name) {
-    pendingDeleteLandmarkId = id;
-    document.getElementById('deleteLandmarkName').textContent = name;
-    document.getElementById('deleteLandmarkModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-function closeDeleteLandmarkModal() {
-    document.getElementById('deleteLandmarkModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-function showDeleteLandmarkConfirm() {
-    closeDeleteLandmarkModal();
-    document.getElementById('deleteLandmarkForm').action = '/landmarks/' + pendingDeleteLandmarkId;
-    document.getElementById('deleteLandmarkConfirmModal').style.display = 'flex';
-}
-function closeDeleteLandmarkConfirm() {
-    document.getElementById('deleteLandmarkConfirmModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-</script>
 @endpush

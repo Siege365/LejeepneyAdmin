@@ -112,7 +112,7 @@
                         
                         @if($landmark->icon_image)
                             <div class="current-icon mb-2" style="padding: 0.75rem; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px;">
-                                <img src="{{ Storage::url($landmark->icon_image) }}" 
+                                <img src="{{ str_starts_with($landmark->icon_image, 'http') ? $landmark->icon_image : Storage::url($landmark->icon_image) }}" 
                                      alt="{{ $landmark->name }}" 
                                      class="img-thumbnail"
                                      style="max-width: 100px; border: 1px solid #E2E8F0;">
@@ -174,7 +174,7 @@
                                 <div class="gallery-preview-grid">
                                     @foreach($landmark->gallery_images as $index => $image)
                                         <div class="gallery-item" style="position: relative; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 0.5rem;">
-                                            <img src="{{ Storage::url($image) }}" 
+                                            <img src="{{ str_starts_with($image, 'http') ? $image : Storage::url($image) }}" 
                                                  alt="Gallery {{ $index + 1 }}" 
                                                  class="img-thumbnail"
                                                  style="width: 100%; height: 100px; object-fit: cover; border: 1px solid #E2E8F0;">

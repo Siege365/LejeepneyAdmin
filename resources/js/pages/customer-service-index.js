@@ -139,3 +139,136 @@ document.addEventListener('DOMContentLoaded', () => CustomerServiceIndex.init())
 
 // Export for use
 window.CustomerServiceIndex = CustomerServiceIndex;
+
+/* ========================================
+   CUSTOMER SERVICE INDEX - DOUBLE CONFIRMATION MODALS
+   Flag, Archive, Restore modal functions
+   ======================================== */
+
+let pendingFlagId = null;
+let pendingArchiveId = null;
+let pendingRestoreId = null;
+
+// Flag modals
+function showTicketFlagModal(id, subject, isFlagged) {
+    pendingFlagId = id;
+    const action = isFlagged ? 'Remove Flag' : 'Flag as Important';
+    const msg = isFlagged 
+        ? 'Are you sure you want to remove the flag from "' + subject + '"?' 
+        : 'Are you sure you want to flag "' + subject + '" as important?';
+    document.getElementById('flagModalTitle').textContent = action;
+    document.getElementById('flagModalMessage').textContent = msg;
+    document.getElementById('flagConfirmMessage').textContent = isFlagged 
+        ? 'The flag will be removed from this ticket.' 
+        : 'This ticket will be flagged as important.';
+    document.getElementById('ticketFlagModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeTicketFlagModal() {
+    document.getElementById('ticketFlagModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showTicketFlagConfirm() {
+    closeTicketFlagModal();
+    document.getElementById('ticketFlagForm').action = '/customer-service/' + pendingFlagId + '/flag';
+    document.getElementById('ticketFlagConfirmModal').style.display = 'flex';
+}
+function closeTicketFlagConfirm() {
+    document.getElementById('ticketFlagConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Archive modals
+function showTicketArchiveModal(id, subject) {
+    pendingArchiveId = id;
+    document.getElementById('archiveTicketSubject').textContent = subject;
+    document.getElementById('ticketArchiveModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeTicketArchiveModal() {
+    document.getElementById('ticketArchiveModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showTicketArchiveConfirm() {
+    closeTicketArchiveModal();
+    document.getElementById('ticketArchiveForm').action = '/customer-service/' + pendingArchiveId + '/archive';
+    document.getElementById('ticketArchiveConfirmModal').style.display = 'flex';
+}
+function closeTicketArchiveConfirm() {
+    document.getElementById('ticketArchiveConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Restore modals
+function showTicketRestoreModal(id, subject) {
+    pendingRestoreId = id;
+    document.getElementById('restoreTicketSubject').textContent = subject;
+    document.getElementById('ticketRestoreModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeTicketRestoreModal() {
+    document.getElementById('ticketRestoreModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showTicketRestoreConfirm() {
+    closeTicketRestoreModal();
+    document.getElementById('ticketRestoreForm').action = '/customer-service/' + pendingRestoreId + '/restore';
+    document.getElementById('ticketRestoreConfirmModal').style.display = 'flex';
+}
+function closeTicketRestoreConfirm() {
+    document.getElementById('ticketRestoreConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Bulk selection (used by inline checkboxes)
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.ticketCheckbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateSelection();
+        });
+    }
+    
+    document.querySelectorAll('.ticketCheckbox').forEach(cb => {
+        cb.addEventListener('change', updateSelection);
+    });
+});
+
+function updateSelection() {
+    const checkboxes = document.querySelectorAll('.ticketCheckbox:checked');
+    const bulkContainer = document.getElementById('bulkActionsContainer');
+    const selectedIdsInput = document.getElementById('selectedTicketIds');
+    
+    if (checkboxes.length > 0) {
+        bulkContainer.classList.add('active');
+        const ids = Array.from(checkboxes).map(cb => cb.value);
+        selectedIdsInput.value = ids.join(',');
+    } else {
+        bulkContainer.classList.remove('active');
+        selectedIdsInput.value = '';
+    }
+}
+
+function clearSelection() {
+    document.getElementById('selectAll').checked = false;
+    document.querySelectorAll('.ticketCheckbox').forEach(cb => cb.checked = false);
+    document.getElementById('bulkActionsContainer').classList.remove('active');
+}
+
+// Expose to global scope for inline onclick handlers
+window.showTicketFlagModal = showTicketFlagModal;
+window.closeTicketFlagModal = closeTicketFlagModal;
+window.showTicketFlagConfirm = showTicketFlagConfirm;
+window.closeTicketFlagConfirm = closeTicketFlagConfirm;
+window.showTicketArchiveModal = showTicketArchiveModal;
+window.closeTicketArchiveModal = closeTicketArchiveModal;
+window.showTicketArchiveConfirm = showTicketArchiveConfirm;
+window.closeTicketArchiveConfirm = closeTicketArchiveConfirm;
+window.showTicketRestoreModal = showTicketRestoreModal;
+window.closeTicketRestoreModal = closeTicketRestoreModal;
+window.showTicketRestoreConfirm = showTicketRestoreConfirm;
+window.closeTicketRestoreConfirm = closeTicketRestoreConfirm;
+window.updateSelection = updateSelection;
+window.clearSelection = clearSelection;

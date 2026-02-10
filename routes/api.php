@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\V1\SupportTicketController;
 use App\Http\Controllers\Api\V1\TicketNotificationController;
 use App\Http\Controllers\Api\V1\RecentActivityController;
+use App\Http\Controllers\Api\V1\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +19,9 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group.
 |
 */
+
+// Public API Endpoints
+Route::get('/v1/settings', [SettingsController::class, 'index']);
 
 // Authentication Routes (Public)
 Route::post('/register', [AuthController::class, 'register']);

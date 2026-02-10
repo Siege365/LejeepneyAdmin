@@ -322,3 +322,129 @@ const CustomerServiceShow = {
 
 // Export for use
 window.CustomerServiceShow = CustomerServiceShow;
+
+/* ========================================
+   CUSTOMER SERVICE SHOW - MODAL CONTROLS
+   Reply, Resolve, In-Progress, Flag, Archive modal functions
+   ======================================== */
+
+// Reply modal - close on backdrop click and Escape
+document.addEventListener('DOMContentLoaded', function() {
+    const replyModal = document.getElementById('replyModal');
+    if (replyModal) {
+        replyModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const replyModal = document.getElementById('replyModal');
+        if (replyModal) {
+            replyModal.style.display = 'none';
+        }
+    }
+});
+
+// Resolve modals
+function showResolveModal() {
+    document.getElementById('resolveModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeResolveModal() {
+    document.getElementById('resolveModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showResolveConfirmModal() {
+    closeResolveModal();
+    document.getElementById('resolveConfirmModal').style.display = 'flex';
+}
+function closeResolveConfirmModal() {
+    document.getElementById('resolveConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// In-Progress modals
+function showInProgressModal() {
+    document.getElementById('inProgressModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeInProgressModal() {
+    document.getElementById('inProgressModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showInProgressConfirmModal() {
+    closeInProgressModal();
+    document.getElementById('inProgressConfirmModal').style.display = 'flex';
+}
+function closeInProgressConfirmModal() {
+    document.getElementById('inProgressConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Flag modals
+function showFlagModal() {
+    document.getElementById('flagModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeFlagModal() {
+    document.getElementById('flagModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showFlagConfirmModal() {
+    closeFlagModal();
+    document.getElementById('flagConfirmModal').style.display = 'flex';
+}
+function closeFlagConfirmModal() {
+    document.getElementById('flagConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Archive modals
+function showArchiveModal() {
+    document.getElementById('archiveModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeArchiveModal() {
+    document.getElementById('archiveModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+function showArchiveConfirmModal() {
+    closeArchiveModal();
+    document.getElementById('archiveConfirmModal').style.display = 'flex';
+}
+function closeArchiveConfirmModal() {
+    document.getElementById('archiveConfirmModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Expose to global scope for inline onclick handlers
+window.showResolveModal = showResolveModal;
+window.closeResolveModal = closeResolveModal;
+window.showResolveConfirmModal = showResolveConfirmModal;
+window.closeResolveConfirmModal = closeResolveConfirmModal;
+window.showInProgressModal = showInProgressModal;
+window.closeInProgressModal = closeInProgressModal;
+window.showInProgressConfirmModal = showInProgressConfirmModal;
+window.closeInProgressConfirmModal = closeInProgressConfirmModal;
+window.showFlagModal = showFlagModal;
+window.closeFlagModal = closeFlagModal;
+window.showFlagConfirmModal = showFlagConfirmModal;
+window.closeFlagConfirmModal = closeFlagConfirmModal;
+window.showArchiveModal = showArchiveModal;
+window.closeArchiveModal = closeArchiveModal;
+window.showArchiveConfirmModal = showArchiveConfirmModal;
+window.closeArchiveConfirmModal = closeArchiveConfirmModal;
+
+// Auto-open reply modal if there are validation errors
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.querySelector('.reply-modal-auto-open')) {
+        const replyModal = document.getElementById('replyModal');
+        if (replyModal) {
+            replyModal.style.display = 'flex';
+        }
+    }
+});

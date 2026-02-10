@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\LandmarkController;
 use App\Http\Controllers\Admin\CustomerServiceController;
 use App\Http\Controllers\Admin\AccountSettingsController;
 use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -99,7 +100,21 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Notifications
     Route::prefix('notifications')->name('admin.notifications.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('/dropdown', [NotificationController::class, 'dropdown'])->name('dropdown');
         Route::post('/{id}/read', [NotificationController::class, 'markAsRead'])->name('mark-read');
         Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+    });
+
+    // Audit Trail
+    Route::prefix('audit-trail')->name('admin.audit-trail.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\AuditTrailController::class, 'index'])->name('index');
+        Route::get('/{id}', [\App\Http\Controllers\Admin\AuditTrailController::class, 'show'])->name('show');
+        Route::get('/export/csv', [\App\Http\Controllers\Admin\AuditTrailController::class, 'export'])->name('export');
+    });
+
+    // Settings
+    Route::prefix('settings')->name('admin.settings.')->group(function () {
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::put('/', [SettingsController::class, 'update'])->name('update');
     });
 });

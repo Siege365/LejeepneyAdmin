@@ -75,7 +75,7 @@
                     <th>Activity</th>
                     <th class="th-user">User</th>
                     <th class="th-date">Date & Time</th>
-                    <th class="th-status">Status</th>
+                    <th class="th-status">Action</th>
                 </tr>
             </thead>
             <tbody>

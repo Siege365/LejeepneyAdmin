@@ -840,6 +840,15 @@
      * Initialize when DOM is ready
      */
     function init() {
+        // In create mode, generate a random color
+        if (config.mode === 'create' && elements.colorInput) {
+            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
+            elements.colorInput.value = randomColor;
+            if (elements.colorValue) {
+                elements.colorValue.textContent = randomColor;
+            }
+        }
+
         initMap();
         
         // Initialize color value display

@@ -59,6 +59,18 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('admin.audit-trail.index') }}" class="{{ request()->routeIs('admin.audit-trail.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <span>Audit Trail</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('admin.settings.index') }}" class="{{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('register') }}" class="{{ request()->routeIs('register') ? 'active' : '' }}">
                     <i class="fa-solid fa-user-plus"></i>
                     <span>Add Admin User</span>
@@ -177,7 +189,7 @@
                         </div>
                         @if($headerNotifications->count() > 0)
                         <div class="notification-dropdown-footer">
-                            <a href="{{ route('admin.customer-service.index') }}" class="notification-view-all">
+                            <a href="{{ route('admin.notifications.index') }}" class="notification-view-all">
                                 View All Notifications
                             </a>
                         </div>

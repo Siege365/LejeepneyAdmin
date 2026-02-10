@@ -464,94 +464,6 @@
 @endsection
 
 @push('scripts')
-<script>
-// Modal controls
-document.getElementById('replyModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        this.style.display = 'none';
-    }
-});
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        document.getElementById('replyModal').style.display = 'none';
-    }
-});
-
-// Auto-open modal if there are validation errors
-@if($errors->any())
-document.getElementById('replyModal').style.display = 'flex';
-@endif
-
-// Action modals functions
-function showResolveModal() {
-    document.getElementById('resolveModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-function closeResolveModal() {
-    document.getElementById('resolveModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-function showResolveConfirmModal() {
-    closeResolveModal();
-    document.getElementById('resolveConfirmModal').style.display = 'flex';
-}
-function closeResolveConfirmModal() {
-    document.getElementById('resolveConfirmModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-
-function showInProgressModal() {
-    document.getElementById('inProgressModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-function closeInProgressModal() {
-    document.getElementById('inProgressModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-function showInProgressConfirmModal() {
-    closeInProgressModal();
-    document.getElementById('inProgressConfirmModal').style.display = 'flex';
-}
-function closeInProgressConfirmModal() {
-    document.getElementById('inProgressConfirmModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-
-function showFlagModal() {
-    document.getElementById('flagModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-function closeFlagModal() {
-    document.getElementById('flagModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-function showFlagConfirmModal() {
-    closeFlagModal();
-    document.getElementById('flagConfirmModal').style.display = 'flex';
-}
-function closeFlagConfirmModal() {
-    document.getElementById('flagConfirmModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-
-function showArchiveModal() {
-    document.getElementById('archiveModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-function closeArchiveModal() {
-    document.getElementById('archiveModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-function showArchiveConfirmModal() {
-    closeArchiveModal();
-    document.getElementById('archiveConfirmModal').style.display = 'flex';
-}
-function closeArchiveConfirmModal() {
-    document.getElementById('archiveConfirmModal').style.display = 'none';
-    document.body.style.overflow = '';
-}
-</script>
 @vite('resources/js/pages/customer-service-show.js')
 <!-- EmailJS SDK -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -579,4 +491,7 @@ function closeArchiveConfirmModal() {
         setTimeout(() => clearInterval(initWhenReady), 5000);
     });
 </script>
+@if($errors->any())
+<div class="reply-modal-auto-open" style="display:none;"></div>
+@endif
 @endpush
