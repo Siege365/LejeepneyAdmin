@@ -9,31 +9,32 @@
 @section('content')
 <div class="content-wrapper">
     <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-header-left">
-            <h1>
-                <i class="fa-solid fa-clipboard-list"></i>
-                Audit Trail
-            </h1>
-            <p class="page-subtitle">Complete history of all system activities and changes</p>
-        </div>
-        <div class="page-header-right">
-            <button type="button" class="btn btn-outline" id="toggleFilters">
-                <i class="fa-solid fa-filter"></i>
-                Filters
-            </button>
-            <form action="{{ route('admin.audit-trail.export') }}" method="GET" id="exportForm" style="display: inline;">
-                <input type="hidden" name="user_id" value="{{ request('user_id') }}">
-                <input type="hidden" name="action" value="{{ request('action') }}">
-                <input type="hidden" name="model_type" value="{{ request('model_type') }}">
-                <input type="hidden" name="date_from" value="{{ request('date_from') }}">
-                <input type="hidden" name="date_to" value="{{ request('date_to') }}">
-                <input type="hidden" name="search" value="{{ request('search') }}">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-download"></i>
-                    Export CSV
+    <div class="card cs-page-header">
+        <div class="card-header">
+            <div>
+                <h2 class="cs-page-title">
+                    Audit Trail
+                </h2>
+                <p class="cs-page-subtitle">Complete history of all system activities and changes</p>
+            </div>
+            <div class="header-actions">
+                <button type="button" class="btn btn-outline" id="toggleFilters">
+                    <i class="fa-solid fa-filter"></i>
+                    Filters
                 </button>
-            </form>
+                <form action="{{ route('admin.audit-trail.export') }}" method="GET" id="exportForm" style="display: inline;">
+                    <input type="hidden" name="user_id" value="{{ request('user_id') }}">
+                    <input type="hidden" name="action" value="{{ request('action') }}">
+                    <input type="hidden" name="model_type" value="{{ request('model_type') }}">
+                    <input type="hidden" name="date_from" value="{{ request('date_from') }}">
+                    <input type="hidden" name="date_to" value="{{ request('date_to') }}">
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-download"></i>
+                        Export CSV
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 

@@ -92,23 +92,23 @@ landmarks (standalone)
 
 ### `support_tickets`
 
-| Column      | Type                                       | Attributes           |
-| ----------- | ------------------------------------------ | -------------------- |
-| id          | bigint                                     | PK, auto-increment   |
-| user_id     | bigint                                     | nullable, FK → users |
-| admin_id    | bigint                                     | nullable, FK → users |
-| subject     | string                                     | required             |
-| message     | text                                       | required             |
-| name        | string                                     | customer name        |
-| email       | string                                     | customer email       |
-| type        | enum                                       | see below            |
-| priority    | enum(`low`, `medium`, `high`, `urgent`)    | default: `medium`    |
-| status      | enum(`pending`, `in-progress`, `resolved`) | default: `pending`   |
-| is_flagged  | boolean                                    | default: false       |
-| is_archived | boolean                                    | default: false       |
-| archived_at | timestamp                                  | nullable             |
-| created_at  | timestamp                                  |                      |
-| updated_at  | timestamp                                  |                      |
+| Column      | Type                                                    | Attributes           |
+| ----------- | ------------------------------------------------------- | -------------------- |
+| id          | bigint                                                  | PK, auto-increment   |
+| user_id     | bigint                                                  | nullable, FK → users |
+| admin_id    | bigint                                                  | nullable, FK → users |
+| subject     | string                                                  | required             |
+| message     | text                                                    | required             |
+| name        | string                                                  | customer name        |
+| email       | string                                                  | customer email       |
+| type        | enum                                                    | see below            |
+| priority    | enum(`low`, `medium`, `high`, `urgent`)                 | default: `medium`    |
+| status      | enum(`pending`, `in-progress`, `resolved`, `cancelled`) | default: `pending`   |
+| is_flagged  | boolean                                                 | default: false       |
+| is_archived | boolean                                                 | default: false       |
+| archived_at | timestamp                                               | nullable             |
+| created_at  | timestamp                                               |                      |
+| updated_at  | timestamp                                               |                      |
 
 **Type values:** `general`, `technical`, `billing`, `feedback`, `other`, `complaint`, `bug`, `inquiry`, `suggestion`, `report`
 
@@ -118,16 +118,19 @@ landmarks (standalone)
 
 ### `ticket_replies`
 
-| Column            | Type      | Attributes                            |
-| ----------------- | --------- | ------------------------------------- |
-| id                | bigint    | PK, auto-increment                    |
-| support_ticket_id | bigint    | FK → support_tickets (cascade delete) |
-| admin_id          | bigint    | nullable, FK → users                  |
-| message           | text      | required                              |
-| admin_name        | string    | default: `Admin Support`              |
-| email_sent        | boolean   | default: false                        |
-| created_at        | timestamp |                                       |
-| updated_at        | timestamp |                                       |
+| Column            | Type                      | Attributes                            |
+| ----------------- | ------------------------- | ------------------------------------- |
+| id                | bigint                    | PK, auto-increment                    |
+| support_ticket_id | bigint                    | FK → support_tickets (cascade delete) |
+| sender_type       | enum(`admin`, `customer`) | default: `admin`                      |
+| admin_id          | bigint                    | nullable, FK → users                  |
+| user_id           | bigint                    | nullable, FK → users (set null)       |
+| sender_name       | string                    | nullable                              |
+| message           | text                      | required                              |
+| admin_name        | string                    | nullable, default: `Admin Support`    |
+| email_sent        | boolean                   | default: false                        |
+| created_at        | timestamp                 |                                       |
+| updated_at        | timestamp                 |                                       |
 
 ---
 
@@ -193,6 +196,30 @@ landmarks (standalone)
 
 ---
 
+### `app_settings`
+
+| Column      | Type      | Attributes                                        |
+| ----------- | --------- | ------------------------------------------------- |
+| id          | bigint    | PK, auto-increment                                |
+| key         | string    | unique, indexed                                   |
+| value       | text      | required                                          |
+| type        | string    | default: `string` (string, number, boolean, json) |
+| description | text      | nullable                                          |
+| is_public   | boolean   | default: true                                     |
+| created_at  | timestamp |                                                   |
+| updated_at  | timestamp |                                                   |
+
+**Indexes:** `key`
+
+**Default Records:**
+
+| Key         | Value | Type   | Description                            |
+| ----------- | ----- | ------ | -------------------------------------- |
+| base_fare   | 13.00 | number | Minimum fare charged for jeepney rides |
+| fare_per_km | 1.80  | number | Additional fare per kilometer traveled |
+
+---
+
 ### Framework Tables
 
 | Table                    | Purpose                      |
@@ -220,6 +247,7 @@ landmarks (standalone)
 | `TicketNotification` | ticket_notifications | belongsTo ticket                                             |
 | `ActivityLog`        | activity_logs        | belongsTo user                                               |
 | `RecentActivity`     | recent_activities    | belongsTo user                                               |
+| `AppSetting`         | app_settings         | — (key-value store, static get/set helpers)                  |
 
 ---
 
@@ -246,10 +274,14 @@ php artisan migrate:status
 
 ## Seeders
 
-| Seeder           | Purpose                              |
-| ---------------- | ------------------------------------ |
-| `DatabaseSeeder` | Master seeder, calls all sub-seeders |
-| `LandmarkSeeder` | Seeds sample landmark data           |
+| Seeder                | Purpose                                              |
+| --------------------- | ---------------------------------------------------- |
+| `DatabaseSeeder`      | Master seeder, calls all sub-seeders                 |
+| `LandmarkSeeder`      | Seeds sample landmark data                           |
+| `AppSettingSeeder`    | Seeds default fare settings (base_fare, fare_per_km) |
+| `AdminUserSeeder`     | Seeds default admin user account                     |
+| `JeepneyRouteSeeder`  | Seeds sample jeepney route data                      |
+| `SupportTicketSeeder` | Seeds sample support tickets                         |
 
 ```bash
 # Run all seeders

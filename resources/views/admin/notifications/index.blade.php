@@ -9,24 +9,25 @@
 @section('content')
 <div class="content-wrapper">
     <!-- Page Header -->
-    <div class="page-header">
-        <div class="page-header-left">
-            <h1>
-                <i class="fa-solid fa-bell"></i>
-                Notifications
-            </h1>
-            <p class="page-subtitle">View all your notifications</p>
-        </div>
-        <div class="page-header-right">
-            @if($notifications->total() > 0)
-            <form action="{{ route('admin.notifications.mark-all-read') }}" method="POST" class="mark-all-read-form" style="display: inline;">
-                @csrf
-                <button type="submit" class="btn btn-outline">
-                    <i class="fa-solid fa-check-double"></i>
-                    Mark All as Read
-                </button>
-            </form>
-            @endif
+    <div class="card cs-page-header">
+        <div class="card-header">
+            <div>
+                <h2 class="cs-page-title">
+                    Notifications
+                </h2>
+                <p class="cs-page-subtitle">View all your notifications</p>
+            </div>
+            <div class="header-actions">
+                @if($notifications->total() > 0)
+                <form action="{{ route('admin.notifications.mark-all-read') }}" method="POST" class="mark-all-read-form" style="display: inline;">
+                    @csrf
+                    <button type="submit" class="btn btn-outline">
+                        <i class="fa-solid fa-check-double"></i>
+                        Mark All as Read
+                    </button>
+                </form>
+                @endif
+            </div>
         </div>
     </div>
 

@@ -131,6 +131,61 @@ Handle support tickets submitted by mobile app users.
 | Pending     | Yellow      | New or awaiting response |
 | In Progress | Blue        | Being handled by admin   |
 | Resolved    | Green       | Issue resolved           |
+| Cancelled   | Gray        | Cancelled by customer    |
+
+---
+
+## Audit Trail
+
+**Route:** `/audit-trail`
+
+Searchable, filterable log of all admin actions across the system.
+
+### Features
+
+| Feature         | Description                                                         |
+| --------------- | ------------------------------------------------------------------- |
+| **List**        | View all activity logs with pagination                              |
+| **Search**      | Search by description, user name, model name                        |
+| **Filter**      | By action (created, updated, deleted), model type, user, date range |
+| **View Detail** | See full log entry with changes JSON                                |
+| **CSV Export**  | Export filtered results to CSV file                                 |
+
+### Log Entry Fields
+
+- Action (created, updated, deleted)
+- Model Type (Route, Landmark, User, Ticket, Setting, etc.)
+- Model Name
+- User who performed the action
+- Description
+- Changes (JSON diff)
+- IP Address
+- Timestamp
+
+---
+
+## Settings / Configuration
+
+**Route:** `/settings`
+
+Manage application-wide settings that are also exposed to the Flutter mobile app via API.
+
+### Features
+
+| Feature              | Description                                                         |
+| -------------------- | ------------------------------------------------------------------- |
+| **View Settings**    | See current base fare and fare per km values                        |
+| **Update Settings**  | Modify fare values with double-confirmation modal                   |
+| **Validation**       | Ensures values are valid positive numbers                           |
+| **API Exposure**     | Settings marked `is_public` are available at `GET /api/v1/settings` |
+| **Activity Logging** | All changes are logged in the audit trail                           |
+
+### Current Settings
+
+| Setting     | Default | Description                                  |
+| ----------- | ------- | -------------------------------------------- |
+| base_fare   | 13.00   | Minimum fare charged for jeepney rides (PHP) |
+| fare_per_km | 1.80    | Additional fare per kilometer traveled (PHP) |
 
 ---
 

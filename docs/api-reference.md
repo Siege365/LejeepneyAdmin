@@ -11,6 +11,7 @@ REST API endpoints for the **LeJeepney Flutter mobile app**.
 ## Table of Contents
 
 - [Authentication](#authentication)
+- [Settings](#settings)
 - [Routes](#routes)
 - [Landmarks](#landmarks)
 - [Support Tickets](#support-tickets)
@@ -86,6 +87,39 @@ POST /api/logout
 ```
 
 🔒 **Requires:** `Authorization: Bearer <token>`
+
+---
+
+## Settings
+
+### Get Public Settings
+
+```
+GET /api/v1/settings
+```
+
+🔓 **Public** — No authentication required.
+
+Returns all app settings marked as public (e.g., fare configuration).
+
+**Response:**
+
+```json
+{
+    "success": true,
+    "data": {
+        "base_fare": 13.0,
+        "fare_per_km": 1.8
+    }
+}
+```
+
+| Field       | Type  | Description                                  |
+| ----------- | ----- | -------------------------------------------- |
+| base_fare   | float | Minimum fare charged for jeepney rides (PHP) |
+| fare_per_km | float | Additional fare per kilometer traveled (PHP) |
+
+> Values are automatically type-cast (numbers returned as floats, not strings).
 
 ---
 
@@ -247,6 +281,20 @@ POST /api/v1/support/tickets/{id}/message
 | --------- | ------ | -------- | ---------------- |
 | email     | string | ✅       | Customer's email |
 | message   | string | ✅       | Message content  |
+
+---
+
+### Cancel Ticket
+
+```
+PUT /api/v1/support/tickets/{id}/cancel
+```
+
+| Parameter | Type   | Required | Description                       |
+| --------- | ------ | -------- | --------------------------------- |
+| email     | string | ✅       | Customer's email for verification |
+
+Changes the ticket status to `cancelled`.
 
 ---
 

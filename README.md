@@ -42,12 +42,15 @@ A Laravel-based web admin panel for managing jeepney routes, landmarks, and cust
 - **Email Notifications** — EmailJS integration to notify customers on ticket replies
 - **Account Settings** — Profile update, password change, account deletion
 - **Notifications** — In-app notification system
+- **Audit Trail** — Searchable, filterable activity log with CSV export
+- **Settings / Configuration** — Manage fare settings (base fare, fare per km) exposed via API
 
 ### REST API (for Flutter App)
 
 - **Routes** — List, search, find routes between points, get route paths
 - **Landmarks** — List, filter by category, featured, nearby search
 - **Support Tickets** — Create tickets, add messages, view notifications
+- **Settings** — Fetch public app settings (base fare, fare per km)
 - **Authentication** — Register, login, token-based auth via Sanctum
 
 ---

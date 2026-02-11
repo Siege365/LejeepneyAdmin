@@ -95,7 +95,6 @@
                     @error('password')
                         <span class="form-error">{{ $message }}</span>
                     @enderror
-                    <p class="form-hint">Minimum 8 characters</p>
                 </div>
 
                 <div class="form-group">

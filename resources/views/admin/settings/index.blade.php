@@ -9,10 +9,13 @@
 
 @section('content')
 <div class="settings-container">
-    <div class="settings-header">
-        <div>
-            <h1 class="settings-title">Settings</h1>
-            <p class="settings-subtitle">Configure application settings and preferences</p>
+    <!-- Page Header -->
+    <div class="card cs-page-header">
+        <div class="card-header">
+            <div>
+                <h2 class="cs-page-title">Settings</h2>
+                <p class="cs-page-subtitle">Configure application settings and preferences</p>
+            </div>
         </div>
     </div>
 
