@@ -18,8 +18,8 @@
     @vite(['resources/css/admin-bundle.css', 'resources/js/admin-bundle.js'])
 
     <!-- Favicon -->
-    <link rel="icon" href="{{ asset('assets/images/Logo.svg') }}" type="image/svg+xml">
-    <link rel="shortcut icon" href="{{ asset('assets/images/Logo.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('assets/images/LeJeepneyFinal.svg') }}" type="image/svg+xml">
+    <link rel="shortcut icon" href="{{ asset('assets/images/LeJeepneyFinal.svg') }}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{ asset('assets/images/LogoSignInPage.png') }}">
     <meta name="theme-color" content="#F59E0B">
     
@@ -29,8 +29,8 @@
     <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <img src="{{ asset('assets/images/Logo.svg') }}" alt="Lejeepney Logo" class="sidebar-logo">
-            <span class="sidebar-brand">Lejeepney</span>
+            <img src="{{ asset('assets/images/LeJeepneyFinal.svg') }}" alt="LeJeepney Logo" class="sidebar-logo">
+            <span class="sidebar-brand">LeJeepney</span>
         </div>
         
         <ul class="nav-links">

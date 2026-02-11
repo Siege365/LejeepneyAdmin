@@ -2,7 +2,7 @@
  * Route Map JavaScript
  * Handles map functionality for creating and editing routes
  * Uses OSRM for road-snapped routing
- * Lejeepney Admin Panel
+ * LeJeepney Admin Panel
  */
 
 (function() {

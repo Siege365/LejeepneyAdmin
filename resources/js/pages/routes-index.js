@@ -1,6 +1,7 @@
 /* ========================================
    ROUTES INDEX PAGE JS
    Route listing page modal functionality
+   LeJeepney Admin Panel
    ======================================== */
 
 // Single route delete - double confirmation

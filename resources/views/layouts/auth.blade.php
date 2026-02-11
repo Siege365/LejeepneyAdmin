@@ -22,7 +22,7 @@
         <div class="auth-card">
             <!-- Logo -->
             <div class="auth-logo">
-                <img src="{{ asset('assets/images/Logo.svg') }}" alt="Lejeepney Logo">
+                <img src="{{ asset('assets/images/LeJeepneyFinal.svg') }}" alt="LeJeepney Logo">
             </div>
             
             @yield('content')

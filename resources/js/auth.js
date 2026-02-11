@@ -265,7 +265,7 @@ function initFormEnhancements() {
         const rememberCheck = loginForm.querySelector('input[name="remember"]');
         
         // Load saved email
-        const savedEmail = localStorage.getItem('lejeepney_remembered_email');
+        const savedEmail = localStorage.getItem('LeJeepney_remembered_email');
         if (savedEmail && emailInput) {
             emailInput.value = savedEmail;
             if (rememberCheck) rememberCheck.checked = true;
@@ -280,9 +280,9 @@ function initFormEnhancements() {
         // Save email on submit
         loginForm.addEventListener('submit', function() {
             if (rememberCheck?.checked && emailInput) {
-                localStorage.setItem('lejeepney_remembered_email', emailInput.value);
+                localStorage.setItem('LeJeepney_remembered_email', emailInput.value);
             } else {
-                localStorage.removeItem('lejeepney_remembered_email');
+                localStorage.removeItem('LeJeepney_remembered_email');
             }
         });
     }

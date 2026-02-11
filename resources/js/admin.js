@@ -1,6 +1,6 @@
 /**
  * Admin JavaScript - Dashboard Layout
- * Lejeepney Admin Panel - Enhanced UX
+ * LeJeepney Admin Panel - Enhanced UX
  */
 
 document.addEventListener('DOMContentLoaded', function() {

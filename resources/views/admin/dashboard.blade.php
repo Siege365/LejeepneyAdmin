@@ -11,7 +11,7 @@
 <!-- Welcome Section -->
 <div class="card welcome-card">
     <h2 class="welcome-title">Welcome back, {{ Auth::user()->name }}! 👋</h2>
-    <p class="welcome-subtitle">Here's what's happening with your Lejeepney admin panel today.</p>
+    <p class="welcome-subtitle">Here's what's happening with your LeJeepney admin panel today.</p>
 </div>
 
 <!-- Stats Grid -->
