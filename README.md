@@ -2,7 +2,7 @@
 
 **Jeepney Route Management System — Admin Panel & API**
 
-A Laravel-based web admin panel for managing jeepney routes, landmarks, and customer support tickets in Cebu. Includes a REST API consumed by the **LeJeepney Flutter mobile app**.
+A Laravel-based web admin panel for managing jeepney routes, landmarks, and customer support tickets in Davao. Includes a REST API consumed by the **LeJeepney Flutter mobile app**.
 
 ---
 
@@ -143,15 +143,17 @@ LejeepneyAdmin/
 
 Detailed documentation is in the [`docs/`](docs/) folder:
 
-| Document                                 | Description                                   |
-| ---------------------------------------- | --------------------------------------------- |
-| [Setup Guide](docs/setup.md)             | Local development environment setup           |
-| [Deployment Guide](docs/deployment.md)   | Production deployment & environment checklist |
-| [API Reference](docs/api-reference.md)   | All REST API endpoints with params & examples |
-| [Admin Panel Guide](docs/admin-panel.md) | Features, modules, and usage guide            |
-| [Database Schema](docs/database.md)      | Models, tables, relationships                 |
-| [Security](docs/security.md)             | Security measures & best practices            |
-| [EmailJS Integration](docs/emailjs.md)   | Email notification setup & configuration      |
+| Document                                                 | Description                                    |
+| -------------------------------------------------------- | ---------------------------------------------- |
+| [System Overview](docs/system-overview.md)               | Architecture, data flows, and how it all works |
+| [Mobile App Integration](docs/mobile-app-integration.md) | Flutter app API guide with examples            |
+| [Setup Guide](docs/setup.md)                             | Local development environment setup            |
+| [Deployment Guide](docs/deployment.md)                   | Production deployment & environment checklist  |
+| [API Reference](docs/api-reference.md)                   | All REST API endpoints with params & examples  |
+| [Admin Panel Guide](docs/admin-panel.md)                 | Features, modules, and usage guide             |
+| [Database Schema](docs/database.md)                      | Models, tables, relationships                  |
+| [Security](docs/security.md)                             | Security measures & best practices             |
+| [EmailJS Integration](docs/emailjs.md)                   | Email notification setup & configuration       |
 
 ---
 

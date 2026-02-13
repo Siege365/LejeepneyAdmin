@@ -2,6 +2,8 @@
 
 Complete reference of all database tables, columns, and relationships.
 
+> For a high-level overview of how the system works, see [system-overview.md](system-overview.md).
+
 ---
 
 ## Entity Relationship Overview

@@ -6,6 +6,12 @@ REST API endpoints for the **LeJeepney Flutter mobile app**.
 
 **Rate Limit:** All v1 endpoints are rate-limited to **60 requests per minute**.
 
+**Authentication:** Token-based via [Laravel Sanctum](https://laravel.com/docs/sanctum). Tokens expire after **30 days** by default.
+
+**Content-Type:** `application/json`
+
+> Endpoints marked with 🔒 require an `Authorization: Bearer <token>` header. Endpoints marked with 🔓 are publicly accessible.
+
 ---
 
 ## Table of Contents
@@ -17,6 +23,9 @@ REST API endpoints for the **LeJeepney Flutter mobile app**.
 - [Support Tickets](#support-tickets)
 - [Ticket Notifications](#ticket-notifications)
 - [Recent Activities](#recent-activities)
+- [Error Responses](#error-responses)
+
+> 📱 For a Flutter-specific integration guide, see [mobile-app-integration.md](mobile-app-integration.md)
 
 ---
 
@@ -164,12 +173,17 @@ Returns all routes with their coordinate paths for map rendering.
 POST /api/v1/routes/find
 ```
 
-| Parameter | Type  | Required | Description           |
-| --------- | ----- | -------- | --------------------- |
-| start_lat | float | ✅       | Starting latitude     |
-| start_lng | float | ✅       | Starting longitude    |
-| end_lat   | float | ✅       | Destination latitude  |
-| end_lng   | float | ✅       | Destination longitude |
+| Parameter | Type  | Required | Default | Description                                        |
+| --------- | ----- | -------- | ------- | -------------------------------------------------- |
+| from_lat  | float | ✅       | —       | Starting latitude                                  |
+| from_lng  | float | ✅       | —       | Starting longitude                                 |
+| to_lat    | float | ✅       | —       | Destination latitude                               |
+| to_lng    | float | ✅       | —       | Destination longitude                              |
+| tolerance | float | ❌       | 0.5     | Max walking distance to/from route in km (0.1–2.0) |
+
+**Response includes:** boarding/alighting points, walking distances, walk times, ride distance, fare breakdown (regular/student/senior), and relevance score. Routes are sorted by relevance (lower = better).
+
+**Fare calculation:** Base fare ₱13.00 (first 4km) + ₱1.80/km thereafter. Student/senior: 20% discount.
 
 ---
 
@@ -238,12 +252,16 @@ POST /api/v1/landmarks/nearby
 POST /api/v1/support/tickets
 ```
 
-| Parameter | Type   | Required | Description         |
-| --------- | ------ | -------- | ------------------- |
-| name      | string | ✅       | Customer's name     |
-| email     | string | ✅       | Customer's email    |
-| subject   | string | ✅       | Ticket subject      |
-| message   | string | ✅       | Ticket message body |
+🔓 **Public** — No authentication required (but `user_id` is auto-attached if authenticated).
+
+| Parameter | Type   | Required | Description                                                                                                   |
+| --------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------- |
+| name      | string | ✅       | Customer's name                                                                                               |
+| email     | string | ✅       | Customer's email                                                                                              |
+| subject   | string | ✅       | Ticket subject                                                                                                |
+| message   | string | ✅       | Ticket message body (10–5000 chars)                                                                           |
+| type      | string | ❌       | `general`, `technical`, `billing`, `feedback`, `complaint`, `bug`, `inquiry`, `suggestion`, `report`, `other` |
+| priority  | string | ❌       | `low`, `medium` (default), `high`, `urgent`                                                                   |
 
 ---
 
@@ -370,9 +388,12 @@ DELETE /api/v1/support/notifications/{id}
 GET /api/v1/recent-activities
 ```
 
-| Parameter | Type   | Required | Description          |
-| --------- | ------ | -------- | -------------------- |
-| email     | string | ❌       | Filter by user email |
+🔒 **Requires:** `Authorization: Bearer <token>` (returns empty for guests)
+
+| Parameter     | Type   | Required | Description                        |
+| ------------- | ------ | -------- | ---------------------------------- |
+| limit         | int    | ❌       | Max results (default: 20, max: 50) |
+| activity_type | string | ❌       | Filter by activity type            |
 
 ---
 
@@ -382,10 +403,18 @@ GET /api/v1/recent-activities
 POST /api/v1/recent-activities
 ```
 
-| Parameter   | Type   | Required | Description          |
-| ----------- | ------ | -------- | -------------------- |
-| action      | string | ✅       | Activity type        |
-| description | string | ✅       | Activity description |
+| Parameter     | Type   | Required | Description                                                                                                                                  |
+| ------------- | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| activity_type | string | ✅       | One of: `route_calculated`, `fare_calculated`, `location_search`, `route_saved`, `ticket_created`, `ticket_replied`, `ticket_status_changed` |
+| title         | string | ✅       | Display title (max 255 chars)                                                                                                                |
+| subtitle      | string | ❌       | Secondary display text                                                                                                                       |
+| from_location | string | ❌       | Origin location name                                                                                                                         |
+| to_location   | string | ❌       | Destination location name                                                                                                                    |
+| route_names   | string | ❌       | Comma-separated route names                                                                                                                  |
+| fare          | float  | ❌       | Calculated fare (0–9999.99)                                                                                                                  |
+| metadata      | object | ❌       | Additional JSON data                                                                                                                         |
+
+> **Limit:** Each user can store a maximum of **50 activities**. Oldest are deleted when the limit is exceeded.
 
 ---
 
@@ -395,9 +424,11 @@ POST /api/v1/recent-activities
 POST /api/v1/recent-activities/batch
 ```
 
-| Parameter  | Type  | Required | Description               |
-| ---------- | ----- | -------- | ------------------------- |
-| activities | array | ✅       | Array of activity objects |
+| Parameter  | Type  | Required | Description                                  |
+| ---------- | ----- | -------- | -------------------------------------------- |
+| activities | array | ✅       | Array of activity objects (max 50 per batch) |
+
+Each object in the array accepts the same fields as the Create Activity endpoint above.
 
 ---
 

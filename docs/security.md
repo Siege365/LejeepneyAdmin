@@ -70,8 +70,11 @@ API routes use **Sanctum token authentication** instead of CSRF.
 ### API (Mobile App)
 
 - **Laravel Sanctum** token-based authentication
-- Tokens issued on login: `$user->createToken('auth_token')`
+- Tokens issued on login: `$user->createToken('mobile-app')`
+- Tokens expire after **30 days** by default (configurable via `SANCTUM_TOKEN_EXPIRATION`)
 - Protected routes require `auth:sanctum` middleware
+- **Role separation:** Only `role = 'user'` accounts can log in via the API. Admin accounts receive HTTP 403.
+- Logout deletes only the current access token (not all user tokens)
 
 ---
 

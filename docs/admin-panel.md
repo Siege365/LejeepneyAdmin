@@ -2,6 +2,8 @@
 
 Overview of all admin panel modules, features, and how to use them.
 
+> For the full system architecture and how the admin panel connects to the mobile app, see [system-overview.md](system-overview.md).
+
 ---
 
 ## Accessing the Admin Panel
@@ -84,11 +86,11 @@ Manage points of interest (landmarks) that users can discover on the mobile app.
 ### Landmark Fields
 
 - Name, Description
-- Category (mall, school, church, hospital, government, terminal, park, market, hotel, restaurant, other)
+- Category (city_center, mall, school, hospital, transport, other)
 - Latitude / Longitude (via map picker)
-- Address
-- Featured (yes/no)
-- Gallery Images (multiple uploads)
+- Featured (yes/no) — featured landmarks are highlighted in the mobile app
+- Icon Image (file upload or external URL, max 2MB, 50–2048px)
+- Gallery Images (multiple file uploads or external URLs, max 5MB each, 100–4096px)
 
 ### Map Picker
 
@@ -186,6 +188,8 @@ Manage application-wide settings that are also exposed to the Flutter mobile app
 | ----------- | ------- | -------------------------------------------- |
 | base_fare   | 13.00   | Minimum fare charged for jeepney rides (PHP) |
 | fare_per_km | 1.80    | Additional fare per kilometer traveled (PHP) |
+
+These settings are synced to the mobile app via `GET /api/v1/settings`. The mobile app fetches them on startup to calculate fares with the latest rates.
 
 ---
 
