@@ -94,6 +94,21 @@ LeJeepney is a **jeepney route navigation and information system** for Davao Cit
     - **Relevance score** — walking is penalized 3x vs riding for ranking
 5. Results are sorted by relevance and returned to the app
 
+> **Optional:** The request can include `include_walking_paths=true`, which instructs the server to enrich walking segments with turn-by-turn directions from the walking route service.
+
+### 2b. Walking Route Queries (Transfer Paths)
+
+For routes with transfers, users need walking directions between jeepney stops. The backend provides a secure proxy:
+
+1. Mobile app sends `POST /api/v1/walking-route` with start/end coordinates
+2. The API checks the 1-hour cache (keyed by rounded coordinates)
+3. If not cached, the API calls **OpenRouteService** (primary, requires `ORS_API_KEY` in `.env`)
+4. If ORS fails, it falls back to **OSRM** (public, no API key required)
+5. The result (path array + distance + duration) is cached for 1 hour
+6. The mobile app receives the walking path and renders it on the map
+
+**Security note:** The `ORS_API_KEY` is stored **only** on the server. The mobile app never calls ORS or OSRM directly, preventing API key exposure and reducing costs through server-side caching.
+
 ### 3. Support Ticket Lifecycle
 
 ```

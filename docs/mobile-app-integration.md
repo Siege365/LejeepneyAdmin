@@ -267,6 +267,106 @@ Walking distance is penalized **3x** because users prefer routes they can reach 
 
 ---
 
+### Walking Route Directions
+
+For routes with transfers, users need walking directions between boarding/alighting points. The backend provides a **secure proxy endpoint** for walking route queries.
+
+#### Why Use the Proxy?
+
+The walking route endpoint:
+
+- **Secures API keys** — ORS_API_KEY stays on the server, never exposed to mobile devices
+- **Saves costs** — results are cached for 1 hour, reducing external API calls
+- **Provides fallback** — tries OpenRouteService first, falls back to OSRM (free, no key) if ORS fails
+
+> ⚠️ **Important:** Do NOT call OpenRouteService or OSRM APIs directly from the Flutter app. Always use this proxy endpoint.
+
+#### API Call
+
+```
+POST /api/v1/walking-route
+```
+
+```json
+{
+    "from_lat": 10.3157,
+    "from_lng": 123.8854,
+    "to_lat": 10.3165,
+    "to_lng": 123.887
+}
+```
+
+| Parameter  | Type  | Required | Description                            |
+| ---------- | ----- | -------- | -------------------------------------- |
+| `from_lat` | float | Yes      | Starting point latitude (-90 to 90)    |
+| `from_lng` | float | Yes      | Starting point longitude (-180 to 180) |
+| `to_lat`   | float | Yes      | Destination latitude (-90 to 90)       |
+| `to_lng`   | float | Yes      | Destination longitude (-180 to 180)    |
+
+#### Response Structure (200)
+
+```json
+{
+    "success": true,
+    "data": {
+        "path": [
+            { "lat": 10.3157, "lng": 123.8854 },
+            { "lat": 10.316, "lng": 123.886 },
+            { "lat": 10.3165, "lng": 123.887 }
+        ],
+        "distance_km": 0.15,
+        "duration_minutes": 2
+    }
+}
+```
+
+| Field              | Type  | Description                               |
+| ------------------ | ----- | ----------------------------------------- |
+| `path`             | array | Array of `{lat, lng}` coordinate points   |
+| `distance_km`      | float | Total walking distance in kilometers      |
+| `duration_minutes` | int   | Estimated walking time (minimum 1 minute) |
+
+#### Error Response (503)
+
+If both ORS and OSRM fail (network issues, rate limits, etc.):
+
+```json
+{
+    "success": false,
+    "message": "Unable to fetch walking directions. Please try again later."
+}
+```
+
+The app should handle this gracefully by showing a fallback message or using straight-line distance estimation.
+
+#### Integration with Route Finding
+
+The `POST /api/v1/routes/find` endpoint accepts an optional `include_walking_paths` parameter:
+
+```json
+{
+    "from_lat": 10.3157,
+    "from_lng": 123.8854,
+    "to_lat": 10.2947,
+    "to_lng": 123.8986,
+    "include_walking_paths": true
+}
+```
+
+When `true`, the backend automatically enriches walking segments with real path data from the walking route service. This saves the mobile app from making separate walking route requests for each transfer.
+
+#### Caching Behavior
+
+- Results are cached for **1 hour** based on rounded coordinates (5 decimal places)
+- Multiple users benefit from the cache (one API call serves many users)
+- Cache is stored in the database (configured via `CACHE_STORE=database` in `.env`)
+
+#### Performance Tip
+
+For **multi-transfer routes**, prefer using `include_walking_paths=true` in the route finder instead of making separate walking route requests. The backend batches these efficiently.
+
+---
+
 ### Route Browsing
 
 #### List All Routes
@@ -749,7 +849,12 @@ When connecting the Flutter app to the backend:
 - [ ] Handle 401 responses globally (token expiry)
 - [ ] Handle 429 responses (rate limiting — show "too many requests" message)
 - [ ] Handle 422 responses (show field-level validation errors)
+- [ ] Handle 503 responses (walking route service unavailable)
 - [ ] Fetch `/api/v1/settings` on app startup for current fare values
+- [ ] Use `POST /api/v1/walking-route` for all walking directions
+- [ ] **NEVER** call OpenRouteService or OSRM APIs directly from the app
+- [ ] Remove any `ORS_API_KEY` from Flutter code (it belongs on the server only)
+- [ ] Prefer `include_walking_paths=true` in route finder for multi-transfer routes
 - [ ] Implement pull-to-refresh on ticket and notification lists
 - [ ] Poll `/api/v1/support/notifications/unread-count` periodically for badge updates
 - [ ] Store recent activities locally and sync with the API

@@ -467,14 +467,23 @@ POST /api/v1/walking-route
 
 🔓 **Public**
 
-Proxies walking directions from OpenRouteService (primary) with OSRM (fallback). Results are cached for **1 hour**.
+Proxies walking directions from OpenRouteService (primary) with OSRM (fallback). Results are cached for **1 hour** to reduce API costs and improve performance.
 
-| Parameter | Type  | Required | Description           |
-| --------- | ----- | -------- | --------------------- |
-| from_lat  | float | ✅       | Origin latitude       |
-| from_lng  | float | ✅       | Origin longitude      |
-| to_lat    | float | ✅       | Destination latitude  |
-| to_lng    | float | ✅       | Destination longitude |
+> **⚠️ Security:** This endpoint serves as a secure proxy. The `ORS_API_KEY` is stored on the server and **never exposed to mobile clients**. Mobile apps should **ALWAYS** use this endpoint instead of calling ORS or OSRM directly.
+
+**Why use this proxy:**
+
+- **Secures API keys** — prevents exposure in decompiled mobile apps
+- **Reduces costs** — 1-hour cache means multiple users benefit from a single API call
+- **Provides fallback** — automatically tries OSRM (free) if ORS fails
+- **Consistent format** — returns standardized JSON regardless of provider
+
+| Parameter | Type  | Required | Description                         |
+| --------- | ----- | -------- | ----------------------------------- |
+| from_lat  | float | ✅       | Origin latitude (-90 to 90)         |
+| from_lng  | float | ✅       | Origin longitude (-180 to 180)      |
+| to_lat    | float | ✅       | Destination latitude (-90 to 90)    |
+| to_lng    | float | ✅       | Destination longitude (-180 to 180) |
 
 **Response (200):**
 
@@ -482,21 +491,39 @@ Proxies walking directions from OpenRouteService (primary) with OSRM (fallback).
 {
     "success": true,
     "data": {
-        "path": [[7.065, 125.608], [7.066, 125.609], ...],
+        "path": [
+            { "lat": 7.065, "lng": 125.608 },
+            { "lat": 7.066, "lng": 125.609 },
+            { "lat": 7.067, "lng": 125.61 }
+        ],
         "distance_km": 0.45,
         "duration_minutes": 5
     }
 }
 ```
 
+| Field              | Type  | Description                               |
+| ------------------ | ----- | ----------------------------------------- |
+| `path`             | array | Array of `{lat, lng}` waypoints           |
+| `distance_km`      | float | Total walking distance in kilometers      |
+| `duration_minutes` | int   | Estimated walking time (minimum 1 minute) |
+
 **Failure (503):**
 
 ```json
 {
     "success": false,
-    "message": "Walking route service temporarily unavailable"
+    "message": "Unable to fetch walking directions. Please try again later."
 }
 ```
+
+Returns `503` when both OpenRouteService and OSRM fail (network issues, rate limits, invalid coordinates, etc.). Mobile apps should handle this gracefully with a fallback message or straight-line estimation.
+
+**Caching behavior:**
+
+- Coordinates are rounded to 5 decimal places (~1.1m precision) for cache key generation
+- Cache TTL: 3600 seconds (1 hour)
+- Cache store: configured via `CACHE_STORE` env variable (default: `database`)
 
 ---
 
