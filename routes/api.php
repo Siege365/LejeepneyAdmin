@@ -3,10 +3,12 @@
 use App\Http\Controllers\Api\RouteApiController;
 use App\Http\Controllers\Api\LandmarkApiController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\V1\SupportTicketController;
 use App\Http\Controllers\Api\V1\TicketNotificationController;
 use App\Http\Controllers\Api\V1\RecentActivityController;
 use App\Http\Controllers\Api\V1\SettingsController;
+use App\Http\Controllers\Api\V1\WalkingRouteController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -27,6 +29,10 @@ Route::get('/v1/settings', [SettingsController::class, 'index']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
+// Password Reset Routes (Public - for Flutter App)
+Route::post('/password/forgot', [PasswordResetController::class, 'forgot'])->middleware('throttle:5,1');
+Route::post('/password/reset', [PasswordResetController::class, 'reset'])->middleware('throttle:5,1');
+
 // Protected Routes (Require Authentication)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
@@ -41,6 +47,9 @@ Route::prefix('v1')->middleware('throttle:60,1')->group(function () {
     Route::get('/routes/paths', [RouteApiController::class, 'getAllPaths']);
     Route::get('/routes/{id}', [RouteApiController::class, 'show']);
     Route::post('/routes/find', [RouteApiController::class, 'findRoutes']);
+    
+    // Walking Directions (ORS/OSRM proxy)
+    Route::post('/walking-route', WalkingRouteController::class);
     
     // Landmarks
     Route::get('/landmarks', [LandmarkApiController::class, 'index']);

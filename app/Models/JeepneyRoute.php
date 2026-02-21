@@ -4,23 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\AppSetting;
 
 class JeepneyRoute extends Model
 {
     use HasFactory;
 
     /**
-     * Base fare for all jeepney routes (first 4km)
-     */
-    const BASE_FARE = 13.00;
-    
-    /**
-     * Additional fare per kilometer after first 4km
-     */
-    const FARE_PER_KM = 1.80;
-    
-    /**
-     * First kilometers covered by base fare
+     * Default base distance covered by base fare (km).
+     * Actual fare values are loaded from the app_settings table.
      */
     const BASE_DISTANCE_KM = 4;
 
@@ -49,18 +41,20 @@ class JeepneyRoute extends Model
     ];
 
     /**
-     * Calculate fare based on distance
+     * Calculate fare based on distance using DB-stored fare settings.
      */
     public function calculateFare(float $distance = null): float
     {
-        $distance = $distance ?? $this->total_distance ?? 0;
-        
+        $distance  = $distance ?? $this->total_distance ?? 0;
+        $baseFare  = (float) AppSetting::get('base_fare', 13.00);
+        $farePerKm = (float) AppSetting::get('fare_per_km', 1.80);
+
         if ($distance <= self::BASE_DISTANCE_KM) {
-            return self::BASE_FARE;
+            return $baseFare;
         }
-        
+
         $additionalKm = $distance - self::BASE_DISTANCE_KM;
-        return self::BASE_FARE + ($additionalKm * self::FARE_PER_KM);
+        return $baseFare + ($additionalKm * $farePerKm);
     }
 
     /**

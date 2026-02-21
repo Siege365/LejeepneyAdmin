@@ -7,9 +7,12 @@ use App\Models\SupportTicket;
 use App\Models\TicketReply;
 use App\Models\TicketNotification;
 use App\Models\ActivityLog;
+use App\Mail\TicketReplyMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class CustomerServiceController extends Controller
 {
@@ -112,7 +115,7 @@ class CustomerServiceController extends Controller
      */
     public function reply(Request $request, $id)
     {
-        \Log::info('Reply attempt started', [
+        Log::info('Reply attempt started', [
             'ticket_id' => $id,
             'has_message' => $request->has('message'),
             'has_status' => $request->has('status'),
@@ -125,7 +128,7 @@ class CustomerServiceController extends Controller
                 'status' => 'required|in:pending,in-progress,resolved,cancelled',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation failed', ['error' => $e->getMessage()]);
+            Log::error('Validation failed', ['error' => $e->getMessage()]);
             
             if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
                 return response()->json([
@@ -141,7 +144,7 @@ class CustomerServiceController extends Controller
         $ticket = SupportTicket::findOrFail($id);
         $admin = Auth::user();
 
-        \Log::info('Creating reply', [
+        Log::info('Creating reply', [
             'ticket_id' => $ticket->id,
             'admin_id' => $admin->id,
             'admin_name' => $admin->name
@@ -158,7 +161,7 @@ class CustomerServiceController extends Controller
                 'email_sent' => $request->has('send_email') ? true : false
             ]);
 
-            \Log::info('Reply created', ['reply_id' => $reply->id]);
+            Log::info('Reply created', ['reply_id' => $reply->id]);
 
             $oldStatus = $ticket->status;
 
@@ -168,7 +171,7 @@ class CustomerServiceController extends Controller
                 'admin_id' => $admin->id
             ]);
 
-            \Log::info('Ticket updated', ['new_status' => $request->status]);
+            Log::info('Ticket updated', ['new_status' => $request->status]);
 
             // Create notification for admin reply
             TicketNotification::createNotification(
@@ -217,7 +220,23 @@ class CustomerServiceController extends Controller
 
             DB::commit();
             
-            \Log::info('Reply completed successfully');
+            Log::info('Reply completed successfully');
+
+            // Send email notification server-side if checkbox was checked
+            if ($request->has('send_email') && $ticket->email) {
+                try {
+                    Mail::to($ticket->email)->send(
+                        new TicketReplyMail($ticket, strip_tags($request->message), $admin->name)
+                    );
+                    Log::info('Ticket reply email sent', ['ticket_id' => $ticket->id, 'to' => $ticket->email]);
+                } catch (\Exception $e) {
+                    // Don't fail the request if email fails — reply was already saved
+                    Log::warning('Failed to send ticket reply email', [
+                        'ticket_id' => $ticket->id,
+                        'error'     => $e->getMessage(),
+                    ]);
+                }
+            }
 
             // Return JSON response for AJAX requests
             if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
@@ -233,7 +252,7 @@ class CustomerServiceController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Reply failed with exception', [
+            Log::error('Reply failed with exception', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

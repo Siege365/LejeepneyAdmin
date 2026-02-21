@@ -5,34 +5,12 @@
 
 const CustomerServiceShow = {
     ticketId: null,
-    emailjsInitialized: false,
-    
-    // EmailJS Configuration (loaded from server-side env via window globals)
-    EMAILJS_PUBLIC_KEY: null,
-    EMAILJS_SERVICE_ID: null,
-    EMAILJS_TEMPLATE_ID: null,
     
     init(ticketId, ticketData = {}) {
         this.ticketId = ticketId;
         this.ticketData = ticketData; // { email, name, subject }
-        this.initEmailJS();
         this.initReplyForm();
         this.scrollToLatestMessage();
-    },
-    
-    // Initialize EmailJS
-    initEmailJS() {
-        if (typeof emailjs !== 'undefined' && !this.emailjsInitialized) {
-            const publicKey = window.EMAILJS_PUBLIC_KEY;
-            if (publicKey) {
-                this.EMAILJS_PUBLIC_KEY = publicKey;
-                this.EMAILJS_SERVICE_ID = window.EMAILJS_SERVICE_ID;
-                this.EMAILJS_TEMPLATE_ID = window.EMAILJS_TEMPLATE_ID;
-                emailjs.init(publicKey);
-                this.emailjsInitialized = true;
-                console.log('EmailJS initialized');
-            }
-        }
     },
     
     // Initialize reply form
@@ -51,7 +29,6 @@ const CustomerServiceShow = {
         const formData = new FormData(form);
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn?.innerHTML;
-        const sendEmail = form.querySelector('#sendEmailCheckbox')?.checked;
         
         if (submitBtn) {
             submitBtn.disabled = true;
@@ -80,11 +57,6 @@ const CustomerServiceShow = {
             const data = await response.json();
             
             if (response.ok && data.success) {
-                // Send email notification if checkbox is checked
-                if (sendEmail && this.emailjsInitialized) {
-                    await this.sendEmailNotification(formData.get('message'));
-                }
-                
                 Toast?.success('Reply sent successfully');
                 
                 // Reload to show new reply
@@ -99,73 +71,6 @@ const CustomerServiceShow = {
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
-            }
-        }
-    },
-    
-    // Send email notification via EmailJS
-    async sendEmailNotification(message) {
-        if (typeof emailjs === 'undefined' || !this.emailjsInitialized) {
-            console.warn('EmailJS not available');
-            Toast?.warning('EmailJS not configured - email notification skipped');
-            return;
-        }
-        
-        const serviceId = this.EMAILJS_SERVICE_ID;
-        const templateId = this.EMAILJS_TEMPLATE_ID;
-        
-        if (!serviceId || !templateId) {
-            console.error('EmailJS service ID or template ID missing');
-            Toast?.warning('Email configuration incomplete - notification skipped');
-            return;
-        }
-        
-        // Get ticket data from window or stored data
-        const ticketEmail = this.ticketData.email || window.TICKET_EMAIL;
-        const ticketName = this.ticketData.name || window.TICKET_NAME;
-        const ticketSubject = this.ticketData.subject || window.TICKET_SUBJECT;
-        
-        if (!ticketEmail) {
-            console.error('No recipient email configured');
-            Toast?.warning('Customer email missing - notification skipped');
-            return;
-        }
-        
-        // Format current time
-        const now = new Date();
-        const timeFormatted = now.toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        
-        try {
-            const result = await emailjs.send(serviceId, templateId, {
-                to_email: ticketEmail,
-                ticket_id: this.ticketId,
-                title: ticketSubject || 'Support Reply',
-                name: ticketName || 'Customer',
-                email: ticketEmail,
-                time: timeFormatted,
-                message: message
-            });
-            
-            console.log('Email notification sent successfully:', result);
-            Toast?.success('Email notification sent to customer');
-        } catch (error) {
-            console.error('EmailJS error:', error);
-            
-            // Show specific error messages based on error code
-            if (error.status === 400) {
-                Toast?.error('EmailJS template not found. Please check your template ID in dashboard.');
-            } else if (error.status === 401) {
-                Toast?.error('EmailJS authentication failed. Please check your public key.');
-            } else if (error.status === 402) {
-                Toast?.error('EmailJS quota exceeded. Please upgrade your plan.');
-            } else {
-                Toast?.warning('Email notification failed, but reply was saved');
             }
         }
     },

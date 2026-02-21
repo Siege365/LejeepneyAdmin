@@ -4,219 +4,163 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\JeepneyRoute;
+use App\Services\RouteFinderService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class RouteApiController extends Controller
 {
     /**
-     * Get all available routes
+     * Get all available routes.
+     * Supports If-Modified-Since header for cache validation.
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
+        // Check If-Modified-Since for 304
+        $lastModified = JeepneyRoute::where('status', 'available')->max('updated_at');
+        if ($lastModified && $this->notModifiedSince($request, $lastModified)) {
+            return response()->json(null, 304);
+        }
+
         $routes = JeepneyRoute::where('status', 'available')
-            ->select('id', 'route_number', 'name', 'path', 'waypoints', 
-                    'start_point', 'end_point', 'total_distance', 'color', 
-                    'estimated_time', 'fare')
+            ->select('id', 'route_number', 'name', 'path', 'waypoints',
+                    'start_point', 'end_point', 'total_distance', 'color',
+                    'estimated_time', 'fare', 'updated_at')
             ->orderBy('route_number')
             ->get();
 
-        return response()->json([
+        return $this->withLastModified(response()->json([
             'success' => true,
             'count' => $routes->count(),
-            'data' => $routes
-        ]);
+            'data' => $routes,
+        ]), $lastModified);
     }
 
     /**
      * Get specific route details
      */
-    public function show($id)
+    public function show($id): JsonResponse
     {
         $route = JeepneyRoute::find($id);
 
         if (!$route) {
             return response()->json([
                 'success' => false,
-                'message' => 'Route not found'
+                'message' => 'Route not found',
             ], 404);
         }
 
-        return response()->json([
+        return $this->withLastModified(response()->json([
             'success' => true,
-            'data' => $route
+            'data' => $route,
+        ]), $route->updated_at);
+    }
+
+    /**
+     * Find routes between two points — supports 0, 1, and 2 transfers.
+     *
+     * Delegates all computation to RouteFinderService.
+     */
+    public function findRoutes(Request $request): JsonResponse
+    {
+        $request->validate([
+            'from_lat'              => 'required|numeric',
+            'from_lng'              => 'required|numeric',
+            'to_lat'                => 'required|numeric',
+            'to_lng'                => 'required|numeric',
+            'tolerance'             => 'nullable|numeric|min:0.1|max:2',
+            'transfer_walk_max'     => 'nullable|numeric|min:0.1|max:1',
+            'include_walking_paths' => 'nullable|boolean',
+        ]);
+
+        $service = app(RouteFinderService::class);
+
+        $results = $service->findRoutes(
+            fromLat:             (float) $request->from_lat,
+            fromLng:             (float) $request->from_lng,
+            toLat:               (float) $request->to_lat,
+            toLng:               (float) $request->to_lng,
+            tolerance:           (float) ($request->tolerance ?? 1.0),
+            transferWalkMax:     (float) ($request->transfer_walk_max ?? 0.3),
+            includeWalkingPaths: $request->boolean('include_walking_paths', false),
+        );
+
+        return response()->json([
+            'success'     => true,
+            'origin'      => ['lat' => (float) $request->from_lat, 'lng' => (float) $request->from_lng],
+            'destination' => ['lat' => (float) $request->to_lat,   'lng' => (float) $request->to_lng],
+            'count'       => count($results),
+            'data'        => $results,
         ]);
     }
 
     /**
-     * Find routes between two points
-     * Main algorithm for route suggestion
+     * Get all route paths for map display (lightweight).
+     *
+     * Supports:
+     *  - ?since=ISO8601  → only return routes updated after this timestamp
+     *  - If-Modified-Since header → return 304 if nothing changed
      */
-    public function findRoutes(Request $request)
+    public function getAllPaths(Request $request): JsonResponse
     {
-        $request->validate([
-            'from_lat' => 'required|numeric',
-            'from_lng' => 'required|numeric',
-            'to_lat' => 'required|numeric',
-            'to_lng' => 'required|numeric',
-            'tolerance' => 'nullable|numeric|min:0.1|max:2'
-        ]);
+        $lastModified = JeepneyRoute::where('status', 'available')->max('updated_at');
 
-        $fromLat = $request->from_lat;
-        $fromLng = $request->from_lng;
-        $toLat = $request->to_lat;
-        $toLng = $request->to_lng;
-        $tolerance = $request->tolerance ?? 0.5; // 500m default
+        // Check If-Modified-Since for 304
+        if ($lastModified && $this->notModifiedSince($request, $lastModified)) {
+            return response()->json(null, 304);
+        }
 
-        $routes = JeepneyRoute::where('status', 'available')->get();
-        $matchingRoutes = [];
+        $query = JeepneyRoute::where('status', 'available')
+            ->select('id', 'route_number', 'name', 'path', 'color', 'updated_at');
 
-        foreach ($routes as $route) {
-            // Check if route passes near both origin and destination
-            $nearOrigin = $route->isPointNearRoute($fromLat, $fromLng, $tolerance);
-            $nearDestination = $route->isPointNearRoute($toLat, $toLng, $tolerance);
-
-            if ($nearOrigin && $nearDestination) {
-                // Find closest points on route
-                $closestToOrigin = $route->findClosestPoint($fromLat, $fromLng);
-                $closestToDestination = $route->findClosestPoint($toLat, $toLng);
-
-                // Calculate walking distances
-                $walkToRoute = $closestToOrigin['distance'];
-                $walkFromRoute = $closestToDestination['distance'];
-
-                // Calculate ride distance (between boarding and alighting points)
-                $rideDistance = $this->calculateRideDistance($route, $closestToOrigin['index'], $closestToDestination['index']);
-
-                // Calculate estimated fare
-                $estimatedFare = $this->calculateFare($rideDistance);
-
-                $matchingRoutes[] = [
-                    'route' => [
-                        'id' => $route->id,
-                        'route_number' => $route->route_number,
-                        'name' => $route->name,
-                        'path' => $route->path,
-                        'color' => $route->color,
-                        'total_distance' => $route->total_distance,
-                        'estimated_time' => $route->estimated_time
-                    ],
-                    'boarding_point' => [
-                        'lat' => $closestToOrigin['lat'],
-                        'lng' => $closestToOrigin['lng'],
-                        'walk_distance_km' => round($walkToRoute, 2),
-                        'walk_time_min' => round($walkToRoute * 12, 0) // ~5km/h walking
-                    ],
-                    'alighting_point' => [
-                        'lat' => $closestToDestination['lat'],
-                        'lng' => $closestToDestination['lng'],
-                        'walk_distance_km' => round($walkFromRoute, 2),
-                        'walk_time_min' => round($walkFromRoute * 12, 0)
-                    ],
-                    'ride_distance_km' => round($rideDistance, 2),
-                    'total_walking_km' => round($walkToRoute + $walkFromRoute, 2),
-                    'estimated_fare' => $estimatedFare,
-                    'relevance_score' => $this->calculateRelevance($walkToRoute, $walkFromRoute, $rideDistance)
-                ];
+        // Delta sync: only routes changed since a given timestamp
+        if ($request->filled('since')) {
+            try {
+                $since = Carbon::parse($request->since);
+                $query->where('updated_at', '>', $since);
+            } catch (\Exception $e) {
+                // Ignore invalid date, return all
             }
         }
 
-        // Sort by relevance (less walking = better)
-        usort($matchingRoutes, function ($a, $b) {
-            return $a['relevance_score'] <=> $b['relevance_score'];
-        });
+        $routes = $query->get();
 
-        return response()->json([
-            'success' => true,
-            'origin' => ['lat' => $fromLat, 'lng' => $fromLng],
-            'destination' => ['lat' => $toLat, 'lng' => $toLng],
-            'tolerance_km' => $tolerance,
-            'routes_found' => count($matchingRoutes),
-            'data' => $matchingRoutes
-        ]);
+        return $this->withLastModified(response()->json([
+            'success'       => true,
+            'count'         => $routes->count(),
+            'last_modified' => $lastModified,
+            'data'          => $routes,
+        ]), $lastModified);
     }
 
+    // ─── Helpers ─────────────────────────────────────────────────────
+
     /**
-     * Calculate distance of ride along route path
+     * Check if the client's If-Modified-Since header indicates no changes.
      */
-    private function calculateRideDistance(JeepneyRoute $route, int $startIndex, int $endIndex): float
+    private function notModifiedSince(Request $request, $lastModified): bool
     {
-        if ($startIndex === $endIndex) return 0;
+        $ifModifiedSince = $request->header('If-Modified-Since');
+        if (!$ifModifiedSince || !$lastModified) return false;
 
-        $path = $route->path;
-        $distance = 0;
-
-        // Ensure we go from smaller to larger index
-        $from = min($startIndex, $endIndex);
-        $to = max($startIndex, $endIndex);
-
-        for ($i = $from; $i < $to; $i++) {
-            $distance += $route->haversineDistance(
-                $path[$i]['lat'],
-                $path[$i]['lng'],
-                $path[$i + 1]['lat'],
-                $path[$i + 1]['lng']
-            );
+        try {
+            $clientDate = Carbon::parse($ifModifiedSince);
+            $serverDate = Carbon::parse($lastModified);
+            return $serverDate->lte($clientDate);
+        } catch (\Exception $e) {
+            return false;
         }
-
-        return $distance;
     }
 
     /**
-     * Calculate fare based on distance
+     * Attach Last-Modified header to a response.
      */
-    private function calculateFare(float $distance): array
+    private function withLastModified(JsonResponse $response, $lastModified): JsonResponse
     {
-        $baseFare = 13.00;
-        $perKmRate = 1.80;
-        $freeKm = 4;
-
-        if ($distance <= $freeKm) {
-            $fare = $baseFare;
-            $additionalFare = 0;
-        } else {
-            $additionalKm = $distance - $freeKm;
-            $additionalFare = round($additionalKm * $perKmRate, 2);
-            $fare = $baseFare + $additionalFare;
+        if ($lastModified) {
+            $response->header('Last-Modified', Carbon::parse($lastModified)->toRfc7231String());
         }
-
-        return [
-            'regular' => round($fare, 2),
-            'student' => round($fare * 0.80, 2), // 20% discount
-            'senior' => round($fare * 0.80, 2),  // 20% discount
-            'breakdown' => [
-                'base_fare' => $baseFare,
-                'additional_fare' => $additionalFare,
-                'distance_charged' => max(0, $distance - $freeKm)
-            ]
-        ];
-    }
-
-    /**
-     * Calculate route relevance score (lower is better)
-     */
-    private function calculateRelevance($walkToRoute, $walkFromRoute, $rideDistance): float
-    {
-        // Walking is penalized more heavily
-        $walkingPenalty = ($walkToRoute + $walkFromRoute) * 3;
-
-        // Slight preference for shorter rides
-        $distanceFactor = $rideDistance * 0.1;
-
-        return round($walkingPenalty + $distanceFactor, 4);
-    }
-
-    /**
-     * Get all route paths for map display
-     */
-    public function getAllPaths()
-    {
-        $routes = JeepneyRoute::where('status', 'available')
-            ->select('id', 'route_number', 'name', 'path', 'color')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $routes
-        ]);
+        return $response;
     }
 }

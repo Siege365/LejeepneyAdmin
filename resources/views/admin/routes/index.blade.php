@@ -91,7 +91,6 @@
                     <th>Route Name</th>
                     <th>Terminal</th>
                     <th>Distance</th>
-                    <th>Base Fare</th>
                     <th class="th-icon">Color</th>
                     <th class="th-status">Status</th>
                     <th class="th-actions">Actions</th>
@@ -113,9 +112,6 @@
                         </span>
                     </td>
                     <td>{{ $route->total_distance ? number_format($route->total_distance, 2) . ' km' : 'N/A' }}</td>
-                    <td>
-                        <span class="fare-cell">₱13.00</span>
-                    </td>
                     <td>
                         <div class="color-swatch" style="background: {{ $route->color ?? '#EBAF3E' }};"></div>
                     </td>

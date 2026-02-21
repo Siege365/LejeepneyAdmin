@@ -465,14 +465,7 @@
 
 @push('scripts')
 @vite('resources/js/pages/customer-service-show.js')
-<!-- EmailJS SDK -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-    // EmailJS Configuration (loaded from server-side .env)
-    window.EMAILJS_PUBLIC_KEY = '{{ config("services.emailjs.public_key", "") }}';
-    window.EMAILJS_SERVICE_ID = '{{ config("services.emailjs.service_id", "") }}';
-    window.EMAILJS_TEMPLATE_ID = '{{ config("services.emailjs.template_id", "") }}';
-    
     // Wait for CustomerServiceShow to be available, then initialize
     document.addEventListener('DOMContentLoaded', function() {
         // Poll for CustomerServiceShow availability (in case Vite loads slowly)

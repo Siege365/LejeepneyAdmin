@@ -41,4 +41,8 @@ return [
         'template_id' => env('EMAILJS_TEMPLATE_ID', ''),
     ],
 
+    'openrouteservice' => [
+        'key' => env('ORS_API_KEY', ''),
+    ],
+
 ];
