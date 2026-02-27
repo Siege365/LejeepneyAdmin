@@ -47,7 +47,7 @@ RUN sed -i 's/Listen 80/Listen 10000/' /etc/apache2/ports.conf
 RUN sed -i 's/:80/:10000/' /etc/apache2/sites-available/*.conf
 
 # Create startup script
-RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan migrate --force\nphp artisan db:seed --force\nphp artisan storage:link\napache2-foreground\n' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
+RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan migrate:fresh --force --seed\nphp artisan storage:link\napache2-foreground\n' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
 
 # Expose Render's default port
 EXPOSE 10000
