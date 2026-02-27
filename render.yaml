@@ -1,7 +1,6 @@
 services:
   - type: web
     name: lejeepney
-    env: php
     region: singapore
     plan: free
     buildCommand: bash render-build.sh
@@ -11,7 +10,7 @@ services:
       php artisan view:cache && 
       php artisan migrate --force && 
       php artisan storage:link && 
-      php-fpm -y /etc/php/8.2/fpm/php-fpm.conf -F
+      heroku-php-apache2 public/
     healthCheckPath: /api/v1/settings
     envVars:
       - key: APP_ENV
