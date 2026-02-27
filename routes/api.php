@@ -34,6 +34,28 @@ Route::get('/ping', function () {
     ]);
 });
 
+// One-time seeder endpoint (protected by secret key)
+Route::post('/seed', function (Illuminate\Http\Request $request) {
+    // Check if secret matches APP_KEY
+    if ($request->header('X-Seed-Secret') !== config('app.key')) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+    
+    try {
+        Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Database seeded successfully',
+            'output' => Illuminate\Support\Facades\Artisan::output(),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+});
+
 // Authentication Routes (Public)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
