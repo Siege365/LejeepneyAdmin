@@ -25,6 +25,15 @@ use Illuminate\Support\Facades\Route;
 // Public API Endpoints
 Route::get('/v1/settings', [SettingsController::class, 'index']);
 
+// Health Check / Keep-Alive Endpoint (for monitoring services)
+Route::get('/ping', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+        'service' => 'LeJeepney API',
+    ]);
+});
+
 // Authentication Routes (Public)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');

@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: lejeepney
+    env: php
+    region: singapore
+    plan: free
+    buildCommand: bash render-build.sh
+    startCommand: |
+      php artisan config:cache && 
+      php artisan route:cache && 
+      php artisan view:cache && 
+      php artisan migrate --force && 
+      php artisan storage:link && 
+      php-fpm -y /etc/php/8.2/fpm/php-fpm.conf -F
+    healthCheckPath: /api/v1/settings
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+
+databases:
+  - name: lejeepney-db
+    plan: free
+    databaseName: lejeepney
+    user: lejeepney
