@@ -1,0 +1,1 @@
+document.addEventListener("DOMContentLoaded",function(){const e=document.getElementById("toggleFilters"),t=document.getElementById("filtersPanel");e&&t&&e.addEventListener("click",function(){const n=t.style.display!=="none";t.style.display=n?"none":"block";const l=e.querySelector("i");l&&(l.className=n?"fa-solid fa-filter":"fa-solid fa-filter-circle-xmark")})});

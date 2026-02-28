@@ -1,0 +1,182 @@
+{
+  "resources/css/admin-bundle.css": {
+    "file": "assets/admin-bundle-DFkawZJt.css",
+    "src": "resources/css/admin-bundle.css",
+    "isEntry": true,
+    "name": "admin-bundle",
+    "names": [
+      "admin-bundle.css"
+    ]
+  },
+  "resources/css/auth.css": {
+    "file": "assets/auth-B8Va8_Vc.css",
+    "src": "resources/css/auth.css",
+    "isEntry": true,
+    "name": "auth",
+    "names": [
+      "auth.css"
+    ]
+  },
+  "resources/css/landmark-form.css": {
+    "file": "assets/landmark-form-CR_Ig9Ed.css",
+    "src": "resources/css/landmark-form.css",
+    "isEntry": true,
+    "name": "landmark-form",
+    "names": [
+      "landmark-form.css"
+    ]
+  },
+  "resources/css/pages/account-settings.css": {
+    "file": "assets/account-settings-DSKTwYT5.css",
+    "src": "resources/css/pages/account-settings.css",
+    "isEntry": true,
+    "name": "account-settings",
+    "names": [
+      "account-settings.css"
+    ]
+  },
+  "resources/css/pages/audit-trail.css": {
+    "file": "assets/audit-trail-6KRH3DwV.css",
+    "src": "resources/css/pages/audit-trail.css",
+    "isEntry": true,
+    "name": "audit-trail",
+    "names": [
+      "audit-trail.css"
+    ]
+  },
+  "resources/css/pages/customer-service.css": {
+    "file": "assets/customer-service-DYcXUQIu.css",
+    "src": "resources/css/pages/customer-service.css",
+    "isEntry": true,
+    "name": "customer-service",
+    "names": [
+      "customer-service.css"
+    ]
+  },
+  "resources/css/pages/dashboard.css": {
+    "file": "assets/dashboard-DffrY9vj.css",
+    "src": "resources/css/pages/dashboard.css",
+    "isEntry": true,
+    "name": "dashboard",
+    "names": [
+      "dashboard.css"
+    ]
+  },
+  "resources/css/pages/notifications.css": {
+    "file": "assets/notifications-Qg0RT_5e.css",
+    "src": "resources/css/pages/notifications.css",
+    "isEntry": true,
+    "name": "notifications",
+    "names": [
+      "notifications.css"
+    ]
+  },
+  "resources/css/pages/settings.css": {
+    "file": "assets/settings-DKlrp7YO.css",
+    "src": "resources/css/pages/settings.css",
+    "isEntry": true,
+    "name": "settings",
+    "names": [
+      "settings.css"
+    ]
+  },
+  "resources/css/route-form.css": {
+    "file": "assets/route-form-DseHD9tL.css",
+    "src": "resources/css/route-form.css",
+    "isEntry": true,
+    "name": "route-form",
+    "names": [
+      "route-form.css"
+    ]
+  },
+  "resources/js/admin-bundle.js": {
+    "file": "assets/admin-bundle-Bw7zi1mF.js",
+    "name": "admin-bundle",
+    "src": "resources/js/admin-bundle.js",
+    "isEntry": true
+  },
+  "resources/js/auth.js": {
+    "file": "assets/auth-XWitGHwu.js",
+    "name": "auth",
+    "src": "resources/js/auth.js",
+    "isEntry": true
+  },
+  "resources/js/landmark-form.js": {
+    "file": "assets/landmark-form-B1wrZDOY.js",
+    "name": "landmark-form",
+    "src": "resources/js/landmark-form.js",
+    "isEntry": true
+  },
+  "resources/js/pages/account-settings.js": {
+    "file": "assets/account-settings-DLHAXelN.js",
+    "name": "account-settings",
+    "src": "resources/js/pages/account-settings.js",
+    "isEntry": true
+  },
+  "resources/js/pages/audit-trail.js": {
+    "file": "assets/audit-trail-C7TeKpuG.js",
+    "name": "audit-trail",
+    "src": "resources/js/pages/audit-trail.js",
+    "isEntry": true
+  },
+  "resources/js/pages/customer-service-index.js": {
+    "file": "assets/customer-service-index-gY7Mj-sW.js",
+    "name": "customer-service-index",
+    "src": "resources/js/pages/customer-service-index.js",
+    "isEntry": true
+  },
+  "resources/js/pages/customer-service-show.js": {
+    "file": "assets/customer-service-show-B4xtN4BJ.js",
+    "name": "customer-service-show",
+    "src": "resources/js/pages/customer-service-show.js",
+    "isEntry": true
+  },
+  "resources/js/pages/dashboard.js": {
+    "file": "assets/dashboard-_qg5Vw-S.js",
+    "name": "dashboard",
+    "src": "resources/js/pages/dashboard.js",
+    "isEntry": true
+  },
+  "resources/js/pages/landmarks-batch.js": {
+    "file": "assets/landmarks-batch-DiRO5ADO.js",
+    "name": "landmarks-batch",
+    "src": "resources/js/pages/landmarks-batch.js",
+    "isEntry": true
+  },
+  "resources/js/pages/landmarks-index.js": {
+    "file": "assets/landmarks-index-CbDzTHcd.js",
+    "name": "landmarks-index",
+    "src": "resources/js/pages/landmarks-index.js",
+    "isEntry": true
+  },
+  "resources/js/pages/notifications.js": {
+    "file": "assets/notifications-DkFuk-hK.js",
+    "name": "notifications",
+    "src": "resources/js/pages/notifications.js",
+    "isEntry": true
+  },
+  "resources/js/pages/routes-batch.js": {
+    "file": "assets/routes-batch-Ccb4CJx8.js",
+    "name": "routes-batch",
+    "src": "resources/js/pages/routes-batch.js",
+    "isEntry": true
+  },
+  "resources/js/pages/routes-index.js": {
+    "file": "assets/routes-index-B7JhKDAV.js",
+    "name": "routes-index",
+    "src": "resources/js/pages/routes-index.js",
+    "isEntry": true
+  },
+  "resources/js/pages/settings.js": {
+    "file": "assets/settings-B--ZJFSd.js",
+    "name": "settings",
+    "src": "resources/js/pages/settings.js",
+    "isEntry": true
+  },
+  "resources/js/route-map.js": {
+    "file": "assets/route-map-D6DnhwTS.js",
+    "name": "route-map",
+    "src": "resources/js/route-map.js",
+    "isEntry": true
+  }
+}

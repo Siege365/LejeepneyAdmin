@@ -23,26 +23,15 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
+# Copy application files (including pre-built assets in public/build)
 COPY . .
 
-# Install dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Build frontend assets with error checking
-RUN npm install
-
-# Increase Node memory limit for Vite build (Render free tier has limited RAM)
-ENV NODE_OPTIONS="--max-old-space-size=1024"
-
-RUN npm run build || { echo "ERROR: npm run build failed!"; exit 1; }
-
-# Verify build artifacts exist
-RUN test -d public/build || { echo "ERROR: public/build directory not found!"; exit 1; }
-RUN test -f public/build/manifest.json || { echo "ERROR: manifest.json not found!"; exit 1; }
-
-# Cleanup
-RUN rm -rf node_modules
+# Note: Frontend assets are pre-built locally and committed to git
+# This avoids memory issues on Render's free tier where npm run build fails
+# The public/build directory is included in the COPY above
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
