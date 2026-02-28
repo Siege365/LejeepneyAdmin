@@ -11,5 +11,6 @@ storage/framework/sessions/*
 storage/framework/views/*
 bootstrap/cache/*
 public/hot
-public/storage
+# public/build is NOT ignored - we commit pre-built assets
+# public/storage is a symlink, will be created by artisan storage:link
 .phpunit.result.cache

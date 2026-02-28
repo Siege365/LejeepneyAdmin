@@ -26,6 +26,9 @@ WORKDIR /var/www/html
 # Copy application files (including pre-built assets in public/build)
 COPY . .
 
+# Verify build assets were copied
+RUN ls -la public/build/manifest.json && echo "✓ Build assets verified in container"
+
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
@@ -54,7 +57,28 @@ ENV APP_ENV=production
 ENV APP_DEBUG=false
 
 # Create startup script
-RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan migrate --force\nphp artisan db:seed --force\nphp artisan storage:link\napache2-foreground\n' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
+RUN printf '#!/bin/bash\n\
+# Ensure production mode (Render may set APP_ENV differently)\n\
+export APP_ENV=production\n\
+export APP_DEBUG=false\n\
+\n\
+# Remove Vite dev server marker if it exists\n\
+rm -f /var/www/html/public/hot\n\
+\n\
+# Verify build assets exist\n\
+if [ ! -f /var/www/html/public/build/manifest.json ]; then\n\
+    echo "ERROR: Build manifest not found!"\n\
+    ls -la /var/www/html/public/build/ || echo "public/build directory missing"\n\
+    exit 1\n\
+fi\n\
+\n\
+echo "✓ Build manifest found, assets ready"\n\
+\n\
+php artisan config:clear\n\
+php artisan migrate --force\n\
+php artisan db:seed --force\n\
+php artisan storage:link\n\
+apache2-foreground\n' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
 
 # Expose Render's default port
 EXPOSE 10000
