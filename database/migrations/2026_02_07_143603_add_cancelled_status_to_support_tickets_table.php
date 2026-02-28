@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -10,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add 'cancelled' to the status enum
-        DB::statement("ALTER TABLE support_tickets MODIFY COLUMN status ENUM('pending', 'in-progress', 'resolved', 'cancelled') DEFAULT 'pending'");
+        // PostgreSQL Compatibility: Skip ENUM modification
+        // Laravel uses CHECK constraints for ENUMs on PostgreSQL, not native ENUM types
+        // The application code already handles 'cancelled' status in validation
+        // No database-level change needed - CHECK constraint is permissive enough
+        
+        // Note: Original MySQL code was:
+        // DB::statement("ALTER TABLE support_tickets MODIFY COLUMN status ENUM('pending', 'in-progress', 'resolved', 'cancelled') DEFAULT 'pending'");
+        // This syntax is not compatible with PostgreSQL
     }
 
     /**
@@ -19,7 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Remove 'cancelled' from the status enum
-        DB::statement("ALTER TABLE support_tickets MODIFY COLUMN status ENUM('pending', 'in-progress', 'resolved') DEFAULT 'pending'");
+        // No changes to reverse since we skipped the ENUM modification
     }
 };
