@@ -28,7 +28,21 @@ COPY . .
 
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
-RUN npm install && npm run build && rm -rf node_modules
+
+# Build frontend assets with error checking
+RUN npm install
+
+# Increase Node memory limit for Vite build (Render free tier has limited RAM)
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+
+RUN npm run build || { echo "ERROR: npm run build failed!"; exit 1; }
+
+# Verify build artifacts exist
+RUN test -d public/build || { echo "ERROR: public/build directory not found!"; exit 1; }
+RUN test -f public/build/manifest.json || { echo "ERROR: manifest.json not found!"; exit 1; }
+
+# Cleanup
+RUN rm -rf node_modules
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
@@ -45,6 +59,10 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 # Configure Apache to listen on Render's port (10000)
 RUN sed -i 's/Listen 80/Listen 10000/' /etc/apache2/ports.conf
 RUN sed -i 's/:80/:10000/' /etc/apache2/sites-available/*.conf
+
+# Set production environment
+ENV APP_ENV=production
+ENV APP_DEBUG=false
 
 # Create startup script
 RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan migrate --force\nphp artisan db:seed --force\nphp artisan storage:link\napache2-foreground\n' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
