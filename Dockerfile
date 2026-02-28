@@ -58,27 +58,41 @@ ENV APP_DEBUG=false
 
 # Create startup script
 RUN printf '#!/bin/bash\n\
-    # Ensure production mode (Render may set APP_ENV differently)\n\
-    export APP_ENV=production\n\
-    export APP_DEBUG=false\n\
-    \n\
-    # Remove Vite dev server marker if it exists\n\
-    rm -f /var/www/html/public/hot\n\
-    \n\
-    # Verify build assets exist\n\
-    if [ ! -f /var/www/html/public/build/manifest.json ]; then\n\
+# Ensure production mode (Render may set APP_ENV differently)\n\
+export APP_ENV=production\n\
+export APP_DEBUG=false\n\
+\n\
+# Remove Vite dev server marker if it exists\n\
+rm -f /var/www/html/public/hot\n\
+\n\
+# Verify build assets exist\n\
+if [ ! -f /var/www/html/public/build/manifest.json ]; then\n\
     echo "ERROR: Build manifest not found!"\n\
     ls -la /var/www/html/public/build/ || echo "public/build directory missing"\n\
     exit 1\n\
-    fi\n\
-    \n\
-    echo "✓ Build manifest found, assets ready"\n\
-    \n\
-    php artisan config:clear\n\
-    php artisan migrate --force\n\
-    php artisan db:seed --force\n\
-    php artisan storage:link\n\
-    apache2-foreground\n' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
+fi\n\
+\n\
+echo "✓ Build manifest found, assets ready"\n\
+\n\
+# Debug: Show environment and manifest location\n\
+echo "APP_ENV is: $APP_ENV"\n\
+ls -la /var/www/html/public/ | grep -E "hot|build"\n\
+\n\
+# Clear ALL caches (config, views, routes, events)\n\
+php artisan optimize:clear\n\
+\n\
+# Run migrations and seeders\n\
+php artisan migrate --force\n\
+php artisan db:seed --force\n\
+php artisan storage:link\n\
+\n\
+# Cache config and routes for performance (views will auto-compile with production assets)\n\
+php artisan config:cache\n\
+php artisan route:cache\n\
+\n\
+echo "✓ Laravel optimized for production"\n\
+\n\
+apache2-foreground\n' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
 
 # Expose Render's default port
 EXPOSE 10000
