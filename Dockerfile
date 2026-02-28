@@ -48,9 +48,9 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Configure Apache to listen on Render's port (10000)
-RUN sed -i 's/Listen 80/Listen 10000/' /etc/apache2/ports.conf
-RUN sed -i 's/:80/:10000/' /etc/apache2/sites-available/*.conf
+# Configure Apache to listen on PORT environment variable (Railway/Render compatible)
+# Default to 80, but will be overridden by $PORT in startup script
+RUN sed -i 's/Listen 80/Listen ${PORT:-80}/' /etc/apache2/ports.conf
 
 # Set production environment
 ENV APP_ENV=production
@@ -58,27 +58,29 @@ ENV APP_DEBUG=false
 
 # Create startup script
 RUN printf '#!/bin/bash\n\
-# Ensure production mode (Render may set APP_ENV differently)\n\
+# Railway/Render compatible - use PORT env var\n\
+export PORT=${PORT:-10000}\n\
 export APP_ENV=production\n\
 export APP_DEBUG=false\n\
 \n\
-# Remove Vite dev server marker if it exists\n\
+# Configure Apache to listen on Railway PORT\n\
+sed -i "s/Listen 80/Listen $PORT/" /etc/apache2/ports.conf\n\
+sed -i "s/:80/:$PORT/" /etc/apache2/sites-available/*.conf\n\
+\n\
+# Remove Vite dev server marker\n\
 rm -f /var/www/html/public/hot\n\
 \n\
 # Verify build assets exist\n\
 if [ ! -f /var/www/html/public/build/manifest.json ]; then\n\
     echo "ERROR: Build manifest not found!"\n\
-    ls -la /var/www/html/public/build/ || echo "public/build directory missing"\n\
     exit 1\n\
 fi\n\
 \n\
-echo "✓ Build manifest found, assets ready"\n\
+echo "✓ Build assets verified"\n\
+echo "✓ Listening on port: $PORT"\n\
+echo "✓ APP_ENV: $APP_ENV"\n\
 \n\
-# Debug: Show environment and manifest location\n\
-echo "APP_ENV is: $APP_ENV"\n\
-ls -la /var/www/html/public/ | grep -E "hot|build"\n\
-\n\
-# Clear ALL caches (config, views, routes, events)\n\
+# Clear ALL caches\n\
 php artisan optimize:clear\n\
 \n\
 # Run migrations and seeders\n\
@@ -86,16 +88,16 @@ php artisan migrate --force\n\
 php artisan db:seed --force\n\
 php artisan storage:link\n\
 \n\
-# Cache config and routes for performance (views will auto-compile with production assets)\n\
+# Cache for production\n\
 php artisan config:cache\n\
 php artisan route:cache\n\
 \n\
-echo "✓ Laravel optimized for production"\n\
+echo "✓ Laravel ready!"\n\
 \n\
 apache2-foreground\n' > /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
 
-# Expose Render's default port
-EXPOSE 10000
+# Expose port (Railway auto-detects, but good practice)
+EXPOSE ${PORT:-10000}
 
 # Start with our script
 CMD ["/usr/local/bin/start.sh"]
