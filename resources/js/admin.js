@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initTableRowSelection();
     initCountUpAnimation();
     initSearchFocus();
+    initFormSubmitProtection();
 });
 
 /**
@@ -261,6 +262,38 @@ function initSearchFocus() {
                 e.preventDefault();
                 input.focus();
             }
+        });
+    });
+}
+
+/**
+ * Global Form Submit Protection
+ * Disables submit buttons during processing to prevent duplicate submissions.
+ * Skips GET forms (filters/search), forms with data-no-disable, and already-disabled buttons.
+ */
+function initFormSubmitProtection() {
+    document.addEventListener('submit', function(e) {
+        // Skip if another handler already prevented the submit (e.g. validation failure)
+        if (e.defaultPrevented) return;
+
+        const form = e.target;
+
+        // Skip GET forms (search/filter forms)
+        if (form.method.toUpperCase() === 'GET') return;
+
+        // Skip forms explicitly opted out
+        if (form.dataset.noDisable !== undefined) return;
+
+        // Find all submit buttons in the form
+        const submitBtns = form.querySelectorAll('button[type="submit"]');
+
+        submitBtns.forEach(btn => {
+            // Skip if already disabled (handled by page-specific JS)
+            if (btn.disabled) return;
+
+            btn.disabled = true;
+            btn.dataset.originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
         });
     });
 }

@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initButtonEffects();
     initInputAnimations();
     initParallaxEffect();
+    initAuthFormSubmitProtection();
 });
 
 /**
@@ -33,6 +34,13 @@ function initFormValidation() {
     if (forgotForm) {
         setupFormValidation(forgotForm);
     }
+
+    // Handle any auth-form without an ID (reset-password, etc.)
+    document.querySelectorAll('.auth-form').forEach(form => {
+        if (!form.id) {
+            setupFormValidation(form);
+        }
+    });
 }
 
 /**
@@ -405,6 +413,21 @@ function initInputAnimations() {
                 wrapper.classList.remove('focused');
             });
         }
+    });
+}
+
+/**
+ * Fallback submit protection for auth forms not handled by setupFormValidation
+ */
+function initAuthFormSubmitProtection() {
+    document.addEventListener('submit', function(e) {
+        if (e.defaultPrevented) return;
+        var form = e.target;
+        if (!form.classList.contains('auth-form')) return;
+        var submitBtn = form.querySelector('button[type="submit"]');
+        if (!submitBtn || submitBtn.disabled) return;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Please wait...';
     });
 }
 

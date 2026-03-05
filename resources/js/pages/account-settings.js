@@ -53,6 +53,11 @@ function closePasswordChangeConfirm() {
 }
 
 function confirmPasswordChange() {
+    var btn = document.querySelector('#passwordChangeConfirmModal .btn-primary');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
+    }
     document.getElementById('passwordChangeForm').submit();
 }
 
@@ -86,6 +91,11 @@ function confirmDeleteAccount() {
     if (!form.checkValidity()) {
         form.reportValidity();
         return;
+    }
+    var btn = document.querySelector('#deleteAccountConfirmModal .btn-danger');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
     }
     form.submit();
 }

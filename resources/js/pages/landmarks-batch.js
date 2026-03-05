@@ -160,6 +160,13 @@ async function confirmBatchDelete() {
     const bulkActionsBar = document.getElementById('bulkActionsBar');
     const batchDeleteUrl = bulkActionsBar.dataset.batchDeleteUrl;
 
+    // Disable confirm button to prevent duplicate requests
+    const confirmBtn = document.querySelector('#finalConfirmModal .btn-danger');
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+    }
+
     try {
         const response = await fetch(batchDeleteUrl, {
             method: 'POST',
@@ -192,6 +199,12 @@ async function confirmBatchDelete() {
     } catch (error) {
         console.error('Batch delete error:', error);
         
+        // Re-enable confirm button on error
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i> Yes, Permanently Delete';
+        }
+
         closeFinalConfirmation();
         
         if (typeof Toast !== 'undefined') {

@@ -373,7 +373,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitBtn = document.querySelector('button[type="submit"]');
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
+            const isEdit = window.landmarkData !== undefined;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ' + (isEdit ? 'Updating...' : 'Creating...');
         }
         
         return true;

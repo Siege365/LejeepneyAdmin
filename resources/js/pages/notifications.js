@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             const notificationItem = this.closest('.notification-item');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            }
             
             try {
                 const response = await fetch(this.action, {
@@ -31,6 +36,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 console.error('Error marking notification as read:', error);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Mark as Read';
+                }
             }
         });
     });
@@ -38,6 +47,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Mark all as read
     document.querySelector('.mark-all-read-form')?.addEventListener('submit', async function(e) {
         e.preventDefault();
+        
+        const markAllBtn = this.querySelector('button[type="submit"]');
+        if (markAllBtn) {
+            markAllBtn.disabled = true;
+            markAllBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+        }
         
         try {
             const response = await fetch(this.action, {
@@ -66,6 +81,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } catch (error) {
             console.error('Error marking all notifications as read:', error);
+            if (markAllBtn) {
+                markAllBtn.disabled = false;
+                markAllBtn.innerHTML = 'Mark All as Read';
+            }
         }
     });
     
